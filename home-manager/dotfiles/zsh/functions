@@ -1,0 +1,12 @@
+todo() { git commit --allow-empty -m "TODO: $*" }
+clone() { git clone git@github.com:$1.git ~/code/$1 && cd ~/code/$1 }
+json_pretty(){ ruby -rjson -e "STDOUT.puts JSON.pretty_generate(JSON[STDIN.read])" }
+uuid(){ ruby -rsecurerandom -e "STDOUT.puts SecureRandom.uuid" }
+
+
+grep_app() { grep -r -n --color=auto $1 ./app }
+grep_spec() { grep -r -n --color=auto $1 ./spec }
+grep_config() { grep -r -n --color=auto $1 ./config }
+grep_locale() { grep -r -n --color=auto $1 ./config/locales }
+
+vim_line() { vim +$2 $1 }

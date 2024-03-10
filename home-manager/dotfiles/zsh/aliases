@@ -1,0 +1,47 @@
+alias vim=nvim
+alias mutt=neomutt
+alias g=git
+alias gp="git push"
+alias gl="git pull"
+alias gpr="gh pr create && gh pr view -w"
+alias gch="git checkout HEAD"
+alias grbi="git rebase -i"
+alias gco="git checkout"
+alias hdiff="git diff HEAD"
+
+alias h=heroku
+alias heroku="nocorrect heroku"
+alias serve="ruby -run -e httpd . -p 5000"
+alias v=vim
+alias vl=vim_line
+alias x=exit
+alias e=exit
+alias :e=vim
+alias :q=exit
+
+alias ssh='TERM=xterm ssh'
+
+alias psg="ps aux | grep"
+
+alias bi="brew install"
+alias bu="brew uninstall"
+
+alias grepf="grep -r -n --color=auto"
+
+alias migrate="rake db:migrate; rake db:migrate RAILS_ENV=test"
+alias grepr="bundle exec rake routes | grep"
+
+alias pbcopy='xclip'
+alias pbpaste='xclip -o'
+
+alias wp="webpack-dev-server --hot"
+alias rs="rails s"
+alias rc="rails c"
+
+
+alias old_ruby_install="cat ~/ruby2.x-openssl.patch | CC=/usr/bin/gcc-5 PKG_CONFIG_PATH=/usr/lib/openssl-1.0/pkgconfig  rbenv install -p"
+alias sold_ruby_install="CC=/usr/bin/gcc-5 PKG_CONFIG_PATH=/usr/lib/openssl-1.0/pkgconfig  rbenv install"
+
+
+alias kgp="kubectl get pods -n"
+alias kex="kubectl exec -it -n"
