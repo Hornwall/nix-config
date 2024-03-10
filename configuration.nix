@@ -8,6 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ../../etc/nixos/hardware-configuration.nix
+      ./keyboard-layout.nix
       ./1password.nix
     ];
 
