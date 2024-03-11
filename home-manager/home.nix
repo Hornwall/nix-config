@@ -4,6 +4,7 @@
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "hannes";
+  home.userFullName = "Hannes Hornwall";
   home.homeDirectory = "/home/hannes";
 
   # This value determines the Home Manager release that your configuration is
@@ -25,6 +26,7 @@
     pkgs.tmux
     pkgs.git
     pkgs.gcc
+    pkgs.nodejs
     pkgs.gnumake
     pkgs.ripgrep
     pkgs.fira-code

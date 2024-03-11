@@ -39,6 +39,7 @@
   # Enable the X11 windowing system.
   services.xserver.enable = true;
   services.xserver.desktopManager.plasma6.enable = true;
+  services.xserver.displayManager.sddm.enable = true;
   services.xserver.displayManager.sddm.wayland.enable = true;
 
   # Configure keymap in X11
@@ -89,14 +90,9 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     zsh
     wget
-    git
-    gcc
-    gnumake
-    zlib.dev
-    openssl_3_2
-    asdf-vm
     _1password-gui
     _1password
+    (import (fetchTarball https://install.devenv.sh/latest)).default
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
