@@ -22,8 +22,13 @@
     # # "Hello, world!" when run.
     # pkgs.hello
     pkgs.kitty
+    pkgs.tmux
     pkgs.git
-    pkgs.neovim
+    pkgs.gcc
+    pkgs.ripgrep
+    pkgs.fira-code
+    pkgs.fira-code-nerdfont
+    pkgs.fira-code-symbols
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -46,12 +51,33 @@
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
     # # symlink to the Nix store copy.
     # ".screenrc".source = dotfiles/screenrc;
+
+    # ZSH
     ".zshrc".source = dotfiles/zshrc;
     ".zsh_prompt".source = dotfiles/zsh_prompt;
     ".zsh/aliases".source = dotfiles/zsh/aliases;
     ".zsh/completion".source = dotfiles/zsh/completion;
     ".zsh/functions".source = dotfiles/zsh/functions;
     ".zsh/work_aliases".source = dotfiles/zsh/work_aliases;
+
+    # Tmux
+    ".tmux.conf".source = dotfiles/tmux.conf;
+    # Kitty
+    ".config/kitty/kitty.conf".source = dotfiles/config/kitty/kitty.conf;
+
+    # Neovim
+    ".config/nvim/init.lua".source = dotfiles/config/nvim/init.lua;
+    ".config/nvim/colors/hybrid.vim".source = dotfiles/config/nvim/colors/hybrid.vim;
+    ".config/nvim/lua/bindings.lua".source = dotfiles/config/nvim/lua/bindings.lua;
+    ".config/nvim/lua/editor.lua".source = dotfiles/config/nvim/lua/editor.lua;
+    ".config/nvim/lua/cheat-sheet.lua".source = dotfiles/config/nvim/lua/cheat-sheet.lua;
+    ".config/nvim/lua/plugins.lua".source = dotfiles/config/nvim/lua/plugins.lua;
+    ".config/nvim/lua/plugins/configs/cmp.lua".source = dotfiles/config/nvim/lua/plugins/configs/cmp.lua;
+    ".config/nvim/lua/plugins/configs/lualine.lua".source = dotfiles/config/nvim/lua/plugins/configs/lualine.lua;
+    ".config/nvim/lua/plugins/configs/nvim-lsp.lua".source = dotfiles/config/nvim/lua/plugins/configs/nvim-lsp.lua;
+    ".config/nvim/lua/plugins/configs/nvimtree.lua".source = dotfiles/config/nvim/lua/plugins/configs/nvimtree.lua;
+    ".config/nvim/lua/plugins/configs/treesitter.lua".source = dotfiles/config/nvim/lua/plugins/configs/treesitter.lua;
+    ".config/nvim/lua/plugins/configs/vim-test.lua".source = dotfiles/config/nvim/lua/plugins/configs/vim-test.lua;
 
     # # You can also set the file content immediately.
     # ".gradle/gradle.properties".text = ''
@@ -77,6 +103,13 @@
   #
   home.sessionVariables = {
     EDITOR = "nvim";
+  };
+
+  programs.neovim = {
+    enable = true;
+    plugins = [
+      pkgs.vimPlugins.packer-nvim
+    ];
   };
 
   # Let Home Manager install and manage itself.
