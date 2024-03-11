@@ -90,6 +90,11 @@
     zsh
     wget
     git
+    gcc
+    gnumake
+    zlib.dev
+    openssl_3_2
+    asdf-vm
     _1password-gui
     _1password
   ];

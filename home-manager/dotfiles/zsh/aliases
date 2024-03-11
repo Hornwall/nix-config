@@ -19,6 +19,9 @@ alias e=exit
 alias :e=vim
 alias :q=exit
 
+alias ehmgr="nvim ~/.config/home-manager"
+alias enix="nvim /var/nix"
+
 alias ssh='TERM=xterm ssh'
 
 alias psg="ps aux | grep"

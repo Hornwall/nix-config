@@ -25,6 +25,7 @@
     pkgs.tmux
     pkgs.git
     pkgs.gcc
+    pkgs.gnumake
     pkgs.ripgrep
     pkgs.fira-code
     pkgs.fira-code-nerdfont

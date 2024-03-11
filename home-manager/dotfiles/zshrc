@@ -45,7 +45,7 @@ export QT_SCALE_FACTOR=1
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
 
 # ASDF
-. /opt/asdf-vm/asdf.sh
+. $(dirname $(dirname $(readlink -f $(which asdf))))/share/asdf-vm/asdf.sh
 
 # cd
 export CDPATH="$CDPATH:$HOME:$HOME/code:$HOME/.config"
