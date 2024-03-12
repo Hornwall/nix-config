@@ -21,6 +21,10 @@
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
 
+  # Enable bluetooth support
+  hardware.bluetooth.enable = true; # enables support for Bluetooth
+  hardware.bluetooth.powerOnBoot = true; # powers up the default Bluetooth controller on boot
+
   # Set your time zone.
   time.timeZone = "Europe/Stockholm";
 
@@ -42,6 +46,9 @@
   services.xserver.displayManager.sddm.enable = true;
   services.xserver.displayManager.sddm.wayland.enable = true;
 
+  # Finger print reader
+  services.fprintd.enable = true;
+
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
@@ -62,9 +69,6 @@
     # If you want to use JACK applications, uncomment this
     #jack.enable = true;
   };
-
-  # Enable flatpak
-  services.flatpak.enable = true;
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;

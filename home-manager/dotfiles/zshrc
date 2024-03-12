@@ -57,7 +57,6 @@ export GDK_DPI_SCALE=0.5
 export QT_DEVICE_PIXEL_RATIO=2
 
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=18"
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 #export PATH="$PATH:$HOME/.rvm/bin"
