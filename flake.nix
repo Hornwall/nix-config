@@ -50,10 +50,10 @@
      # NixOS configuration entrypoint
      # Available through 'nixos-rebuild --flake .#your-hostname'
      nixosConfigurations = {
-       thinkpad-x1 = nixpkgs.lib.nixosSystem {
+       x1-carbon = nixpkgs.lib.nixosSystem {
          specialArgs = {inherit inputs outputs;};
          modules = [
-           ./nixos/thinkpad-x1/configuration.nix
+           ./nixos/x1-carbon/configuration.nix
          ];
        };
      };
@@ -62,7 +62,7 @@
      # Available through 'home-manager --flake .#your-username@your-hostname'
      homeConfigurations = {
        # FIXME replace with your username@hostname
-       "hannes@thinkpad-x1" = home-manager.lib.homeManagerConfiguration {
+       "hannes@x1-carbon" = home-manager.lib.homeManagerConfiguration {
          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
          extraSpecialArgs = {inherit inputs outputs;};
          modules = [
