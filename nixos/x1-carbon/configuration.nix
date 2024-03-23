@@ -74,9 +74,6 @@
     #jack.enable = true;
   };
 
-  # Enable gnome keyring
-  security.pam.services.gdm.enableGnomeKeyring = true;
-
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
   #allow unfree packages
