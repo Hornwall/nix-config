@@ -12,6 +12,12 @@
       ./1password.nix
     ];
 
+  # Enable flakes
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # Use latest kernel
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -69,6 +75,9 @@
     # If you want to use JACK applications, uncomment this
     #jack.enable = true;
   };
+
+  # Enable gnome keyring
+  security.pam.services.gdm.enableGnomeKeyring = true;
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
