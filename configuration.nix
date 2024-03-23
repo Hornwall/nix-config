@@ -42,9 +42,8 @@
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
-  services.xserver.desktopManager.plasma6.enable = true;
-  services.xserver.displayManager.sddm.enable = true;
-  services.xserver.displayManager.sddm.wayland.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.displayManager.gdm.enable = true;
 
   # Finger print reader
   services.fprintd.enable = true;
@@ -59,6 +58,7 @@
   # Enable sound.
   # sound.enable = true;
   # hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.enable = false;
 
   security.rtkit.enable = true;
   services.pipewire = {
@@ -99,6 +99,8 @@
     _1password-gui
     _1password
     (import (fetchTarball https://install.devenv.sh/latest)).default
+    gnomeExtensions.pop-shell
+    gnomeExtensions.dash-to-panel
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
