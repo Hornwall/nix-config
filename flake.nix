@@ -9,7 +9,7 @@
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     # Home manager
-    home-manager.url = "github:nix-community/home-manager/release-23.05";
+    home-manager.url = "github:nix-community/home-manager/release-23.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
   outputs = {
@@ -33,13 +33,13 @@
    in {
      # Your custom packages
      # Accessible through 'nix build', 'nix shell', etc
-     # packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
+     packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
      # Formatter for your nix files, available through 'nix fmt'
      # Other options beside 'alejandra' include 'nixpkgs-fmt'
      #formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
      # Your custom packages and modifications, exported as overlays
-     #overlays = import ./overlays {inherit inputs;};
+     overlays = import ./overlays {inherit inputs;};
      # Reusable nixos modules you might want to export
      # These are usually stuff you would upstream into nixpkgs
      #nixosModules = import ./modules/nixos;
