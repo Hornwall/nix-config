@@ -42,7 +42,7 @@ export QT_SCREEN_SCALE_FACTORS=1
 export QT_SCALE_FACTOR=1
 
 # Allow ssh-add to use kwallet
-export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/keyring/ssh"
 
 # cd
 export CDPATH="$CDPATH:$HOME:$HOME/code:$HOME/.config"
