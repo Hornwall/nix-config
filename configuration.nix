@@ -7,7 +7,7 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      ../../etc/nixos/hardware-configuration.nix
+      /etc/nixos/hardware-configuration.nix
       ./keyboard-layout.nix
       ./1password.nix
     ];
@@ -50,9 +50,6 @@
   services.xserver.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
   services.xserver.displayManager.gdm.enable = true;
-
-  # Finger print reader
-  services.fprintd.enable = true;
 
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";

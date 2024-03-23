@@ -115,10 +115,10 @@
     };
 
     # Utilized by `nix bundle -- .#<name>` (should be a .drv input, not program path?)
-    bundlers.x86_64-linux.hornwall = nix-bundle.bundlers.x86_64-linux.toArx;
+    bundlers.x86_64-linux.nixos = nix-bundle.bundlers.x86_64-linux.toArx;
 
     # Utilized by `nix bundle -- .#<name>`
-    defaultBundler.x86_64-linux = self.bundlers.x86_64-linux.hornwall;
+    defaultBundler.x86_64-linux = self.bundlers.x86_64-linux.nixos;
 
     # Utilized by `nix run . -- <args?>`
     defaultApp.x86_64-linux = self.apps.x86_64-linux.hello;
@@ -140,7 +140,7 @@
 
     # Used with `nixos-rebuild --flake .#<hostname>`
     # nixosConfigurations."<hostname>".config.system.build.toplevel must be a derivation
-    nixosConfigurations.hornwall = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
@@ -151,10 +151,10 @@
     devShell.x86_64-linux = rust-web-server.devShell.x86_64-linux;
 
     # Utilized by `nix develop .#<name>`
-    devShells.x86_64-linux.hornwall = self.devShell.x86_64-linux;
+    devShells.x86_64-linux.nixos = self.devShell.x86_64-linux;
 
     # Utilized by Hydra build jobs
-    hydraJobs.hornwall.x86_64-linux = self.defaultPackage.x86_64-linux;
+    hydraJobs.nixos.x86_64-linux = self.defaultPackage.x86_64-linux;
 
     # Utilized by `nix flake init -t <flake>`
     defaultTemplate = {
@@ -163,6 +163,6 @@
     };
 
     # Utilized by `nix flake init -t <flake>#<name>`
-    templates.hornwall = self.defaultTemplate;
+    templates.nixos = self.defaultTemplate;
   };
 }
