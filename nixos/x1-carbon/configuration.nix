@@ -10,6 +10,7 @@
       ./hardware-configuration.nix
       ./keyboard-layout.nix
       ./1password.nix
+      ./gnome.nix
     ];
 
   # Enable flakes
