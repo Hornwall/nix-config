@@ -59,7 +59,7 @@
        vm = nixpkgs.lib.nixosSystem {
          specialArgs = {inherit inputs outputs;};
          modules = [
-           ./nixos/x1-carbon/configuration.nix
+           ./nixos/vm/configuration.nix
          ];
        };
      };
