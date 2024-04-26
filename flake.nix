@@ -56,6 +56,12 @@
            ./nixos/x1-carbon/configuration.nix
          ];
        };
+       vm = nixpkgs.lib.nixosSystem {
+         specialArgs = {inherit inputs outputs;};
+         modules = [
+           ./nixos/x1-carbon/configuration.nix
+         ];
+       };
      };
 
      # Standalone home-manager configuration entrypoint
@@ -63,6 +69,14 @@
      homeConfigurations = {
        # FIXME replace with your username@hostname
        "hannes@x1-carbon" = home-manager.lib.homeManagerConfiguration {
+         pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+         extraSpecialArgs = {inherit inputs outputs;};
+         modules = [
+           # > Our main home-manager configuration file <
+           ./home-manager/home.nix
+         ];
+       };
+       "hannes@vm" = home-manager.lib.homeManagerConfiguration {
          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
          extraSpecialArgs = {inherit inputs outputs;};
          modules = [
