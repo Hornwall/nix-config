@@ -56,6 +56,12 @@
            ./nixos/x1-carbon/configuration.nix
          ];
        };
+       thinkpad-z16 = nixpkgs.lib.nixosSystem {
+         specialArgs = {inherit inputs outputs;};
+         modules = [
+           ./nixos/thinkpad-z16/configuration.nix
+         ];
+       };
        vm = nixpkgs.lib.nixosSystem {
          specialArgs = {inherit inputs outputs;};
          modules = [
@@ -69,6 +75,14 @@
      homeConfigurations = {
        # FIXME replace with your username@hostname
        "hannes@x1-carbon" = home-manager.lib.homeManagerConfiguration {
+         pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+         extraSpecialArgs = {inherit inputs outputs;};
+         modules = [
+           # > Our main home-manager configuration file <
+           ./home-manager/home.nix
+         ];
+       };
+       "hannes@thinkpad-z16" = home-manager.lib.homeManagerConfiguration {
          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
          extraSpecialArgs = {inherit inputs outputs;};
          modules = [
