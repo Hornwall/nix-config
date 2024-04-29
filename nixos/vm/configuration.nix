@@ -11,7 +11,6 @@
       ./keyboard-layout.nix
       ./1password.nix
       ./gnome.nix
-      <home-manager/nixos>
     ];
 
   # Enable flakes
