@@ -35,6 +35,24 @@
   # Set your time zone.
   time.timeZone = "Europe/Stockholm";
 
+  networking.extraHosts =
+  ''
+    127.0.0.1 app.aboardhr.localhost
+    127.0.0.1 whistle.aboardhr.localhost
+  '';
+
+
+  services.nginx = {
+    enable = true;
+    virtualHosts."app.aboardhr.localhost" = {
+      locations."/".proxyPass = "http://localhost:3000/";
+    };
+    virtualHosts."whistle.aboardhr.localhost" = {
+      locations."/".proxyPass = "http://localhost:3000/";
+    };
+  };
+
+
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
