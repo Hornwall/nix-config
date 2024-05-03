@@ -36,6 +36,8 @@
     pkgs.vscode
     pkgs.devbox
     pkgs.heroku
+    pkgs.solargraph
+    pkgs.bundix
     #Fonts
     pkgs.fira-code
     pkgs.fira-code-nerdfont

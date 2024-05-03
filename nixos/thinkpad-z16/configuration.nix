@@ -7,10 +7,13 @@
 {
   imports =
     [ # Include the results of the hardware scan.
+      <nixos-hardware/lenovo/thinkpad/z/gen2>
       ./hardware-configuration.nix
       ./keyboard-layout.nix
       ./1password.nix
       ./gnome.nix
+      ./docker.nix
+      ./aboard.nix
     ];
 
   # Enable flakes
@@ -35,23 +38,8 @@
   # Set your time zone.
   time.timeZone = "Europe/Stockholm";
 
-  networking.extraHosts =
-  ''
-    127.0.0.1 app.aboardhr.localhost
-    127.0.0.1 whistle.aboardhr.localhost
-  '';
-
-
-  services.nginx = {
-    enable = true;
-    virtualHosts."app.aboardhr.localhost" = {
-      locations."/".proxyPass = "http://localhost:3000/";
-    };
-    virtualHosts."whistle.aboardhr.localhost" = {
-      locations."/".proxyPass = "http://localhost:3000/";
-    };
-  };
-
+  # Enabled fwupd
+  services.fwupd.enable = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -105,7 +93,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.hannes = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
     packages = with pkgs; [
       firefox
@@ -121,8 +109,10 @@
     wget
     _1password-gui
     _1password
+    gnome.gnome-tweaks
     gnomeExtensions.pop-shell
     gnomeExtensions.dash-to-panel
+    docker-compose
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
