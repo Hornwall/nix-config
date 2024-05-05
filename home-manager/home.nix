@@ -37,7 +37,6 @@
     pkgs.devbox
     pkgs.heroku
     pkgs.solargraph
-    pkgs.bundix
     #Fonts
     pkgs.fira-code
     pkgs.fira-code-nerdfont
@@ -48,6 +47,7 @@
     pkgs.spotify
     pkgs.discord
     pkgs.slack
+    pkgs.beyond-identity
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the

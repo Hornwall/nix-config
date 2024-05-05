@@ -2,7 +2,9 @@
   networking.extraHosts =
   ''
     127.0.0.1 app.aboardhr.localhost
+    127.0.0.1 app.aboardhr.test
     127.0.0.1 whistle.aboardhr.localhost
+    127.0.0.1 whistle.aboardhr.test
   '';
 
 
@@ -17,7 +19,17 @@
       sslCertificateKey = "/etc/ssl/certs/plain.key";
 
       locations."/" = {
-        proxyPass = "http://localhost:6001/";
+        proxyPass = "http://localhost:3000/";
+        proxyWebsockets = true;
+      };
+    };
+    virtualHosts."app.aboardhr.test" = {
+      addSSL = true;
+      sslCertificate = "/etc/ssl/certs/cert.pem";
+      sslCertificateKey = "/etc/ssl/certs/plain.key";
+
+      locations."/" = {
+        proxyPass = "http://localhost:3000/";
         proxyWebsockets = true;
       };
     };
@@ -27,7 +39,17 @@
       sslCertificateKey = "/etc/ssl/certs/plain.key";
 
       locations."/" = {
-        proxyPass = "http://localhost:6001/";
+        proxyPass = "http://localhost:3000/";
+        proxyWebsockets = true;
+      };
+    };
+    virtualHosts."whistle.aboardhr.test" = {
+      addSSL = true;
+      sslCertificate = "/etc/ssl/certs/cert.pem";
+      sslCertificateKey = "/etc/ssl/certs/plain.key";
+
+      locations."/" = {
+        proxyPass = "http://localhost:3000/";
         proxyWebsockets = true;
       };
     };
