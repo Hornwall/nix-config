@@ -18,6 +18,7 @@
 
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.trusted-users = [ "root" "hannes" ];
 
   # Use latest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -40,6 +41,9 @@
 
   # Enabled fwupd
   services.fwupd.enable = true;
+
+  # Enable flatpaks
+  services.flatpak.enable = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -85,7 +89,10 @@
   #allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # Use ZSH as the default shell
   programs.zsh.enable = true;
+  users.defaultUserShell = pkgs.zsh;
+
   programs.git.enable = true;
 
   programs.steam.enable = true;
@@ -113,6 +120,7 @@
     gnomeExtensions.pop-shell
     gnomeExtensions.dash-to-panel
     docker-compose
+    beyond-identity
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
