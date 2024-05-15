@@ -4,6 +4,11 @@
 
 { config, lib, pkgs, ... }:
 
+let
+  nixpkgs-beyond-identity = import (/home/hannes/code/nixpkgs) {
+    config.allowUnfree = true;
+  };
+in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -84,6 +89,9 @@
     #jack.enable = true;
   };
 
+  # Enable keybase
+  services.keybase.enable = true;
+
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
   #allow unfree packages
@@ -120,7 +128,7 @@
     gnomeExtensions.pop-shell
     gnomeExtensions.dash-to-panel
     docker-compose
-    beyond-identity
+    nixpkgs-beyond-identity.beyond-identity
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

@@ -28,6 +28,7 @@
     pkgs.kitty
     pkgs.tmux
     pkgs.git
+    pkgs.gh
     pkgs.gcc
     pkgs.nodejs
     pkgs.gnumake
