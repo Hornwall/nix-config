@@ -2,25 +2,18 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, nixpkgs-hornwall, ... }:
 
-let
-  nixpkgs-beyond-identity = import (/home/hannes/code/nixpkgs) {
-    config.allowUnfree = true;
-  };
-in
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      <nixos-hardware/lenovo/thinkpad/z/gen2>
-      ./hardware-configuration.nix
-      ./keyboard-layout.nix
-      ./1password.nix
-      ./gnome.nix
-      ./docker.nix
-      ./aboard.nix
-    ];
-
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    ./keyboard-layout.nix
+    ./1password.nix
+    ./gnome.nix
+    ./docker.nix
+    ./aboard.nix
+  ];
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.settings.trusted-users = [ "root" "hannes" ];
@@ -95,7 +88,18 @@ in
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
   #allow unfree packages
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs = {
+    config.allowUnfree = true;
+
+    overlays = [
+      (final: prev: {
+        hornwall = import nixpkgs-hornwall {
+          config.allowUnfree = true;
+          system = "x86_64-linux";
+        };
+      })
+    ];
+  };
 
   # Use ZSH as the default shell
   programs.zsh.enable = true;
@@ -128,7 +132,7 @@ in
     gnomeExtensions.pop-shell
     gnomeExtensions.dash-to-panel
     docker-compose
-    nixpkgs-beyond-identity.beyond-identity
+    hornwall.beyond-identity
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -172,6 +176,5 @@ in
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "23.11"; # Did you read the comment?
-
 }
 

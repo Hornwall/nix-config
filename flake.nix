@@ -8,6 +8,12 @@
     # at the same time. Here's an working example:
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # Hardware support
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
+    # Custom nixpkgs with update to beyond-identity
+    nixpkgs-hornwall.url = "github:hornwall/nixpkgs/update-beyond-identity";
+
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-23.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -15,6 +21,8 @@
   outputs = {
      self,
      nixpkgs,
+     nixos-hardware,
+     nixpkgs-hornwall,
      home-manager,
      ...
    } @ inputs: let
@@ -57,8 +65,9 @@
          ];
        };
        thinkpad-z16 = nixpkgs.lib.nixosSystem {
-         specialArgs = {inherit inputs outputs;};
+         specialArgs = {inherit inputs outputs nixpkgs-hornwall;};
          modules = [
+           nixos-hardware.nixosModules.lenovo-thinkpad-z
            ./nixos/thinkpad-z16/configuration.nix
          ];
        };
