@@ -38,6 +38,7 @@
     pkgs.devbox
     pkgs.heroku
     pkgs.solargraph
+    pkgs.gnupg
     #Fonts
     pkgs.fira-code
     pkgs.fira-code-nerdfont
@@ -131,6 +132,7 @@
     
     aliases = {
       st = "status -sb";
+      lg = "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative";
     };
   };
 }

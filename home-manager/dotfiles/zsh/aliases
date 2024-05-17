@@ -35,8 +35,13 @@ alias pbcopy='xclip'
 alias pbpaste='xclip -o'
 
 alias wp="webpack-dev-server --hot"
-alias rs="rails s"
-alias rc="rails c"
 
 alias kgp="kubectl get pods -n"
 alias kex="kubectl exec -it -n"
+
+alias dup="devenv up"
+alias ds="devenv shell"
+alias rs="devenv shell bin/dev"
+alias rc="devenv shell rails c"
+alias rt="devenv shell rails test"
+alias mt="devenv shell make -- -j8"
