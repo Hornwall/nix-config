@@ -10,8 +10,13 @@
 
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
   boot.initrd.kernelModules = [ "dm-snapshot" ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
+  boot.kernelModules = [ "kvm-amd" "v4l2loopback" ];
+  boot.extraModulePackages = with config.boot.kernelPackages; [
+    v4l2loopback.out
+  ];
+  boot.extraModprobeConfig = ''
+    options v4l2loopback exclisive_caps=1 card_label="Virtual Camera"
+  '';
   boot.initrd.luks.devices = {
     root = {
       device = "/dev/disk/by-uuid/4fc51fd7-34c7-4371-be86-9037fc0dbfe0";
@@ -42,4 +47,11 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+  hardware.opengl = {
+    enable = true;
+    driSupport = true;
+    driSupport32Bit = true;
+    extraPackages = with pkgs; [ libva vaapiVdpau libvdpau-va-gl ];
+  };
 }

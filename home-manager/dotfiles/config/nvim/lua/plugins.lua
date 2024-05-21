@@ -95,6 +95,15 @@ return packer.startup(function()
     end,
   }
 
+  use {
+    "laytan/tailwind-sorter.nvim",
+    requires = {"nvim-treesitter/nvim-treesitter", "nvim-lua/plenary.nvim"},
+    config = function() require("tailwind-sorter").setup({
+      on_save_enabled = true,
+      on_save_pattern = { "*.html", "*.erb", "*.js", "*.jsx", "*.tsx", "*.twig", "*.hbs", "*.php", "*.heex" }
+    }) end,
+    run = "cd formatter && npm ci && npm run build",
+  }
 
   -- LSP
   use  {
@@ -139,13 +148,13 @@ return packer.startup(function()
   }
 
   -- Treesitter
-  use {
-    "nvim-treesitter/nvim-treesitter",
-    config = function()
-      require "plugins.configs.treesitter"
-    end,
-    run = ":TSUpdate"
-  }
+ --use {
+ --  "nvim-treesitter/nvim-treesitter",
+ --  config = function()
+ --    require "plugins.configs.treesitter"
+ --  end,
+ --  run = ":TSUpdate"
+ --}
   use {
       "nvim-treesitter/nvim-treesitter-textobjects",
       after = "nvim-treesitter",

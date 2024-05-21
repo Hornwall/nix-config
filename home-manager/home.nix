@@ -39,6 +39,7 @@
     pkgs.heroku
     pkgs.solargraph
     pkgs.gnupg
+    pkgs.nodePackages_latest.typescript-language-server
     #Fonts
     pkgs.fira-code
     pkgs.fira-code-nerdfont
@@ -114,6 +115,7 @@
     enable = true;
     plugins = [
       pkgs.vimPlugins.packer-nvim
+      pkgs.vimPlugins.nvim-treesitter.withAllGrammars
     ];
   };
 
