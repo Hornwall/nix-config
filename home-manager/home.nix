@@ -40,6 +40,7 @@
     pkgs.solargraph
     pkgs.gnupg
     pkgs.nodePackages_latest.typescript-language-server
+    pkgs.ngrok
     #Fonts
     pkgs.fira-code
     pkgs.fira-code-nerdfont
