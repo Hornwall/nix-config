@@ -12,7 +12,7 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     # Custom nixpkgs with update to beyond-identity
-    nixpkgs-hornwall.url = "github:hornwall/nixpkgs/update-beyond-identity";
+    nixpkgs-hornwall.url = "github:hornwall/nixpkgs/master";
 
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-24.05";
