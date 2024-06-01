@@ -13,7 +13,7 @@
     ./gnome.nix
     ./docker.nix
     ./aboard.nix
-    ./ollama.nix
+    #./ollama.nix
   ];
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
