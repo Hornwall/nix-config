@@ -11,8 +11,8 @@
     # Hardware support
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    # Custom nixpkgs with update to beyond-identity
-    nixpkgs-hornwall.url = "github:hornwall/nixpkgs/master";
+    # Custom nixpkgs with update to immersed
+    nixpkgs-hornwall.url = "github:hornwall/nixpkgs/update-immersed";
 
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-24.05";
@@ -23,6 +23,7 @@
      nixpkgs,
      nixos-hardware,
      nixpkgs-hornwall,
+     nixpkgs-unstable,
      home-manager,
      ...
    } @ inputs: let
@@ -65,7 +66,7 @@
          ];
        };
        thinkpad-z16 = nixpkgs.lib.nixosSystem {
-         specialArgs = {inherit inputs outputs nixpkgs-hornwall;};
+         specialArgs = {inherit inputs outputs nixpkgs-hornwall nixpkgs-unstable;};
          modules = [
            nixos-hardware.nixosModules.lenovo-thinkpad-z
            ./nixos/thinkpad-z16/configuration.nix

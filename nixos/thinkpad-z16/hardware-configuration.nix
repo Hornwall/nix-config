@@ -13,6 +13,7 @@
   boot.kernelModules = [ "kvm-amd" "v4l2loopback" ];
   boot.extraModulePackages = with config.boot.kernelPackages; [
     v4l2loopback.out
+    evdi.out
   ];
   boot.extraModprobeConfig = ''
     options v4l2loopback exclisive_caps=1 card_label="Virtual Camera"
@@ -48,6 +49,7 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
+  hardware.uinput.enable = true;
   hardware.opengl = {
     enable = true;
     driSupport = true;
