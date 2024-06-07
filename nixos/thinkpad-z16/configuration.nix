@@ -139,8 +139,8 @@
     gnomeExtensions.pop-shell
     gnomeExtensions.dash-to-panel
     docker-compose
+    beyond-identity
     hornwall.immersed-vr
-    unstable.beyond-identity
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
