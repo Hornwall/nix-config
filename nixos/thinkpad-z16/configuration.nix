@@ -32,8 +32,15 @@
   networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
 
   # Enable bluetooth support
-  hardware.bluetooth.enable = true; # enables support for Bluetooth
-  hardware.bluetooth.powerOnBoot = true; # powers up the default Bluetooth controller on boot
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    input = {
+      General = {
+        UserspaceHID = true;
+      };
+    };
+  };
 
   # Set your time zone.
   time.timeZone = "Europe/Stockholm";
