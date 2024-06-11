@@ -103,7 +103,6 @@
       outputs.overlays.additions
       outputs.overlays.modifications
       outputs.overlays.unstable-packages
-      outputs.overlays.hornwall-packages
     ];
   };
 
@@ -139,7 +138,7 @@
     gnomeExtensions.dash-to-panel
     docker-compose
     beyond-identity
-    hornwall.immersed-vr
+    immersed-vr
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

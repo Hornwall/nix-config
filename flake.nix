@@ -11,9 +11,6 @@
     # Hardware support
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    # Custom nixpkgs with update to immersed
-    nixpkgs-hornwall.url = "github:hornwall/nixpkgs/update-immersed";
-
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-24.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -22,7 +19,6 @@
      self,
      nixpkgs,
      nixos-hardware,
-     nixpkgs-hornwall,
      nixpkgs-unstable,
      home-manager,
      ...
@@ -42,7 +38,10 @@
    in {
      # Your custom packages
      # Accessible through 'nix build', 'nix shell', etc
-     packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
+     packages = forAllSystems (system:
+        let pkgs = nixpkgs.legacyPackages.${system};
+        in import ./pkgs { inherit pkgs; }
+      );
      # Formatter for your nix files, available through 'nix fmt'
      # Other options beside 'alejandra' include 'nixpkgs-fmt'
      #formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
