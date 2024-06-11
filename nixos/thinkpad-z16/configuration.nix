@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, nixpkgs-hornwall, nixpkgs-unstable, ... }:
+{ inputs, outputs, config, lib, pkgs, ... }:
 
 {
   imports = [
@@ -20,7 +20,7 @@
   nix.settings.trusted-users = [ "root" "hannes" ];
 
   # Use latest kernel
-  boot.kernelPackages = pkgs.linuxPackages_6_8;
+  boot.kernelPackages = pkgs.linuxPackages_6_9;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -100,18 +100,10 @@
     config.allowUnfree = true;
 
     overlays = [
-      (final: prev: {
-        hornwall = import nixpkgs-hornwall {
-          config.allowUnfree = true;
-          system = "x86_64-linux";
-        };
-      })
-      (final: prev: {
-        unstable = import nixpkgs-unstable {
-          config.allowUnfree = true;
-          system = "x86_64-linux";
-        };
-      })
+      outputs.overlays.additions
+      outputs.overlays.modifications
+      outputs.overlays.unstable-packages
+      outputs.overlays.hornwall-packages
     ];
   };
 

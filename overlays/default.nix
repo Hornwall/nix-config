@@ -20,4 +20,10 @@
       config.allowUnfree = true;
     };
   };
+  hornwall-packages = final: _prev: {
+    hornwall = import inputs.nixpkgs-hornwall {
+      system = final.system;
+      config.allowUnfree = true;
+    };
+  };
 }

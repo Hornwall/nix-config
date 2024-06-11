@@ -66,7 +66,7 @@
          ];
        };
        thinkpad-z16 = nixpkgs.lib.nixosSystem {
-         specialArgs = {inherit inputs outputs nixpkgs-hornwall nixpkgs-unstable;};
+         specialArgs = {inherit inputs outputs;};
          modules = [
            nixos-hardware.nixosModules.lenovo-thinkpad-z
            ./nixos/thinkpad-z16/configuration.nix

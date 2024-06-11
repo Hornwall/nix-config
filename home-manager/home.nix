@@ -41,6 +41,7 @@
     pkgs.gnupg
     pkgs.nodePackages_latest.typescript-language-server
     pkgs.ngrok
+    pkgs.fzf
     #Fonts
     pkgs.fira-code
     pkgs.fira-code-nerdfont
@@ -52,6 +53,7 @@
     pkgs.discord
     pkgs.slack
     pkgs.gimp
+    pkgs.chromium
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -137,6 +139,7 @@
     aliases = {
       st = "status -sb";
       lg = "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative";
+      fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup";
     };
   };
 }
