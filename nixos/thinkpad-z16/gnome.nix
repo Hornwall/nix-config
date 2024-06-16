@@ -59,6 +59,8 @@
   };
   security.pam.services.gdm.enableGnomeKeyring = true;
 
+
+  xdg.autostart.enable = true;
   xdg.portal = {
     config = {
       gnome = {

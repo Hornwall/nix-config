@@ -3,7 +3,7 @@
     enable = true;
     acceleration = "rocm";
     environmentVariables = {
-      HSA_OVERRIDE_GFX_VERSION = "9.0.0";
+      HSA_OVERRIDE_GFX_VERSION = "10.3.1";
     };
   };
 }

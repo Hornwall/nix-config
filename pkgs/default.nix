@@ -3,4 +3,5 @@
 
 { pkgs ? (import ../nixpkgs.nix) { } }: {
   immersed-vr = pkgs.callPackage ./immersed-vr.nix { };
+  beyond-identity = pkgs.callPackage ./beyond-identity.nix { };
 }

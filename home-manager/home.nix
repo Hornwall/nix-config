@@ -42,6 +42,7 @@
     pkgs.nodePackages_latest.typescript-language-server
     pkgs.ngrok
     pkgs.fzf
+    pkgs.zeal
     #Fonts
     pkgs.fira-code
     pkgs.fira-code-nerdfont
