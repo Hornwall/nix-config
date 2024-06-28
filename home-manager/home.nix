@@ -55,6 +55,7 @@
     pkgs.slack
     pkgs.gimp
     pkgs.chromium
+    pkgs.inkscape
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the

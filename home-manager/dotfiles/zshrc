@@ -24,10 +24,7 @@ export PATH="/home/hannes/.yarn/bin:$PATH"
 export PATH="/home/hannes/.cargo/bin:$PATH"
 export PATH="/home/hannes/scripts/ruby:$PATH"
 export PATH="/home/hannes/scripts/shell:$PATH"
-export PATH=/Developer/NVIDIA/CUDA-7.0/bin:$PATH
 export PATH=/home/hannes/.local/bin:$PATH
-export DYLD_LIBRARY_PATH=/Developer/NVIDIA/CUDA-7.0/lib:$DYLD_LIBRARY_PATH
-export APOEX_EMAIL="hannes.hornwall@apoex.se"
 export ERL_AFLAGS="-kernel shell_history enabled"
 
 export EDITOR=nvim
@@ -58,8 +55,4 @@ export QT_DEVICE_PIXEL_RATIO=2
 
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=18"
 
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-#export PATH="$PATH:$HOME/.rvm/bin"
-#[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source <(fzf --zsh)

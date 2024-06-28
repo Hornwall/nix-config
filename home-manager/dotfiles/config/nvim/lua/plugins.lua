@@ -99,7 +99,7 @@ return packer.startup(function()
     "laytan/tailwind-sorter.nvim",
     requires = {"nvim-treesitter/nvim-treesitter", "nvim-lua/plenary.nvim"},
     config = function() require("tailwind-sorter").setup({
-      on_save_enabled = true,
+      on_save_enabled = false,
       on_save_pattern = { "*.html", "*.erb", "*.js", "*.jsx", "*.tsx", "*.twig", "*.hbs", "*.php", "*.heex" }
     }) end,
     run = "cd formatter && npm ci && npm run build",
