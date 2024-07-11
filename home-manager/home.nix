@@ -43,6 +43,7 @@
     pkgs.ngrok
     pkgs.fzf
     pkgs.zeal
+    pkgs.ruby_3_3
     #Fonts
     pkgs.fira-code
     pkgs.fira-code-nerdfont

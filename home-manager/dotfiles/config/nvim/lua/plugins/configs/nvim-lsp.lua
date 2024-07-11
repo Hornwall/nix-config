@@ -17,21 +17,21 @@ require("lspconfig").volar.setup{
   on_attach = function()
     map_keys()
   end,
-} -- connect to solargraph
+} -- connect to volar
 
 require("lspconfig").tsserver.setup{
   capabilities = capabilities,
   on_attach = function()
     map_keys()
   end,
-} -- connect to solargraph
+} -- connect to tsserver
 
-require("lspconfig").solargraph.setup{
-  capabilities = capabilities,
-  on_attach = function()
-    map_keys()
-  end,
-} -- connect to solargraph
+-- require("lspconfig").solargraph.setup{
+--   capabilities = capabilities,
+--   on_attach = function()
+--    map_keys()
+--  end,
+--} -- connect to solargraph
 
 -- Standardrb
 vim.opt.signcolumn = "yes" -- otherwise it bounces in and out, not strictly needed though
@@ -41,7 +41,7 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     vim.lsp.start {
       name = "standard",
-      cmd = { "~/.rbenv/shims/standardrb", "--lsp" },
+      cmd = { "/home/hannes/.local/share/gem/ruby/3.3.0/bin/standardrb", "--lsp" },
     }
   end,
 })
