@@ -134,6 +134,7 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     zsh
     wget
+    distrobox
     _1password-gui
     _1password
     gnome.gnome-tweaks
@@ -143,6 +144,14 @@
     beyond-identity
     immersed-vr
   ];
+
+  # Make scripts with /bin/bash work
+  system.activationScripts.binbash = {
+    deps = [ "binsh" ];
+    text = ''
+         ln -s /bin/sh /bin/bash
+    '';
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
