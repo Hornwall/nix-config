@@ -34,7 +34,9 @@
     pkgs.gnumake
     pkgs.ripgrep
     pkgs.wl-clipboard
-    pkgs.vscode
+    pkgs.dive
+    pkgs.docker-slim
+    #pkgs.vscode
     pkgs.devbox
     pkgs.heroku
     pkgs.solargraph
@@ -44,6 +46,7 @@
     pkgs.fzf
     pkgs.zeal
     pkgs.ruby_3_3
+    pkgs.tldr
     #Fonts
     pkgs.fira-code
     pkgs.fira-code-nerdfont
@@ -53,7 +56,7 @@
     # Software
     pkgs.spotify
     pkgs.discord
-    pkgs.slack
+    #pkgs.slack
     pkgs.gimp
     pkgs.chromium
     pkgs.inkscape
