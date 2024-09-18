@@ -20,7 +20,7 @@
   nix.settings.trusted-users = [ "root" "hannes" ];
 
   # Use latest kernel
-  boot.kernelPackages = pkgs.linuxPackages_6_10;
+  boot.kernelPackages = pkgs.linuxPackages_6_11;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
