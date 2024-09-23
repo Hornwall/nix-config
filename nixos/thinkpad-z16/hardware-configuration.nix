@@ -9,7 +9,7 @@
     ];
 
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
-  boot.initrd.kernelModules = [ "dm-snapshot" ];
+  boot.initrd.kernelModules = [ "amdgpu" "dm-snapshot" ];
   boot.kernelModules = [ "kvm-amd" "v4l2loopback" ];
   boot.plymouth = {
     enable = true;
@@ -78,6 +78,11 @@
     enable = true;
     driSupport = true;
     driSupport32Bit = true;
-    extraPackages = with pkgs; [ libva vaapiVdpau libvdpau-va-gl ];
+    extraPackages = with pkgs; [
+      libgpg-error
+      libva
+      vaapiVdpau
+      libvdpau-va-gl
+    ];
   };
 }
