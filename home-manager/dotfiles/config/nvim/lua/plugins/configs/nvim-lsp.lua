@@ -19,12 +19,12 @@ require("lspconfig").volar.setup{
   end,
 } -- connect to volar
 
-require("lspconfig").tsserver.setup{
+require("lspconfig").ts_ls.setup{
   capabilities = capabilities,
   on_attach = function()
     map_keys()
   end,
-} -- connect to tsserver
+} -- connect to ts-ls
 
 -- require("lspconfig").solargraph.setup{
 --   capabilities = capabilities,

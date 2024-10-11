@@ -24,70 +24,6 @@ return packer.startup(function()
   use "AndrewRadev/deleft.vim"
   use "lervag/vimtex"
 
--- Copilot
-   use {
-    "zbirenbaum/copilot.lua",
-    event = "VimEnter",
-    config = function()
-      vim.defer_fn(function()
-        require("copilot").setup({
-          panel = {
-            enabled = false,
-          },
-          suggestion = {
-            enabled = true,
-            auto_trigger = true,
-            debounce = 10,
-            keymap = {
-              accept = "<c-e>",
-              next = "<c-n>",
-              prev = "<c-p>",
-              dismiss = "<C-]>",
-            },
-          },
-          filetypes = {
-            yaml = false,
-            markdown = false,
-            help = false,
-            gitcommit = false,
-            gitrebase = false,
-            hgcommit = false,
-            norg = false,
-            svn = false,
-            cvs = false,
-            ruby = true,
-            ["."] = false,
-          },
-          copilot_node_command = "node",
-          plugin_manager_path = vim.fn.stdpath("data") .. "/site/pack/packer",
-          server_opts_overrides = {
-            advanced = {
-              length = 1,
-            }
-          },
-        })
-      end, 100)
-
-      local suggestion = require("copilot.suggestion")
-
-        -- if suggestion.is_visible() then
-        -- vim.keymap.set("i", "<c-e>", function()
-        --   suggestion.accept()
-        -- else
-        --   return "<c-o>g$"
-        -- end
-      -- end, { expr = true })
-
-      vim.keymap.set("i", "<c-p>", function()
-        suggestion.prev()
-      end)
-
-      vim.keymap.set("i", "<c-n>", function()
-        suggestion.next()
-      end)
-    end,
-  }
-
   use { 
     "vim-test/vim-test" ,
     config = function()
@@ -170,4 +106,19 @@ return packer.startup(function()
       }
     end
   }
+
+  use {
+    "supermaven-inc/supermaven-nvim",
+    after = "nvim-cmp",
+    config = function()
+      require("supermaven-nvim").setup({
+        keymaps = {
+          accept_suggestion = "<C-e>",
+          clear_suggestion = "<C-]>",
+          accept_word = "<C-j>",
+        },
+      })
+    end,
+  }
+
 end)
