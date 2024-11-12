@@ -25,6 +25,8 @@ export PATH="/home/hannes/.cargo/bin:$PATH"
 export PATH="/home/hannes/scripts/ruby:$PATH"
 export PATH="/home/hannes/scripts/shell:$PATH"
 export PATH=/home/hannes/.local/bin:$PATH
+export PATH=~/.npm-packages/bin:$PATH
+export NODE_PATH=~/.npm-packages/lib/node_modules
 export ERL_AFLAGS="-kernel shell_history enabled"
 
 export EDITOR=nvim

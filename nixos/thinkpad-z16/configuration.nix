@@ -143,6 +143,9 @@
     docker-compose
     beyond-identity
     immersed-vr
+    unstable.ruby_3_4
+    unstable.rubyPackages_3_4.standard
+    unstable.android-studio
   ];
 
   # Make scripts with /bin/bash work

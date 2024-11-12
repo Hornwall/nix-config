@@ -45,7 +45,6 @@
     pkgs.ngrok
     pkgs.fzf
     pkgs.zeal
-    pkgs.ruby_3_3
     pkgs.tldr
     #Fonts
     pkgs.fira-code
@@ -56,12 +55,13 @@
     # Software
     pkgs.spotify
     pkgs.discord
-    #pkgs.slack
+    pkgs.slack
     pkgs.gimp
     pkgs.chromium
     pkgs.inkscape
     pkgs.teams-for-linux
     pkgs.calibre
+    pkgs.feh
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
