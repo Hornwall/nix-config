@@ -101,7 +101,7 @@
     zsh
     wget
     _1password-gui
-    _1password
+    _1password-cli
     gnomeExtensions.pop-shell
     gnomeExtensions.dash-to-panel
   ];

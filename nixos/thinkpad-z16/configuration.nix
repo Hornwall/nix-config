@@ -136,8 +136,8 @@
     wget
     distrobox
     _1password-gui
-    _1password
-    gnome.gnome-tweaks
+    _1password-cli
+    gnome-tweaks
     gnomeExtensions.pop-shell
     gnomeExtensions.dash-to-panel
     docker-compose
