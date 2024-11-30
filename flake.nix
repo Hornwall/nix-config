@@ -3,7 +3,7 @@
 
   inputs = {
     # Nixpkgs
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     # You can access packages and modules from different nixpkgs revs
     # at the same time. Here's an working example:
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -12,7 +12,7 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     # Home manager
-    home-manager.url = "github:nix-community/home-manager/release-24.05";
+    home-manager.url = "github:nix-community/home-manager/release-24.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
   outputs = {
