@@ -36,6 +36,8 @@
     pkgs.wl-clipboard
     pkgs.dive
     pkgs.docker-slim
+    pkgs.awscli
+    pkgs.yarn
     #pkgs.vscode
     pkgs.devbox
     pkgs.heroku
