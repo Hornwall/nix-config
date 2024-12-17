@@ -35,9 +35,9 @@
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
-    input = {
+    settings = {
       General = {
-        UserspaceHID = true;
+        Experimental = true;
       };
     };
   };
