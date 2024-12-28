@@ -15,9 +15,20 @@
     ./aboard.nix
     ./homepage.nix
   ];
-  # Enable flakes
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  nix.settings.trusted-users = [ "root" "hannes" ];
+
+  nix = {
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+    optimise.automatic = true;
+
+    settings = {
+      experimental-features = [ "nix-command" "flakes" ];
+      trusted-users = [ "root" "hannes" ];
+    };
+  };
 
   # Use latest kernel
   boot.kernelPackages = pkgs.linuxPackages_6_12;
