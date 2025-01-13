@@ -26,6 +26,7 @@
   home.packages = [
     # Devtools
     pkgs.kitty
+    pkgs.ghostty
     pkgs.tmux
     pkgs.git
     pkgs.gh
