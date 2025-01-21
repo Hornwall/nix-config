@@ -5,7 +5,7 @@
 
 let
   pname = "beyond-identity";
-  version = "2.99.0-0";
+  version = "2.100.2-0";
   libPath = lib.makeLibraryPath ([ glib glibc openssl tpm2-tss gtk3 gnome-keyring polkit polkit_gnome ]);
   meta = with lib; {
     description = "Passwordless MFA identities for workforces, customers, and developers";
@@ -22,7 +22,7 @@ let
 
     src = fetchurl {
       url = "https://packages.beyondidentity.com/public/linux-authenticator/deb/ubuntu/pool/focal/main/b/be/${pname}_${version}/${pname}_${version}_amd64.deb";
-      hash = "sha512-AuLVlDbQLeUgKM3ttgg84tMLrcUOj2gZwiD6QW2vKmrJIh+8hL7S6WaUt4KtnWQlkM79BtRmrAOgBc2qylHR9g==";
+      hash = "sha512-s5hvx1ab3VI6eC32vLYqMpVnI8Sujn2snYHIP7DctFv8cOoCbxzkqMNznTHeR5MiA5XsuIltR+e0RuO448gSXw==";
     };
 
     nativeBuildInputs = [
