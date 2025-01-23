@@ -41,7 +41,7 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     vim.lsp.start {
       name = "standard",
-      cmd = { "/home/hannes/.local/share/gem/ruby/3.3.0/bin/standardrb", "--lsp" },
+      cmd = { "standardrb", "--lsp" },
     }
   end,
 })
