@@ -11,6 +11,8 @@
     # Hardware support
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-24.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";

@@ -136,6 +136,7 @@
     shell = pkgs.zsh;
     packages = with pkgs; [
       firefox
+      inputs.zen-browser.packages."${system}".default
       tree
     ];
   };

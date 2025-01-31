@@ -11,6 +11,7 @@
     "1password/custom_allowed_browsers" = {
       text = ''
         firefox
+        .zen-wrapped
       '';
       mode = "0755";
     };
