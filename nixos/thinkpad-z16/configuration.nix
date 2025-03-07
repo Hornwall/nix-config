@@ -135,8 +135,8 @@
     extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
     packages = with pkgs; [
-      firefox
-      firefox-devedition
+      unstable.firefox
+      librewolf
       inputs.zen-browser.packages."${system}".default
       tree
     ];
