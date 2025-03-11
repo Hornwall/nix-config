@@ -49,6 +49,10 @@
     settings = {
       General = {
         Experimental = true;
+        Privacy = "device";
+        JustWorksRepairing = "always";
+        Class = "0x000100";
+        FastConnectable = true;
       };
     };
   };
@@ -136,7 +140,7 @@
     shell = pkgs.zsh;
     packages = with pkgs; [
       unstable.firefox
-      librewolf
+      unstable.librewolf
       inputs.zen-browser.packages."${system}".default
       tree
     ];

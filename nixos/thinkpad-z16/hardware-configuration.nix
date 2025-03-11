@@ -35,10 +35,10 @@
   ];
   boot.extraModulePackages = with config.boot.kernelPackages; [
     v4l2loopback.out
-    #evdi.out
+    xpadneo
   ];
   boot.extraModprobeConfig = ''
-    options v4l2loopback exclisive_caps=1 card_label="Virtual Camera"
+    options v4l2loopback exclisive_caps=1 card_label="Virtual Camera bluetooth disable_ertm=Y"
   '';
   boot.initrd.luks.devices = {
     root = {
@@ -72,6 +72,7 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.xpadneo.enable = true;
 
   hardware.uinput.enable = true;
   hardware.graphics = {

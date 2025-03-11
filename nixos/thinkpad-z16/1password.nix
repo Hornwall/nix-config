@@ -12,6 +12,7 @@
       text = ''
         firefox
         .zen-wrapped
+        .librewolf-wrapped
       '';
       mode = "0755";
     };
