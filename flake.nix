@@ -13,6 +13,9 @@
 
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
 
+    # Cosmic desktop
+    nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
+
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-24.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -22,6 +25,7 @@
      nixpkgs,
      nixos-hardware,
      nixpkgs-unstable,
+     nixos-cosmic,
      home-manager,
      ...
    } @ inputs: let
@@ -70,6 +74,13 @@
          specialArgs = {inherit inputs outputs;};
          modules = [
            nixos-hardware.nixosModules.lenovo-thinkpad-z
+           {
+             nix.settings = {
+               substituters = [ "https://cosmic.cachix.org/" ];
+               trusted-public-keys = [ "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE=" ];
+             };
+           }
+           nixos-cosmic.nixosModules.default
            ./nixos/thinkpad-z16/configuration.nix
          ];
        };
