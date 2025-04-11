@@ -12,7 +12,7 @@ let
 
   src = fetchurl {
     url = "https://static.immersed.com/dl/Immersed-x86_64.AppImage";
-    hash = "sha256-u07QpGXEXbp7ApZgerq36x+4Wxsz08YAruIVnZeS0ck=";
+    hash = "sha256-U0YYXai1zUeU8ZaIb7QiCrpbfvOAYywWgNQ3r2uVyl0=";
   };
 
   extraPkgs = pkgs: with pkgs; [
