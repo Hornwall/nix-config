@@ -14,6 +14,7 @@
     ./docker.nix
     ./aboard.nix
     ./homepage.nix
+    ./waydroid.nix
   ];
 
   nix = {
