@@ -15,6 +15,7 @@
     ./aboard.nix
     ./homepage.nix
     ./waydroid.nix
+    ./ollama.nix
   ];
 
   nix = {
