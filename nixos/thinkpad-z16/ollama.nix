@@ -9,5 +9,13 @@
     # results in environment variable "HSA_OVERRIDE_GFX_VERSION=10.3.0"
     rocmOverrideGfx = "10.3.0";
   };
-  services.open-webui.enable = true;
+
+  services.open-webui = {
+    enable = true;
+    environment = {
+      ENABLE_WEB_SEARCH              = "True";
+      ENABLE_SEARCH_QUERY_GENERATION = "True";
+      WEB_SEARCH_ENGINE              = "duckduckgo";
+    };
+  };
 }
