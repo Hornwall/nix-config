@@ -55,6 +55,7 @@
     recommendedOptimisation = true;
     recommendedProxySettings = true;
     recommendedTlsSettings = true;
+    clientMaxBodySize = "100M";
 
     logError = "stderr debug";
   
