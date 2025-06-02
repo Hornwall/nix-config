@@ -16,6 +16,7 @@
     ./homepage.nix
     ./waydroid.nix
     ./ollama.nix
+    (import ./searxng.nix { inherit lib; })
   ];
 
   nix = {
