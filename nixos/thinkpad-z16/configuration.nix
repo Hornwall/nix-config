@@ -163,6 +163,7 @@
     unstable.ruby_3_4
     unstable.rubyPackages_3_4.standard
     unstable.android-studio
+    unstable.code-cursor
   ];
 
   # Make scripts with /bin/bash work
