@@ -13,6 +13,13 @@
 
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
 
+    hyprland.url = "github:hyprwm/Hyprland";
+
+    hyprland-plugins = {
+      url = "github:hyprwm/hyprland-plugins";
+      inputs.hyprland.follows = "hyprland";
+    };
+
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-25.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -23,6 +30,8 @@
      nixos-hardware,
      nixpkgs-unstable,
      home-manager,
+     hyprland,
+     hyprland-plugins,
      ...
    } @ inputs: let
      inherit (self) outputs;
@@ -70,6 +79,7 @@
          specialArgs = {inherit inputs outputs;};
          modules = [
            nixos-hardware.nixosModules.lenovo-thinkpad-z
+           hyprland.nixosModules.default
            ./nixos/thinkpad-z16/configuration.nix
          ];
        };
