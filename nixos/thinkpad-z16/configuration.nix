@@ -16,7 +16,7 @@
     ./homepage.nix
     ./waydroid.nix
     ./ollama.nix
-    (import ./hyperland.nix { inherit inputs pkgs; })
+    (import ./hyprland.nix { inherit inputs pkgs; })
     (import ./searxng.nix { inherit lib; })
   ];
 
@@ -168,6 +168,19 @@
     unstable.rubyPackages_3_4.standard
     unstable.android-studio
     unstable.code-cursor
+  ];
+
+  fonts.packages = with pkgs; [
+    pkgs.fira-code
+    pkgs.fira-code-symbols
+    pkgs.nerd-fonts.jetbrains-mono
+    pkgs.nerd-fonts.fira-code
+    pkgs.nerd-fonts.droid-sans-mono
+    pkgs.nerd-fonts.noto
+    pkgs.nerd-fonts.hack
+    pkgs.nerd-fonts.ubuntu
+    pkgs.inter
+    pkgs.cascadia-code
   ];
 
   # Make scripts with /bin/bash work

@@ -50,11 +50,6 @@
     pkgs.fzf
     pkgs.zeal
     pkgs.tldr
-    #Fonts
-    pkgs.fira-code
-    pkgs.fira-code-nerdfont
-    pkgs.fira-code-symbols
-    pkgs.inter
 
     # Software
     pkgs.spotify
@@ -70,7 +65,13 @@
     # Hyperland
     pkgs.wofi
     pkgs.hyprpaper
+    pkgs.hypridle
     pkgs.hyprlock
+    pkgs.hyprpanel
+    pkgs.hyprcursor
+    pkgs.hyprpolkitagent
+    pkgs.brightnessctl
+    pkgs.wf-recorder
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
