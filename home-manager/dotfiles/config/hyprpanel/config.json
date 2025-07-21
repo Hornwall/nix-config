@@ -1,0 +1,93 @@
+{
+  "bar.customModules.storage.paths": [
+    "/"
+  ],
+  "theme.font.size": "1rem",
+  "theme.bar.floating": false,
+  "bar.autoHide": "never",
+  "menus.clock.weather.location": "Stockholm",
+  "menus.clock.weather.unit": "metric",
+  "menus.clock.time.military": true,
+  "menus.clock.time.hideSeconds": false,
+  "notifications.position": "top right",
+  "scalingPriority": "hyprland",
+  "menus.media.displayTimeTooltip": false,
+  "menus.dashboard.shortcuts.left.shortcut1.command": "firefox",
+  "menus.dashboard.shortcuts.left.shortcut1.icon": "󰈹",
+  "menus.dashboard.shortcuts.left.shortcut1.tooltip": "Firefox",
+  "menus.dashboard.shortcuts.left.shortcut3.tooltip": "Slack",
+  "menus.dashboard.shortcuts.left.shortcut3.command": "slack",
+  "menus.dashboard.shortcuts.left.shortcut3.icon": "",
+  "theme.bar.buttons.modules.kbLayout.enableBorder": false,
+  "theme.bar.buttons.modules.hypridle.enableBorder": false,
+  "bar.workspaces.show_numbered": false,
+  "bar.workspaces.show_icons": false,
+  "theme.bar.buttons.bluetooth.enableBorder": false,
+  "theme.bar.buttons.notifications.enableBorder": false,
+  "menus.power.lowBatteryNotification": false,
+  "bar.layouts": {
+    "0": {
+      "left": [
+        "dashboard",
+        "workspaces",
+        "windowtitle"
+      ],
+      "middle": [
+        "media"
+      ],
+      "right": [
+        "volume",
+        "network",
+        "bluetooth",
+        "battery",
+        "systray",
+        "clock",
+        "notifications"
+      ]
+    },
+    "1": {
+      "left": [
+        "dashboard",
+        "workspaces",
+        "windowtitle"
+      ],
+      "middle": [
+        "media"
+      ],
+      "right": [
+        "volume",
+        "network",
+        "bluetooth",
+        "battery",
+        "systray",
+        "clock",
+        "notifications"
+      ]
+    },
+    "2": {
+      "left": [
+        "dashboard",
+        "workspaces",
+        "windowtitle"
+      ],
+      "middle": [
+        "media"
+      ],
+      "right": [
+        "volume",
+        "clock",
+        "notifications"
+      ]
+    }
+  },
+  "wallpaper.enable": true,
+  "wallpaper.image": "",
+  "theme.matugen": false,
+  "theme.matugen_settings.mode": "dark",
+  "theme.matugen_settings.scheme_type": "tonal-spot",
+  "theme.matugen_settings.variation": "standard_1",
+  "theme.bar.transparent": false,
+  "theme.bar.opacity": 100,
+  "bar.clock.format": "%a %b %d  %H:%M",
+  "menus.dashboard.shortcuts.left.shortcut4.command": "wofi -show drun"
+}
