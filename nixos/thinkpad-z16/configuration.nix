@@ -164,10 +164,14 @@
     docker-compose
     beyond-identity
     immersed-vr
+    xdg-desktop-portal-gtk
+    xdg-desktop-portal-hyprland
     unstable.ruby_3_4
     unstable.rubyPackages_3_4.standard
     unstable.android-studio
     unstable.code-cursor
+    libsecret
+    seahorse
   ];
 
   fonts.packages = with pkgs; [

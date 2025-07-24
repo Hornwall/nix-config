@@ -72,6 +72,8 @@
     pkgs.hyprpolkitagent
     pkgs.brightnessctl
     pkgs.wf-recorder
+    pkgs.gnome-keyring
+    pkgs.seahorse
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -148,6 +150,10 @@
 
   programs.zsh = {
     enable = true;
+  };
+
+  programs.ssh = {
+    addKeysToAgent = true;
   };
 
   programs.git = {

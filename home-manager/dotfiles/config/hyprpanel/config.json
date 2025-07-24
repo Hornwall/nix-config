@@ -7,6 +7,7 @@
   "bar.autoHide": "never",
   "menus.clock.weather.location": "Stockholm",
   "menus.clock.weather.unit": "metric",
+  "menus.clock.weather.key": "/home/hannes/.config/hyprpanel/.weather.json",
   "menus.clock.time.military": true,
   "menus.clock.time.hideSeconds": false,
   "notifications.position": "top right",
@@ -80,6 +81,7 @@
       ]
     }
   },
+  "bar.launcher.icon": "",
   "wallpaper.enable": true,
   "wallpaper.image": "",
   "theme.matugen": false,
