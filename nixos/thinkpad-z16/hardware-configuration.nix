@@ -10,7 +10,7 @@
 
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
   boot.initrd.kernelModules = [ "amdgpu" "dm-snapshot" ];
-  boot.kernelModules = [ "kvm-amd" "v4l2loopback" ];
+  boot.kernelModules = [ "kvm-amd" ];
   boot.plymouth = {
     enable = true;
     theme = "rings";
@@ -34,11 +34,10 @@
     "udev.log_priority=3"
   ];
   boot.extraModulePackages = with config.boot.kernelPackages; [
-    v4l2loopback.out
     xpadneo
   ];
   boot.extraModprobeConfig = ''
-    options v4l2loopback exclisive_caps=1 card_label="Virtual Camera bluetooth disable_ertm=Y"
+    options exclisive_caps=1 card_label="Virtual Camera bluetooth disable_ertm=Y"
   '';
   boot.initrd.luks.devices = {
     root = {
