@@ -75,6 +75,7 @@
     pkgs.gnome-keyring
     pkgs.seahorse
     pkgs.sherlock-launcher
+    pkgs.libnotify
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -162,7 +163,11 @@
 
     userName = "Hannes Hornwall";
     userEmail = "hannes@hornwall.me";
-    
+
+    extraConfig = {
+      core.excludesfile = "~/.gitignore";
+    };
+
     aliases = {
       st = "status -sb";
       lg = "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative";
