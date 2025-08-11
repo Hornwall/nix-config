@@ -122,6 +122,15 @@ return packer.startup(function()
   }
 
   use {
+    "folke/snacks.nvim",
+    config = function()
+      -- Set keymaps for the dependency here
+      vim.keymap.set("t", "<C-h>", "<cmd>TmuxNavigateLeft<cr>")
+      vim.keymap.set("t", "<C-l>", "<cmd>TmuxNavigateRight<cr>")
+    end
+  }
+
+  use {
     "coder/claudecode.nvim",
     requires = { "folke/snacks.nvim" },
     config = function()
