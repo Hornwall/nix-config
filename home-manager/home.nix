@@ -72,6 +72,9 @@
     pkgs.hyprpolkitagent
     pkgs.brightnessctl
     pkgs.wf-recorder
+    pkgs.grim
+    pkgs.slurp
+    pkgs.satty
     pkgs.gnome-keyring
     pkgs.seahorse
     pkgs.sherlock-launcher
@@ -112,6 +115,7 @@
     # .config
     ".config".source = dotfiles/config;
     ".config".recursive = true;
+    
 
     # # You can also set the file content immediately.
     # ".gradle/gradle.properties".text = ''

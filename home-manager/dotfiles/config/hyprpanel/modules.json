@@ -1,1 +1,12 @@
-{}
+{
+  "custom/recording": {
+    "execute": "/home/hannes/.config/hyprpanel/recording-status.sh",
+    "tooltip": "Recording",
+    "label": "",
+    "interval": 500,
+    "hideOnEmpty": true,
+    "icon": {
+      "recording": "󰻃"
+    }
+  }
+}

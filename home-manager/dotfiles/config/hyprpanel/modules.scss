@@ -1,0 +1,18 @@
+/* Recording indicator styles */
+.recording-inactive {
+  opacity: 0;
+  font-size: 0;
+}
+
+.recording-active {
+  opacity: 1.0;
+  color: #ff0000;
+  animation: pulse 1.5s infinite;
+  font-size: inherit;
+}
+
+@keyframes pulse {
+  0% { opacity: 1.0; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1.0; }
+}

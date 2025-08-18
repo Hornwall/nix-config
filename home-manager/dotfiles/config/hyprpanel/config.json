@@ -42,6 +42,7 @@
         "bluetooth",
         "battery",
         "systray",
+        "custom/recording",
         "clock",
         "notifications"
       ]
@@ -61,6 +62,7 @@
         "bluetooth",
         "battery",
         "systray",
+        "custom/recording",
         "clock",
         "notifications"
       ]
@@ -76,6 +78,7 @@
       ],
       "right": [
         "volume",
+        "custom/recording",
         "clock",
         "notifications"
       ]
