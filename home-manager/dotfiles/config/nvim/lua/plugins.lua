@@ -24,6 +24,62 @@ return packer.startup(function()
   use "AndrewRadev/deleft.vim"
   use "lervag/vimtex"
 
+  use {
+    "coder/claudecode.nvim",
+    requires = {
+      "folke/snacks.nvim",
+      config = function()
+        -- Set keymaps for the dependency here
+      end
+    },
+    config = function()
+      require("claudecode").setup()
+      
+      -- Key mappings
+      local opts = { noremap = true, silent = true }
+
+      -- Create an autocommand group to ensure commands don't get duplicated
+      local claudeGroup = vim.api.nvim_create_augroup("ClaudeCodeCustomKeys", { clear = true })
+
+      -- When a terminal opens...
+      vim.api.nvim_create_autocmd("TermOpen", {
+        group = claudeGroup,
+        callback = function()
+          -- Set a BUFFER-LOCAL keymap. This is crucial.
+          local term_opts = { buffer = true, noremap = true, silent = true }
+          vim.keymap.set("t", "<C-h>", "<cmd>TmuxNavigateLeft<cr>", term_opts)
+          vim.keymap.set("t", "<C-l>", "<cmd>TmuxNavigateRight<cr>", term_opts)
+        end,
+      })
+      
+      -- AI/Claude Code group (description only)
+      vim.keymap.set("n", "<leader>a", "<nop>", vim.tbl_extend("force", opts, { desc = "AI/Claude Code" }))
+      
+      -- Main commands
+      vim.keymap.set("n", "<leader>ac", "<cmd>ClaudeCode<cr>", vim.tbl_extend("force", opts, { desc = "Toggle Claude" }))
+      vim.keymap.set("n", "<leader>af", "<cmd>ClaudeCodeFocus<cr>", vim.tbl_extend("force", opts, { desc = "Focus Claude" }))
+      vim.keymap.set("n", "<leader>ar", "<cmd>ClaudeCode --resume<cr>", vim.tbl_extend("force", opts, { desc = "Resume Claude" }))
+      vim.keymap.set("n", "<leader>aC", "<cmd>ClaudeCode --continue<cr>", vim.tbl_extend("force", opts, { desc = "Continue Claude" }))
+      vim.keymap.set("n", "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", vim.tbl_extend("force", opts, { desc = "Select Claude model" }))
+      vim.keymap.set("n", "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", vim.tbl_extend("force", opts, { desc = "Add current buffer" }))
+      
+      -- Visual mode mapping
+      vim.keymap.set("v", "<leader>as", "<cmd>ClaudeCodeSend<cr>", vim.tbl_extend("force", opts, { desc = "Send to Claude" }))
+      
+      -- File tree specific mapping
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "NvimTree", "neo-tree", "oil", "minifiles" },
+        callback = function()
+          vim.keymap.set("n", "<leader>as", "<cmd>ClaudeCodeTreeAdd<cr>", vim.tbl_extend("force", opts, { desc = "Add file", buffer = true }))
+        end,
+      })
+      
+      -- Diff management
+      vim.keymap.set("n", "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", vim.tbl_extend("force", opts, { desc = "Accept diff" }))
+      vim.keymap.set("n", "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", vim.tbl_extend("force", opts, { desc = "Deny diff" }))
+    end,
+  }
+
   use { 
     "vim-test/vim-test" ,
     config = function()
@@ -118,52 +174,6 @@ return packer.startup(function()
           accept_word = "<C-j>",
         },
       })
-    end,
-  }
-
-  use {
-    "folke/snacks.nvim",
-    config = function()
-      -- Set keymaps for the dependency here
-      vim.keymap.set("t", "<C-h>", "<cmd>TmuxNavigateLeft<cr>")
-      vim.keymap.set("t", "<C-l>", "<cmd>TmuxNavigateRight<cr>")
-    end
-  }
-
-  use {
-    "coder/claudecode.nvim",
-    requires = { "folke/snacks.nvim" },
-    config = function()
-      require("claudecode").setup()
-      
-      -- Key mappings
-      local opts = { noremap = true, silent = true }
-      
-      -- AI/Claude Code group (description only)
-      vim.keymap.set("n", "<leader>a", "<nop>", vim.tbl_extend("force", opts, { desc = "AI/Claude Code" }))
-      
-      -- Main commands
-      vim.keymap.set("n", "<leader>ac", "<cmd>ClaudeCode<cr>", vim.tbl_extend("force", opts, { desc = "Toggle Claude" }))
-      vim.keymap.set("n", "<leader>af", "<cmd>ClaudeCodeFocus<cr>", vim.tbl_extend("force", opts, { desc = "Focus Claude" }))
-      vim.keymap.set("n", "<leader>ar", "<cmd>ClaudeCode --resume<cr>", vim.tbl_extend("force", opts, { desc = "Resume Claude" }))
-      vim.keymap.set("n", "<leader>aC", "<cmd>ClaudeCode --continue<cr>", vim.tbl_extend("force", opts, { desc = "Continue Claude" }))
-      vim.keymap.set("n", "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", vim.tbl_extend("force", opts, { desc = "Select Claude model" }))
-      vim.keymap.set("n", "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", vim.tbl_extend("force", opts, { desc = "Add current buffer" }))
-      
-      -- Visual mode mapping
-      vim.keymap.set("v", "<leader>as", "<cmd>ClaudeCodeSend<cr>", vim.tbl_extend("force", opts, { desc = "Send to Claude" }))
-      
-      -- File tree specific mapping
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "NvimTree", "neo-tree", "oil", "minifiles" },
-        callback = function()
-          vim.keymap.set("n", "<leader>as", "<cmd>ClaudeCodeTreeAdd<cr>", vim.tbl_extend("force", opts, { desc = "Add file", buffer = true }))
-        end,
-      })
-      
-      -- Diff management
-      vim.keymap.set("n", "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", vim.tbl_extend("force", opts, { desc = "Accept diff" }))
-      vim.keymap.set("n", "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", vim.tbl_extend("force", opts, { desc = "Deny diff" }))
     end,
   }
 end)
