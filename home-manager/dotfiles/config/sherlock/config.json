@@ -19,9 +19,9 @@
       "icon_paths": [
           "/home/basti/testconfig/icons"
       ],
-      "icon_size": 22,
-      "use_base_css": true,
-      "opacity": 1.0,
+      "icon_size": 24,
+      "use_base_css": false,
+      "opacity": 0.95,
       "mod_key_ascii": [
           "\u21e7",
           "\u21e7",
@@ -78,7 +78,7 @@
       "edge": "top"
   },
   "status_bar": {
-      "enable": true
+      "enable": false
   },
   "search_bar_icon": {
       "enable": true,
