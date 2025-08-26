@@ -101,6 +101,8 @@
          modules = [
            # > Our main home-manager configuration file <
            ./home-manager/home.nix
+           # > Host-specific configuration <
+           ./home-manager/modules/hosts/x1-carbon.nix
          ];
        };
        "hannes@thinkpad-z16" = home-manager.lib.homeManagerConfiguration {
@@ -109,6 +111,8 @@
          modules = [
            # > Our main home-manager configuration file <
            ./home-manager/home.nix
+           # > Host-specific configuration <
+           ./home-manager/modules/hosts/thinkpad-z16.nix
          ];
        };
        "hannes@vm" = home-manager.lib.homeManagerConfiguration {
@@ -117,6 +121,8 @@
          modules = [
            # > Our main home-manager configuration file <
            ./home-manager/home.nix
+           # > Host-specific configuration <
+           ./home-manager/modules/hosts/vm.nix
          ];
        };
      };

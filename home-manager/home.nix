@@ -1,6 +1,11 @@
 { config, pkgs, ... }:
 
 {
+  # Import all our modular configurations
+  imports = [
+    ./modules
+  ];
+
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "hannes";
@@ -21,164 +26,6 @@
     };
   };
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
-  home.packages = [
-    # Devtools
-    pkgs.kitty
-    pkgs.ghostty
-    pkgs.tmux
-    pkgs.git
-    pkgs.gh
-    pkgs.gcc
-    pkgs.nodejs
-    pkgs.gnumake
-    pkgs.ripgrep
-    pkgs.wl-clipboard
-    pkgs.dive
-    pkgs.docker-slim
-    pkgs.awscli2
-    pkgs.ssm-session-manager-plugin
-    pkgs.yarn
-    #pkgs.vscode
-    pkgs.devbox
-    pkgs.heroku
-    pkgs.solargraph
-    pkgs.gnupg
-    pkgs.nodePackages_latest.typescript-language-server
-    pkgs.ngrok
-    pkgs.fzf
-    pkgs.zeal
-    pkgs.tldr
-
-    # Software
-    pkgs.spotify
-    pkgs.discord
-    pkgs.slack
-    pkgs.gimp
-    pkgs.chromium
-    pkgs.inkscape
-    pkgs.teams-for-linux
-    pkgs.calibre
-    pkgs.feh
-
-    # Hyperland
-    pkgs.wofi
-    pkgs.hyprpaper
-    pkgs.hypridle
-    pkgs.hyprlock
-    pkgs.hyprpanel
-    pkgs.hyprcursor
-    pkgs.hyprpolkitagent
-    pkgs.brightnessctl
-    pkgs.wf-recorder
-    pkgs.grim
-    pkgs.slurp
-    pkgs.satty
-    pkgs.tesseract
-    pkgs.gnome-keyring
-    pkgs.seahorse
-    pkgs.sherlock-launcher
-    pkgs.libnotify
-
-    # # It is sometimes useful to fine-tune packages, for example, by applying
-    # # overrides. You can do that directly here, just don't forget the
-    # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
-    # # fonts?
-    # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
-
-    # # You can also create simple shell scripts directly inside your
-    # # configuration. For example, this adds a command 'my-hello' to your
-    # # environment:
-    # (pkgs.writeShellScriptBin "my-hello" ''
-    #   echo "Hello, ${config.home.username}!"
-    # '')
-  ];
-
-  fonts.fontconfig.enable = true;
-
-  # Home Manager is pretty good at managing dotfiles. The primary way to manage
-  # plain files is through 'home.file'.
-  home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-
-    # ZSH
-    ".zshrc".source = dotfiles/zshrc;
-    ".zsh_prompt".source = dotfiles/zsh_prompt;
-    ".zsh".source = dotfiles/zsh;
-    ".zsh".recursive = true;
-
-    # Tmux
-    ".tmux.conf".source = dotfiles/tmux.conf;
-    # .config
-    ".config".source = dotfiles/config;
-    ".config".recursive = true;
-    
-
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
-  };
-
-  # Home Manager can also manage your environment variables through
-  # 'home.sessionVariables'. If you don't want to manage your shell through Home
-  # Manager then you have to manually source 'hm-session-vars.sh' located at
-  # either
-  #
-  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  /etc/profiles/per-user/hannes/etc/profile.d/hm-session-vars.sh
-  #
-  home.sessionVariables = {
-    EDITOR = "nvim";
-  };
-
-  programs.neovim = {
-    enable = true;
-    plugins = [
-      pkgs.vimPlugins.packer-nvim
-      pkgs.vimPlugins.nvim-treesitter.withAllGrammars
-    ];
-  };
-
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-
-  programs.zsh = {
-    enable = true;
-  };
-
-  programs.ssh = {
-    addKeysToAgent = true;
-  };
-
-  programs.git = {
-    enable = true;
-
-    userName = "Hannes Hornwall";
-    userEmail = "hannes@hornwall.me";
-
-    extraConfig = {
-      core.excludesfile = "~/.gitignore";
-    };
-
-    aliases = {
-      st = "status -sb";
-      lg = "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative";
-      fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup";
-      squash = "!f() { git fetch origin main && git rebase -i --autosquash $(git merge-base main HEAD); }; f";
-    };
-  };
 }
-
