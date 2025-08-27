@@ -143,7 +143,6 @@
     packages = with pkgs; [
       unstable.firefox
       unstable.librewolf
-      inputs.zen-browser.packages."${system}".default
       tree
     ];
   };
