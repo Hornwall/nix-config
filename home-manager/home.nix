@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, outputs, ... }:
 
 {
   # Import all our modular configurations
@@ -21,9 +21,22 @@
   home.stateVersion = "25.05"; # Please read the comment before changing.
 
   nixpkgs = {
-    config = {
-      allowUnfree = true;
-    };
+    config.allowUnfree = true;
+    overlays = [
+      # Custom packages overlay
+      (final: _prev: import ../pkgs {pkgs = final;})
+      
+      # Modifications overlay (empty for now)
+      (final: prev: {})
+      
+      # Unstable packages overlay
+      (final: _prev: {
+        unstable = import (builtins.fetchTarball "https://github.com/nixos/nixpkgs/archive/nixos-unstable.tar.gz") {
+          system = final.system;
+          config.allowUnfree = true;
+        };
+      })
+    ];
   };
 
   # Let Home Manager install and manage itself.

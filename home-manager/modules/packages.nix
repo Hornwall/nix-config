@@ -1,61 +1,61 @@
 { config, lib, pkgs, ... }:
 
 {
-  home.packages = with pkgs; [
+  home.packages = [
     # Development Tools
-    kitty
-    ghostty
-    tmux
-    git
-    gh
-    gcc
-    nodejs
-    gnumake
-    ripgrep
-    wl-clipboard
-    dive
-    docker-slim
-    awscli2
-    ssm-session-manager-plugin
-    yarn
-    devbox
-    heroku
-    solargraph
-    gnupg
-    nodePackages_latest.typescript-language-server
-    ngrok
-    fzf
-    zeal
-    tldr
+    pkgs.kitty
+    pkgs.ghostty
+    pkgs.tmux
+    pkgs.git
+    pkgs.gh
+    pkgs.gcc
+    pkgs.nodejs
+    pkgs.gnumake
+    pkgs.ripgrep
+    pkgs.wl-clipboard
+    pkgs.dive
+    pkgs.docker-slim
+    pkgs.awscli2
+    pkgs.ssm-session-manager-plugin
+    pkgs.yarn
+    pkgs.devbox
+    pkgs.heroku
+    pkgs.solargraph
+    pkgs.gnupg
+    pkgs.nodePackages_latest.typescript-language-server
+    pkgs.ngrok
+    pkgs.fzf
+    pkgs.zeal
+    pkgs.tldr
 
     # Desktop Applications
-    spotify
-    discord
-    slack
-    gimp
-    chromium
-    inkscape
-    teams-for-linux
-    calibre
-    feh
+    pkgs.spotify
+    pkgs.discord
+    pkgs.slack
+    pkgs.gimp
+    pkgs.chromium
+    pkgs.inkscape
+    pkgs.teams-for-linux
+    pkgs.calibre
+    pkgs.feh
 
     # Hyprland & Window Manager
-    wofi
-    hyprpaper
-    hypridle
-    hyprlock
-    hyprpanel
-    hyprcursor
-    hyprpolkitagent
-    brightnessctl
-    wf-recorder
-    grim
-    slurp
-    satty
-    tesseract
-    gnome-keyring
-    seahorse
-    sherlock-launcher
-    libnotify
+    pkgs.wofi
+    pkgs.hyprpaper
+    pkgs.hypridle
+    pkgs.hyprlock
+    pkgs.hyprpanel
+    pkgs.hyprcursor
+    pkgs.hyprpolkitagent
+    pkgs.brightnessctl
+    pkgs.wf-recorder
+    pkgs.grim
+    pkgs.slurp
+    pkgs.satty
+    pkgs.tesseract
+    pkgs.gnome-keyring
+    pkgs.seahorse
+    pkgs.unstable.sherlock-launcher
+    pkgs.libnotify
   ];
 }
