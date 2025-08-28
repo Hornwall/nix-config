@@ -19,14 +19,13 @@ app_paths = []
 width = 900
 height = 593
 gsk_renderer = "cairo"
-icon_paths = ["testconfig/icons"]
 icon_size = 22
 use_base_css = true
 opacity = 1.0
 mod_key_ascii = ["⇧", "⇧", "⌘", "⌘", "⎇", "✦", "✦", "⌘"]
 
 [behavior]
-use_xdg_data_dir_icons = false
+use_xdg_data_dir_icons = true
 animate = true
 
 [binds]
