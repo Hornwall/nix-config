@@ -25,7 +25,7 @@ return packer.startup(function()
   use "lervag/vimtex"
 
   use {
-    "coder/claudecode.nvim",
+    "hornwall/claudecode.nvim",
     requires = {
       "folke/snacks.nvim",
       config = function()
@@ -33,17 +33,17 @@ return packer.startup(function()
       end
     },
     config = function()
-      require("claudecode").setup()
+      require("codex").setup()
       
       -- Key mappings
       local opts = { noremap = true, silent = true }
 
       -- Create an autocommand group to ensure commands don't get duplicated
-      local claudeGroup = vim.api.nvim_create_augroup("ClaudeCodeCustomKeys", { clear = true })
+      local codexGroup = vim.api.nvim_create_augroup("CodexCustomKeys", { clear = true })
 
       -- When a terminal opens...
       vim.api.nvim_create_autocmd("TermOpen", {
-        group = claudeGroup,
+        group = codexGroup,
         callback = function()
           -- Set a BUFFER-LOCAL keymap. This is crucial.
           local term_opts = { buffer = true, noremap = true, silent = true }
@@ -56,27 +56,27 @@ return packer.startup(function()
       vim.keymap.set("n", "<leader>a", "<nop>", vim.tbl_extend("force", opts, { desc = "AI/Claude Code" }))
       
       -- Main commands
-      vim.keymap.set("n", "<leader>ac", "<cmd>ClaudeCode<cr>", vim.tbl_extend("force", opts, { desc = "Toggle Claude" }))
-      vim.keymap.set("n", "<leader>af", "<cmd>ClaudeCodeFocus<cr>", vim.tbl_extend("force", opts, { desc = "Focus Claude" }))
-      vim.keymap.set("n", "<leader>ar", "<cmd>ClaudeCode --resume<cr>", vim.tbl_extend("force", opts, { desc = "Resume Claude" }))
-      vim.keymap.set("n", "<leader>aC", "<cmd>ClaudeCode --continue<cr>", vim.tbl_extend("force", opts, { desc = "Continue Claude" }))
-      vim.keymap.set("n", "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", vim.tbl_extend("force", opts, { desc = "Select Claude model" }))
-      vim.keymap.set("n", "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", vim.tbl_extend("force", opts, { desc = "Add current buffer" }))
+      vim.keymap.set("n", "<leader>ac", "<cmd>Codex<cr>", vim.tbl_extend("force", opts, { desc = "Toggle Codex" }))
+      vim.keymap.set("n", "<leader>af", "<cmd>CodexFocus<cr>", vim.tbl_extend("force", opts, { desc = "Focus Codex" }))
+      vim.keymap.set("n", "<leader>ar", "<cmd>Codex --resume<cr>", vim.tbl_extend("force", opts, { desc = "Resume Codex" }))
+      vim.keymap.set("n", "<leader>aC", "<cmd>Codex --continue<cr>", vim.tbl_extend("force", opts, { desc = "Continue Codex" }))
+      vim.keymap.set("n", "<leader>am", "<cmd>CodexSelectModel<cr>", vim.tbl_extend("force", opts, { desc = "Select Codex model" }))
+      vim.keymap.set("n", "<leader>ab", "<cmd>CodexAdd %<cr>", vim.tbl_extend("force", opts, { desc = "Add current buffer" }))
       
       -- Visual mode mapping
-      vim.keymap.set("v", "<leader>as", "<cmd>ClaudeCodeSend<cr>", vim.tbl_extend("force", opts, { desc = "Send to Claude" }))
+      vim.keymap.set("v", "<leader>as", "<cmd>CodexSend<cr>", vim.tbl_extend("force", opts, { desc = "Send to Codex" }))
       
       -- File tree specific mapping
       vim.api.nvim_create_autocmd("FileType", {
         pattern = { "NvimTree", "neo-tree", "oil", "minifiles" },
         callback = function()
-          vim.keymap.set("n", "<leader>as", "<cmd>ClaudeCodeTreeAdd<cr>", vim.tbl_extend("force", opts, { desc = "Add file", buffer = true }))
+          vim.keymap.set("n", "<leader>as", "<cmd>CodexTreeAdd<cr>", vim.tbl_extend("force", opts, { desc = "Add file", buffer = true }))
         end,
       })
       
       -- Diff management
-      vim.keymap.set("n", "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", vim.tbl_extend("force", opts, { desc = "Accept diff" }))
-      vim.keymap.set("n", "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", vim.tbl_extend("force", opts, { desc = "Deny diff" }))
+      vim.keymap.set("n", "<leader>aa", "<cmd>CodexDiffAccept<cr>", vim.tbl_extend("force", opts, { desc = "Accept diff" }))
+      vim.keymap.set("n", "<leader>ad", "<cmd>CodexDiffDeny<cr>", vim.tbl_extend("force", opts, { desc = "Deny diff" }))
     end,
   }
 
