@@ -67,7 +67,7 @@ opacity = 0.6
 edge = "top"
 
 [status_bar]
-enable = true
+enable = false
 
 [search_bar_icon]
 enable = true
