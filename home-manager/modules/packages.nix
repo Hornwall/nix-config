@@ -12,6 +12,7 @@
     pkgs.nodejs
     pkgs.gnumake
     pkgs.ripgrep
+    pkgs.jq
     pkgs.wl-clipboard
     pkgs.dive
     pkgs.docker-slim
