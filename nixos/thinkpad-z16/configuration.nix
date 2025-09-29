@@ -79,6 +79,8 @@
   # Enabled fwupd
   services.fwupd.enable = true;
 
+  services.intune.enable = true;
+
   # Enable flatpaks
   services.flatpak.enable = true;
 
@@ -183,6 +185,7 @@
     unstable.code-cursor
     libsecret
     seahorse
+    microsoft-edge
   ];
 
   fonts.packages = with pkgs; [
