@@ -32,6 +32,7 @@
     "rd.systemd.show_status=false"
     "rd.udev.log_level=3"
     "udev.log_priority=3"
+    "mt7921_common.disable_clc=1"
   ];
   boot.extraModulePackages = with config.boot.kernelPackages; [
     xpadneo

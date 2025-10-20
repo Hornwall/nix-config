@@ -34,7 +34,7 @@
   };
 
   # Use latest kernel
-  boot.kernelPackages = pkgs.linuxPackages_6_16;
+  boot.kernelPackages = pkgs.linuxPackages_6_17;
 
   #boot.kernelPatches = [
   #  # Fix the /proc/net/tcp seek issue
