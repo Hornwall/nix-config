@@ -28,6 +28,7 @@
     pkgs.fzf
     pkgs.zeal
     pkgs.tldr
+    pkgs.devenv
 
     # Desktop Applications
     pkgs.spotify
@@ -39,6 +40,7 @@
     pkgs.teams-for-linux
     pkgs.calibre
     pkgs.feh
+    pkgs.lmstudio
 
     # Hyprland & Window Manager
     pkgs.wofi
