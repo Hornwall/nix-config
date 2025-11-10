@@ -127,6 +127,9 @@
       outputs.overlays.modifications
       outputs.overlays.unstable-packages
     ];
+    permittedInsecurePackages = [
+      "gradle-7.6.6"
+    ];
   };
 
   # Use ZSH as the default shell
@@ -239,4 +242,3 @@
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "23.11"; # Did you read the comment?
 }
-
