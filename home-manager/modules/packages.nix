@@ -28,7 +28,7 @@
     pkgs.fzf
     pkgs.zeal
     pkgs.tldr
-    pkgs.devenv
+    pkgs.unstable.devenv
 
     # Desktop Applications
     pkgs.spotify
