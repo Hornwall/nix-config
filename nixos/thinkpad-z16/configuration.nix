@@ -166,6 +166,7 @@
     gnomeExtensions.dash-to-panel
     docker-compose
     beyond-identity
+    tuple
     immersed-vr
     xdg-desktop-portal-gtk
     xdg-desktop-portal-hyprland
