@@ -127,7 +127,7 @@
       outputs.overlays.modifications
       outputs.overlays.unstable-packages
     ];
-    permittedInsecurePackages = [
+    config.permittedInsecurePackages = [
       "gradle-7.6.6"
     ];
   };
