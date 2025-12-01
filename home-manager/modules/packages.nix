@@ -41,6 +41,7 @@
     pkgs.calibre
     pkgs.feh
     pkgs.lmstudio
+    pkgs.prismlauncher
 
     # Hyprland & Window Manager
     pkgs.wofi
