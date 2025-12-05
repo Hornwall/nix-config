@@ -167,7 +167,6 @@
     docker-compose
     beyond-identity
     tuple
-    immersed-vr
     xdg-desktop-portal-gtk
     xdg-desktop-portal-hyprland
     unstable.ruby_3_4
