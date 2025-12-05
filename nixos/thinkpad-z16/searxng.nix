@@ -21,7 +21,7 @@
     };
 
     # UWSGI configuration
-    runInUwsgi = true;
+    configureUwsgi = true;
 
     uwsgiConfig = {
       socket = "/run/searx/searx.sock";
