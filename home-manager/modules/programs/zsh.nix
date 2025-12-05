@@ -1,10 +1,6 @@
 { config, lib, pkgs, ... }:
 
 {
-  programs.zsh = {
-    enable = true;
-  };
-
   programs.ssh = {
     addKeysToAgent = true;
   };
