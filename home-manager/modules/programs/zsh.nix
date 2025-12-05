@@ -2,7 +2,11 @@
 
 {
   programs.ssh = {
-    addKeysToAgent = true;
+    matchBlocks = {
+      "*" = {
+        addKeysToAgent = true;
+      };
+    };
   };
 
   home.sessionVariables = {
