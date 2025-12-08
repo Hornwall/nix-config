@@ -34,9 +34,6 @@
     "udev.log_priority=3"
     "mt7921_common.disable_clc=1"
   ];
-  boot.extraModulePackages = with config.boot.kernelPackages; [
-    xpadneo
-  ];
   boot.extraModprobeConfig = ''
     options exclisive_caps=1 card_label="Virtual Camera bluetooth disable_ertm=Y"
   '';
@@ -72,7 +69,6 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  hardware.xpadneo.enable = true;
 
   hardware.uinput.enable = true;
   hardware.graphics = {
