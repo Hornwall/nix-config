@@ -32,7 +32,7 @@
       # Unstable packages overlay
       (final: _prev: {
         unstable = import (builtins.fetchTarball "https://github.com/nixos/nixpkgs/archive/nixos-unstable.tar.gz") {
-          system = final.system;
+          system = final.stdenv.hostPlatform.system;
           config.allowUnfree = true;
         };
       })

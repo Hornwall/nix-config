@@ -8,7 +8,7 @@
     enable = true;
     xwayland.enable = true;
     # Use the hyprland package from our flake input for consistency
-    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     plugins = [
       pkgs.hyprlandPlugins.hyprsplit
     ];
