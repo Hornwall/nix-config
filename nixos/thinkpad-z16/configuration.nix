@@ -167,6 +167,8 @@
     docker-compose
     beyond-identity
     tuple
+    handy
+    wtype
     xdg-desktop-portal-gtk
     xdg-desktop-portal-hyprland
     unstable.ruby_3_4
