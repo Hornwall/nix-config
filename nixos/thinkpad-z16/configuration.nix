@@ -175,6 +175,7 @@
     unstable.rubyPackages_3_4.standard
     unstable.android-studio
     unstable.code-cursor
+    unstable.cursor-cli
     libsecret
     seahorse
     microsoft-edge
