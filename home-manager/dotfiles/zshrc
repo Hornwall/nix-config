@@ -60,3 +60,6 @@ export QT_DEVICE_PIXEL_RATIO=2
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=18"
 
 source <(fzf --zsh)
+
+export DIRENV_LOG_FORMAT=
+eval "$(direnv hook zsh)"
