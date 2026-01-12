@@ -9,12 +9,12 @@
     rocmOverrideGfx = "11.0.2";
   };
 
-  services.open-webui = {
-    enable = true;
-    environment = {
-      ENABLE_WEB_SEARCH              = "True";
-      ENABLE_SEARCH_QUERY_GENERATION = "True";
-      WEB_SEARCH_ENGINE              = "duckduckgo";
-    };
-  };
+  #services.open-webui = {
+  #  enable = true;
+  #  environment = {
+  #    ENABLE_WEB_SEARCH              = "True";
+  #    ENABLE_SEARCH_QUERY_GENERATION = "True";
+  #    WEB_SEARCH_ENGINE              = "duckduckgo";
+  #  };
+  #};
 }
