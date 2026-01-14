@@ -2,7 +2,7 @@
 
 stdenv.mkDerivation rec {
   pname = "tuple";
-  version = "v2025_12_02.0";
+  version = "v2026_01_09.0";
 
   src = fetchurl {
     url = "https://tuple-client-releases.s3.amazonaws.com/linux/${version}/x64/tuple";

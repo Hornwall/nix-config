@@ -30,6 +30,7 @@
     pkgs.tldr
     pkgs.unstable.devenv
     pkgs.direnv
+    pkgs.unstable.opencode
 
     # Desktop Applications
     pkgs.spotify
