@@ -6,7 +6,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://tuple-client-releases.s3.amazonaws.com/linux/${version}/x64/tuple";
-    hash = "sha256-9fsXySb3wPOB5u+58ZuUbQIxf4HYh/54SAHKud8Oi/U=";
+    hash = "sha256-E5a+YmR27kgpRozo7afPz+yqORb7O7qaC7kHxHKWtgg=";
   };
 
   dontUnpack = true;
