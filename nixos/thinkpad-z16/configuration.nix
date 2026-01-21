@@ -14,7 +14,7 @@
     ./docker.nix
     ./aboard.nix
     ./homepage.nix
-    ./ollama.nix
+    (import ./ollama.nix { inherit inputs pkgs; })
     (import ./hyprland.nix { inherit inputs pkgs; })
     (import ./searxng.nix { inherit lib; })
   ];

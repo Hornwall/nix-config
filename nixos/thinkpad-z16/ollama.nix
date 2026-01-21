@@ -1,6 +1,8 @@
+{ inputs, pkgs }:
 {
   services.ollama = {
     enable = true;
+    package = pkgs.unstable.ollama;
     loadModels = ["llama3.2:3b"];
     acceleration = "rocm";
     environmentVariables = {
