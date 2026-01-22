@@ -147,7 +147,6 @@
     shell = pkgs.zsh;
     packages = with pkgs; [
       unstable.firefox
-      unstable.librewolf
       tree
     ];
   };
