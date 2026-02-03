@@ -114,7 +114,28 @@ return packer.startup(function()
           return
         end
 
-        require("opencode").prompt("@" .. path, { submit = true })
+        -- Pre-fill a file reference, but let the user add context before sending.
+        require("opencode").prompt("@" .. path .. " ")
+      end
+
+      local function prompt_current_file_range(mode)
+        local path = vim.fn.expand("%:p")
+        if not path or path == "" then
+          vim.notify("No current file", vim.log.levels.WARN, { title = "opencode" })
+          return
+        end
+
+        if mode == "visual" then
+          local start_line = vim.fn.line("'<")
+          local end_line = vim.fn.line("'>")
+          if start_line > end_line then
+            start_line, end_line = end_line, start_line
+          end
+          require("opencode").prompt("@" .. path .. " lines " .. start_line .. "-" .. end_line .. " ")
+          return
+        end
+
+        require("opencode").prompt("@" .. path .. " ")
       end
 
       -- AI/opencode group (description only)
@@ -126,10 +147,10 @@ return packer.startup(function()
       vim.keymap.set("n", "<leader>ar", function() require("opencode").select_session() end, vim.tbl_extend("force", opts, { desc = "Resume session" }))
       vim.keymap.set("n", "<leader>aC", function() require("opencode").command("session.new") end, vim.tbl_extend("force", opts, { desc = "New session" }))
       vim.keymap.set("n", "<leader>am", function() require("opencode").select() end, vim.tbl_extend("force", opts, { desc = "Select opencode action" }))
-      vim.keymap.set("n", "<leader>ab", function() require("opencode").prompt("@buffer", { submit = true }) end, vim.tbl_extend("force", opts, { desc = "Add current buffer" }))
+      vim.keymap.set("n", "<leader>ab", function() prompt_current_file_range("normal") end, vim.tbl_extend("force", opts, { desc = "Reference current file" }))
 
       -- Visual mode: send selection/context to opencode
-      vim.keymap.set("v", "<leader>as", function() require("opencode").prompt("@this", { submit = true }) end, vim.tbl_extend("force", opts, { desc = "Send selection" }))
+      vim.keymap.set("v", "<leader>as", function() prompt_current_file_range("visual") end, vim.tbl_extend("force", opts, { desc = "Reference selection" }))
 
       -- File tree / picker buffers: add file under cursor (best-effort)
       vim.api.nvim_create_autocmd("FileType", {
