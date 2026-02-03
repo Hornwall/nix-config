@@ -43,6 +43,7 @@
     pkgs.calibre
     pkgs.feh
     pkgs.lmstudio
+    pkgs.gradia
     pkgs.prismlauncher
 
     # Hyprland & Window Manager
