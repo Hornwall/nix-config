@@ -1,37 +1,40 @@
-local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
+local capabilities = require("cmp_nvim_lsp").default_capabilities(
+  vim.lsp.protocol.make_client_capabilities()
+)
 
-function map_keys()
-  vim.keymap.set("n", "K", vim.lsp.buf.hover, {buffer=0})
-  vim.keymap.set("n", "gd", vim.lsp.buf.definition, {buffer=0})
-  vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, {buffer=0})
-  vim.keymap.set("n", "gi", vim.lsp.buf.implementation, {buffer=0})
-  vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, {buffer=0})
-  vim.keymap.set("n", "<leader>dj", vim.diagnostic.goto_next, {buffer=0})
-  vim.keymap.set("n", "<leader>dk", vim.diagnostic.goto_prev, {buffer=0})
-  vim.keymap.set("n", "<leader>dl", "<cmd>Telescope diagnostics<cr>", {buffer=0})
-  vim.keymap.set("n", "<leader>tr", "<cmd>Telescope lsp_references<cr>", {buffer=0})
+local function map_keys(bufnr)
+  vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
+  vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = bufnr })
+  vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, { buffer = bufnr })
+  vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr })
+  vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, { buffer = bufnr })
+  vim.keymap.set("n", "<leader>dj", vim.diagnostic.goto_next, { buffer = bufnr })
+  vim.keymap.set("n", "<leader>dk", vim.diagnostic.goto_prev, { buffer = bufnr })
+  vim.keymap.set("n", "<leader>dl", "<cmd>Telescope diagnostics<cr>", { buffer = bufnr })
+  vim.keymap.set("n", "<leader>tr", "<cmd>Telescope lsp_references<cr>", { buffer = bufnr })
 end
 
-require("lspconfig").volar.setup{
-  capabilities = capabilities,
-  on_attach = function()
-    map_keys()
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("LspKeymaps", { clear = true }),
+  callback = function(args)
+    map_keys(args.buf)
   end,
-} -- connect to volar
+})
 
-require("lspconfig").ts_ls.setup{
+vim.lsp.config("volar", {
   capabilities = capabilities,
-  on_attach = function()
-    map_keys()
-  end,
-} -- connect to ts-ls
+})
+vim.lsp.enable("volar")
 
--- require("lspconfig").solargraph.setup{
+vim.lsp.config("ts_ls", {
+  capabilities = capabilities,
+})
+vim.lsp.enable("ts_ls")
+
+-- vim.lsp.config("solargraph", {
 --   capabilities = capabilities,
---   on_attach = function()
---    map_keys()
---  end,
---} -- connect to solargraph
+-- })
+-- vim.lsp.enable("solargraph")
 
 -- Standardrb
 vim.opt.signcolumn = "yes" -- otherwise it bounces in and out, not strictly needed though
