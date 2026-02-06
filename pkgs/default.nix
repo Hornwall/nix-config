@@ -4,5 +4,6 @@
 { pkgs ? (import ../nixpkgs.nix) { } }: {
   beyond-identity = pkgs.callPackage ./beyond-identity.nix { };
   handy = pkgs.callPackage ./handy.nix { };
+  opencode = pkgs.callPackage ./opencode.nix { };
   tuple = pkgs.callPackage ./tuple.nix { };
 }
