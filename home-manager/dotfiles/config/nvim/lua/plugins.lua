@@ -42,6 +42,25 @@ return packer.startup(function()
       -- Required for opencode.nvim's buffer reload integration.
       vim.o.autoread = true
 
+      -- Auto-reload files changed outside Neovim (e.g. by opencode).
+      local reload_group = vim.api.nvim_create_augroup("AutoReloadExternalChanges", { clear = true })
+
+      vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI", "TermClose" }, {
+        group = reload_group,
+        callback = function()
+          if vim.fn.mode() ~= "c" then
+            vim.cmd("checktime")
+          end
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("FileChangedShellPost", {
+        group = reload_group,
+        callback = function()
+          vim.notify("File reloaded from disk", vim.log.levels.INFO)
+        end,
+      })
+
       -- opencode.nvim reads configuration from this global.
       vim.g.opencode_opts = vim.tbl_deep_extend("force", vim.g.opencode_opts or {}, {
         provider = {
