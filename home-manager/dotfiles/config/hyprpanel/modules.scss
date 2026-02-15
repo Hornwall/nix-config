@@ -1,0 +1,39 @@
+/* Recording indicator styles */
+.recording-inactive {
+  opacity: 0;
+  font-size: 0;
+}
+
+.recording-active {
+  opacity: 1.0;
+  color: #ff0000;
+  animation: pulse 1.5s infinite;
+  font-size: inherit;
+}
+
+@keyframes pulse {
+  0% { opacity: 1.0; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1.0; }
+}
+
+/* SAS awards widget styles */
+.sas-awards-avail {
+  color: #68b5ab;
+}
+
+.sas-awards-none {
+  color: #5c656e;
+  opacity: 0.8;
+}
+
+/* Bar button styling for custom/sas_awards to match theme */
+/* Icon element carries classes: txt-icon bar-button-icon module-icon cmodule-sas_awards */
+.cmodule-sas_awards .module-icon {
+  color: #68b5ab; /* theme.bar.menus.label */
+}
+
+/* Text label element carries classes: bar-button-label module-label cmodule-sas_awards */
+.cmodule-sas_awards .module-label {
+  color: #b7bcba; /* theme.bar.menus.text */
+}

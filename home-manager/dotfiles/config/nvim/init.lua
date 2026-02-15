@@ -1,10 +1,9 @@
+vim.g.mapleader = ","
+vim.g.maplocalleader = ","
+
 require("plugins")
 require("editor")
 require("cheat-sheet")
-
-local g = vim.g
-
-g.mapleader = ","
 
 local nightfox = require("nightfox")
 nightfox.setup({

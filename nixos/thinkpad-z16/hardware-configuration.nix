@@ -4,40 +4,80 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
-  imports = [ ];
+  imports =
+    [ (modulesPath + "/installer/scan/not-detected.nix")
+    ];
 
-  boot.initrd.availableKernelModules = [ "ata_piix" "ohci_pci" "ehci_pci" "ahci" "sd_mod" "sr_mod" ];
-  boot.initrd.kernelModules = [ "dm-snapshot" ];
+  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
+  boot.initrd.kernelModules = [ "amdgpu" "dm-snapshot" ];
+  boot.kernelModules = [ "kvm-amd" ];
+  boot.plymouth = {
+    enable = true;
+    theme = "rings";
+    themePackages = with pkgs; [
+      # By default we would install all themes
+      (adi1090x-plymouth-themes.override {
+        selected_themes = [ "rings" ];
+      })
+    ];
+  };
+  boot.consoleLogLevel = 0;
+  boot.initrd.verbose = false;
+  boot.loader.timeout = 0;
+  boot.kernelParams = [
+    "quiet"
+    "splash"
+    "boot.shell_on_fail"
+    "loglevel=3"
+    "rd.systemd.show_status=false"
+    "rd.udev.log_level=3"
+    "udev.log_priority=3"
+    "mt7921_common.disable_clc=1"
+  ];
+  boot.extraModprobeConfig = ''
+    options exclisive_caps=1 card_label="Virtual Camera bluetooth disable_ertm=Y"
+  '';
   boot.initrd.luks.devices = {
     root = {
-      device = "/dev/disk/by-uuid/bbc7bbe4-9289-4060-9de4-7a3d66b6729f";
+      device = "/dev/disk/by-uuid/4fc51fd7-34c7-4371-be86-9037fc0dbfe0";
       preLVM = true;
       allowDiscards = true;
     };
   };
-  boot.kernelModules = [ ];
-  boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/f758f90e-e4bd-4bdf-ad7a-22aa2123e9b8";
+    { device = "/dev/disk/by-uuid/83aa392e-7742-4ab8-b332-0127922dbbb5";
       fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/E4AE-8C7D";
+    { device = "/dev/disk/by-uuid/736B-6E01";
       fsType = "vfat";
+      options = [ "fmask=0022" "dmask=0022" ];
     };
 
-  swapDevices =
-    [ { device = "/dev/disk/by-uuid/6c3abd1b-869a-42ce-9449-cfd2201b2b04"; }
-    ];
+  swapDevices = [ ];
+
+  services.fstrim.enable = true;
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
   # still possible to use this option, but it's recommended to use it in conjunction
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.enp0s3.useDHCP = lib.mkDefault true;
+  # networking.interfaces.wlp4s0.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+  hardware.uinput.enable = true;
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      libgpg-error
+      libva
+      libva-vdpau-driver
+      libvdpau-va-gl
+    ];
+  };
 }

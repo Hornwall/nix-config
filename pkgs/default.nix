@@ -1,5 +1,9 @@
 # Custom packages, that can be defined similarly to ones from nixpkgs
-# You can build them using 'nix build .#example'
-pkgs: {
-  # example = pkgs.callPackage ./example { };
+# You can build them using 'nix build .#example' or (legacy) 'nix-build -A example'
+
+{ pkgs ? (import ../nixpkgs.nix) { } }: {
+  beyond-identity = pkgs.callPackage ./beyond-identity.nix { };
+  handy = pkgs.callPackage ./handy.nix { };
+  opencode = pkgs.callPackage ./opencode.nix { };
+  tuple = pkgs.callPackage ./tuple.nix { };
 }

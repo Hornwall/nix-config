@@ -24,15 +24,16 @@ export PATH="/home/hannes/.yarn/bin:$PATH"
 export PATH="/home/hannes/.cargo/bin:$PATH"
 export PATH="/home/hannes/scripts/ruby:$PATH"
 export PATH="/home/hannes/scripts/shell:$PATH"
-export PATH=/Developer/NVIDIA/CUDA-7.0/bin:$PATH
 export PATH=/home/hannes/.local/bin:$PATH
-export DYLD_LIBRARY_PATH=/Developer/NVIDIA/CUDA-7.0/lib:$DYLD_LIBRARY_PATH
-export APOEX_EMAIL="hannes.hornwall@apoex.se"
+export PATH=~/.npm-packages/bin:$PATH
+export NODE_PATH=~/.npm-packages/lib/node_modules
 export ERL_AFLAGS="-kernel shell_history enabled"
 
 export EDITOR=nvim
 
 export GOPATH="$HOME/code/go"
+
+export NODE_OPTIONS="--max-old-space-size=8192"
 
 export BROWSER=firefox
 
@@ -42,7 +43,7 @@ export QT_SCREEN_SCALE_FACTORS=1
 export QT_SCALE_FACTOR=1
 
 # Allow ssh-add to use kwallet
-export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/keyring/ssh"
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
 
 # cd
 export CDPATH="$CDPATH:$HOME:$HOME/code:$HOME/.config"
@@ -58,8 +59,7 @@ export QT_DEVICE_PIXEL_RATIO=2
 
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=18"
 
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-#export PATH="$PATH:$HOME/.rvm/bin"
-#[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+source <(fzf --zsh)
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+export DIRENV_LOG_FORMAT=
+eval "$(direnv hook zsh)"

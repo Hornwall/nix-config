@@ -1,0 +1,27 @@
+{
+  "custom/recording": {
+    "execute": "/home/hannes/.config/hyprpanel/recording-status.sh",
+    "tooltip": "Recording",
+    "label": "",
+    "interval": 500,
+    "hideOnEmpty": true,
+    "icon": {
+      "recording": "󰻃"
+    }
+  },
+  "custom/sas_awards": {
+    "execute": "/home/hannes/.config/hyprpanel/sas-awards-widget.sh",
+    "tooltip": "September flights to Tokyo",
+    "label": "{text}",
+    "interval": 300000,
+    "hideOnEmpty": false,
+    "icon": {
+      "avail": "✈",
+      "none": "󰚌"
+    },
+    "actions": {
+      "onLeftClick": "/home/hannes/.config/hyprpanel/sas-awards-panel.sh open",
+      "onRightClick": "/home/hannes/.config/hyprpanel/sas-awards-panel.sh 2026-09"
+    }
+  }
+}

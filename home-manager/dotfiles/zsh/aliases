@@ -20,14 +20,11 @@ alias :e=vim
 alias :q=exit
 
 alias ehmgr="nvim ~/.config/home-manager"
-alias enix="nvim /var/nix"
+alias enix="nvim /var/nix-config"
 
 alias ssh='TERM=xterm ssh'
 
 alias psg="ps aux | grep"
-
-alias bi="brew install"
-alias bu="brew uninstall"
 
 alias grepf="grep -r -n --color=auto"
 
@@ -38,13 +35,13 @@ alias pbcopy='xclip'
 alias pbpaste='xclip -o'
 
 alias wp="webpack-dev-server --hot"
-alias rs="rails s"
-alias rc="rails c"
-
-
-alias old_ruby_install="cat ~/ruby2.x-openssl.patch | CC=/usr/bin/gcc-5 PKG_CONFIG_PATH=/usr/lib/openssl-1.0/pkgconfig  rbenv install -p"
-alias sold_ruby_install="CC=/usr/bin/gcc-5 PKG_CONFIG_PATH=/usr/lib/openssl-1.0/pkgconfig  rbenv install"
-
 
 alias kgp="kubectl get pods -n"
 alias kex="kubectl exec -it -n"
+
+alias dup="devenv up"
+alias ds="devenv shell"
+alias rs="devenv shell bin/dev"
+alias rc="devenv shell rails c"
+alias rt="devenv shell rails test"
+alias mt="devenv shell make -- -j8"

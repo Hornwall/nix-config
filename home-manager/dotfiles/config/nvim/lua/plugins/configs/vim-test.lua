@@ -1,4 +1,4 @@
-local g = vim.g
+vim.g["test#strategy"] = "neovim"
 
-g["test#strategy"] = "neovim"
-vim["test#javascript#jest#executable"] = "yarn test"
+
+vim.g["test#ruby#rails#executable"] = "devenv -q shell rails test"

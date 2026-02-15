@@ -6,6 +6,7 @@ require'nvim-treesitter.configs'.setup {
     "go",
     "hcl",
     "html",
+    "erb",
     "javascript",
     "json",
     "lua",

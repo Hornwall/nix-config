@@ -1,0 +1,89 @@
+{
+  "default_apps": {
+    "slack": "slack --enable-features=UseOzonePlatform --ozone-platform=wayland",
+    "terminal": "ghostty",
+    "browser": "firefox",
+    "mpris": null
+  },
+  "units": {
+    "lengths": "meters",
+    "weights": "kg",
+    "volumes": "l",
+    "temperatures": "C",
+    "currency": "eur"
+  },
+  "appearance": {
+      "width": 900,
+      "height": 593,
+      "gsk_renderer": "cairo",
+      "icon_paths": [
+          "/home/basti/testconfig/icons"
+      ],
+      "icon_size": 24,
+      "use_base_css": false,
+      "opacity": 0.95,
+      "mod_key_ascii": [
+          "\u21e7",
+          "\u21e7",
+          "\u2318",
+          "\u2318",
+          "\u2387",
+          "\u2726",
+          "\u2726",
+          "\u2318"
+      ]
+  },
+  "behavior": {
+      "use_xdg_data_dir_icons": false,
+      "animate": true,
+      "global_prefix": null,
+      "global_flags": null
+  },
+  "binds": {
+      "up": "control-k",
+      "down": "control-j",
+      "left": "control-ih",
+      "right": "control-l",
+      "context": "control-i",
+      "modifier": "control",
+      "exec_inplace": "control-return"
+  },
+  "files": {
+      "config": "/home/hannes/.config/sherlock/config.toml",
+      "css": "/home/hannes/.config/sherlock/main.css",
+      "fallback": "/home/hannes/.config/sherlock/fallback.json",
+      "alias": "/home/hannes/.config/sherlock/sherlock_alias.json",
+      "ignore": "/home/hannes/.config/sherlock/sherlockignore",
+      "actions": "/home/hannes/.config/sherlock/sherlock_actions.json"
+  },
+  "runtime": {
+      "method": null,
+      "multi": false,
+      "center": false,
+      "photo_mode": false,
+      "display_raw": false,
+      "input": null,
+      "sub_menu": null,
+      "daemonize": false,
+      "field": null
+  },
+  "expand": {
+      "enable": false,
+      "edge": "top",
+      "margin": 0
+  },
+  "backdrop": {
+      "enable": false,
+      "opacity": 0.6,
+      "edge": "top"
+  },
+  "status_bar": {
+      "enable": false
+  },
+  "search_bar_icon": {
+      "enable": true,
+      "icon": "system-search-symbolic",
+      "icon_back": "go-previous-symbolic",
+      "size": 22
+  }
+}

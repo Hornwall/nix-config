@@ -11,6 +11,8 @@
     "1password/custom_allowed_browsers" = {
       text = ''
         firefox
+        .zen-wrapped
+        .librewolf-wrapped
       '';
       mode = "0755";
     };
