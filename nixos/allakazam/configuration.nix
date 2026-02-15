@@ -87,8 +87,19 @@
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
+  services.xserver.videoDrivers = [ "nvidia" ];
   services.desktopManager.gnome.enable = true;
   services.displayManager.gdm.enable = true;
+
+  hardware.graphics.enable = true;
+  hardware.nvidia = {
+    modesetting.enable = true;
+    powerManagement.enable = false;
+    powerManagement.finegrained = false;
+    open = false;
+    nvidiaSettings = true;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+  };
 
   # Enable ozon for electron apps
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
