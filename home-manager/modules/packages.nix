@@ -16,7 +16,6 @@
     pkgs.wl-clipboard
     pkgs.dive
     pkgs.docker-slim
-    pkgs.awscli2
     pkgs.ssm-session-manager-plugin
     pkgs.yarn
     pkgs.devbox
@@ -35,11 +34,9 @@
     # Desktop Applications
     pkgs.spotify
     pkgs.discord
-    pkgs.slack
     pkgs.gimp
     pkgs.chromium
     pkgs.inkscape
-    pkgs.teams-for-linux
     pkgs.calibre
     pkgs.feh
     pkgs.lmstudio

@@ -6,11 +6,11 @@
   
   # Example: Additional packages for the ThinkPad Z16
   home.packages = with pkgs; [
-    # Add any ThinkPad Z16 specific packages here
+    # Add any allakazam specific packages here
   ];
 
   # Example: Host-specific environment variables
   home.sessionVariables = {
-    # HOST_MACHINE = "thinkpad-z16";
+    # HOST_MACHINE = "allakazam";
   };
 }

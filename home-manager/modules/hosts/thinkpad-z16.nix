@@ -6,6 +6,9 @@
   
   # Example: Additional packages for the ThinkPad Z16
   home.packages = with pkgs; [
+    pkgs.slack
+    pkgs.teams-for-linux
+    pkgs.awscli2
     # Add any ThinkPad Z16 specific packages here
   ];
 
