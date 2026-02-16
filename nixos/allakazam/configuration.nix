@@ -150,10 +150,19 @@
 
   programs.steam.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # Define a user account. Don't forget to set a password with 'passwd'.
   users.users.hannes = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "docker" ]; # Enable 'sudo' for the user.
+    shell = pkgs.zsh;
+    packages = with pkgs; [
+      unstable.firefox
+      tree
+    ];
+  };
+
+  users.users.johanna = {
+    isNormalUser = true;
     shell = pkgs.zsh;
     packages = with pkgs; [
       unstable.firefox
