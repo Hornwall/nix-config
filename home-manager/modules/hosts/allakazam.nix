@@ -11,6 +11,6 @@
 
   # Example: Host-specific environment variables
   home.sessionVariables = {
-    # HOST_MACHINE = "allakazam";
+    NIX_CONFIG_PATH = "/home/hannes/code/nix-config";
   };
 }

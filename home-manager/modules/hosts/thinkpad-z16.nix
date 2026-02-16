@@ -14,6 +14,6 @@
 
   # Example: Host-specific environment variables
   home.sessionVariables = {
-    # HOST_MACHINE = "thinkpad-z16";
+    NIX_CONFIG_PATH = "/var/nix-config";
   };
 }
