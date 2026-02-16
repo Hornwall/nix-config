@@ -82,10 +82,11 @@
            ./nixos/thinkpad-z16/configuration.nix
          ];
        };
-       vm = nixpkgs.lib.nixosSystem {
+       allakazam = nixpkgs.lib.nixosSystem {
          specialArgs = {inherit inputs outputs;};
          modules = [
-           ./nixos/vm/configuration.nix
+           hyprland.nixosModules.default
+           ./nixos/allakazam/configuration.nix
          ];
        };
      };
@@ -114,14 +115,14 @@
            ./home-manager/modules/hosts/thinkpad-z16.nix
          ];
        };
-       "hannes@vm" = home-manager.lib.homeManagerConfiguration {
+       "hannes@allakazam" = home-manager.lib.homeManagerConfiguration {
          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
          extraSpecialArgs = {inherit inputs outputs;};
          modules = [
            # > Our main home-manager configuration file <
            ./home-manager/home.nix
            # > Host-specific configuration <
-           ./home-manager/modules/hosts/vm.nix
+           ./home-manager/modules/hosts/allakazam.nix
          ];
        };
      };
