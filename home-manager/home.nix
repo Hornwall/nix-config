@@ -23,19 +23,9 @@
   nixpkgs = {
     config.allowUnfree = true;
     overlays = [
-      # Custom packages overlay
-      (final: _prev: import ../pkgs {pkgs = final;})
-      
-      # Modifications overlay (empty for now)
-      (final: prev: {})
-      
-      # Unstable packages overlay
-      (final: _prev: {
-        unstable = import (builtins.fetchTarball "https://github.com/nixos/nixpkgs/archive/nixos-unstable.tar.gz") {
-          system = final.stdenv.hostPlatform.system;
-          config.allowUnfree = true;
-        };
-      })
+      outputs.overlays.additions
+      outputs.overlays.modifications
+      outputs.overlays.unstable-packages
     ];
   };
 
