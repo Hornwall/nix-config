@@ -21,6 +21,7 @@ alias :q=exit
 
 alias ehmgr="nvim ~/.config/home-manager"
 alias enix="nvim /var/nix-config"
+alias hmup='home-manager switch --flake "/var/nix-config#hannes@$(hostnamectl --static)"'
 
 alias ssh='TERM=xterm ssh'
 
