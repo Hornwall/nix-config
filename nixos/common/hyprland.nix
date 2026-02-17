@@ -1,4 +1,4 @@
-{inputs, pkgs}:
+{ pkgs }:
 {
   #programs.hyperland = {
   #  enable = true;
@@ -7,8 +7,7 @@
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
-    # Use the hyprland package from our flake input for consistency
-    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+    package = pkgs.hyprland;
     plugins = [
       pkgs.hyprlandPlugins.hyprsplit
     ];
