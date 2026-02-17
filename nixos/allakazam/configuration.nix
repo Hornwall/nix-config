@@ -8,14 +8,14 @@
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    ./keyboard-layout.nix
-    ./1password.nix
-    ./gnome.nix
-    ./docker.nix
-    ./homepage.nix
+    ../common/keyboard-layout.nix
+    ../common/1password.nix
+    ../common/gnome.nix
+    ../common/docker.nix
+    ../common/homepage.nix
     (import ./ollama.nix { inherit inputs pkgs; })
-    (import ./hyprland.nix { inherit inputs pkgs; })
-    (import ./searxng.nix { inherit lib; })
+    (import ../common/hyprland.nix { inherit inputs pkgs; })
+    (import ../common/searxng.nix { inherit lib; })
   ];
 
   nix = {
