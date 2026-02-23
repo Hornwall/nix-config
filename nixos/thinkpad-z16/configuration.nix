@@ -179,6 +179,7 @@
     libsecret
     seahorse
     microsoft-edge
+    agent-browser
   ];
 
   fonts.packages = with pkgs; [
