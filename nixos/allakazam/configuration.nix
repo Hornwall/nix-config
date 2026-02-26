@@ -13,6 +13,7 @@
     ../common/gnome.nix
     ../common/docker.nix
     ../common/homepage.nix
+    (import ./sunshine.nix { inherit inputs pkgs; })
     (import ./ollama.nix { inherit inputs pkgs; })
     (import ../common/hyprland.nix { inherit pkgs; })
     (import ../common/searxng.nix { inherit lib; })
@@ -192,7 +193,6 @@
     xdg-desktop-portal-hyprland
     unstable.ruby_3_4
     unstable.rubyPackages_3_4.standard
-    unstable.android-studio
     unstable.code-cursor
     unstable.cursor-cli
     libsecret
