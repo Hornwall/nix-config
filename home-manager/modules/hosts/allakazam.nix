@@ -13,4 +13,8 @@
   home.sessionVariables = {
     NIX_CONFIG_PATH = "/home/hannes/code/nix-config";
   };
+
+  hornwall.dotfiles.overrides = {
+    ".config/hyprpanel/config.json" = ../../dotfiles/hosts/allakazam/hyprpanel/config.json;
+  };
 }
