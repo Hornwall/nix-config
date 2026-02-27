@@ -17,4 +17,8 @@
   home.sessionVariables = {
     NIX_CONFIG_PATH = "/var/nix-config";
   };
+
+  hornwall.dotfiles.overrides = {
+    ".config/hyprpanel/config.json" = ../../dotfiles/hosts/thinkpad-z16/hyprpanel/config.json;
+  };
 }
