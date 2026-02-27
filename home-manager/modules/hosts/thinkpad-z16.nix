@@ -9,6 +9,7 @@
     pkgs.slack
     pkgs.teams-for-linux
     pkgs.awscli2
+    pkgs.sentry-cli
     # Add any ThinkPad Z16 specific packages here
   ];
 
