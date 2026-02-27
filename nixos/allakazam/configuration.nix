@@ -187,7 +187,7 @@
     docker-compose
     beyond-identity
     tuple
-    handy
+    voxtype
     wtype
     xdg-desktop-portal-gtk
     xdg-desktop-portal-hyprland
