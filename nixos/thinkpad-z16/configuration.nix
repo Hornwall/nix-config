@@ -167,7 +167,7 @@
     docker-compose
     beyond-identity
     tuple
-    voxtype
+    voxtype-rocm
     wtype
     xdg-desktop-portal-gtk
     xdg-desktop-portal-hyprland
