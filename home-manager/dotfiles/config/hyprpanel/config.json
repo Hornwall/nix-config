@@ -41,6 +41,7 @@
         "network",
         "bluetooth",
         "battery",
+        "custom/voxtype",
         "custom/recording",
         "systray",
         "clock",
@@ -61,6 +62,7 @@
         "network",
         "bluetooth",
         "battery",
+        "custom/voxtype",
         "custom/recording",
         "systray",
         "clock",
@@ -78,6 +80,7 @@
       ],
       "right": [
         "volume",
+        "custom/voxtype",
         "custom/recording",
         "systray",
         "clock",

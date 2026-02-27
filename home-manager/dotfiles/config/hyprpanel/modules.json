@@ -1,4 +1,17 @@
 {
+  "custom/voxtype": {
+    "execute": "/home/hannes/.config/hyprpanel/voxtype-status.sh",
+    "tooltip": "Voxtype",
+    "label": "",
+    "interval": 500,
+    "hideOnEmpty": false,
+    "icon": {
+      "idle": "",
+      "recording": "󰻃",
+      "transcribing": "󰦨",
+      "error": ""
+    }
+  },
   "custom/recording": {
     "execute": "/home/hannes/.config/hyprpanel/recording-status.sh",
     "tooltip": "Recording",
