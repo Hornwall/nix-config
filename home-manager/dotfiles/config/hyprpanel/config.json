@@ -41,7 +41,6 @@
         "network",
         "bluetooth",
         "battery",
-        "custom/sas_awards",
         "custom/recording",
         "systray",
         "clock",
@@ -62,7 +61,6 @@
         "network",
         "bluetooth",
         "battery",
-        "custom/sas_awards",
         "custom/recording",
         "systray",
         "clock",
@@ -80,7 +78,6 @@
       ],
       "right": [
         "volume",
-        "custom/sas_awards",
         "custom/recording",
         "systray",
         "clock",
