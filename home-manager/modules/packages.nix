@@ -59,7 +59,7 @@
     pkgs.tesseract
     pkgs.gnome-keyring
     pkgs.seahorse
-    pkgs.unstable.sherlock-launcher
+    pkgs.walker
     pkgs.libnotify
   ];
 }
