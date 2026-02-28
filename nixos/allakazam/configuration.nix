@@ -60,6 +60,8 @@
     };
   };
 
+  hardware.xpadneo.enable = true;
+
   # Set your time zone.
   time.timeZone = "Europe/Stockholm";
 
@@ -187,7 +189,7 @@
     docker-compose
     beyond-identity
     tuple
-    voxtype-cuda
+    voxtype-vulkan
     wtype
     xdg-desktop-portal-gtk
     xdg-desktop-portal-hyprland
@@ -233,7 +235,7 @@
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
