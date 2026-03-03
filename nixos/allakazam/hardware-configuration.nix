@@ -12,6 +12,7 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ ];
   boot.extraModulePackages = [ ];
+  boot.kernelParams = [ "nvidia-drm.modeset=1" "nvidia-drm.fbdev=1" ];
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/1e2e77a7-aa10-4424-94b3-5e6652fa068a";
