@@ -13,6 +13,7 @@
     ../common/gnome.nix
     ../common/docker.nix
     ./aboard.nix
+    ./qemu.nix
     ../common/homepage.nix
     (import ./ollama.nix { inherit inputs pkgs; })
     (import ../common/hyprland.nix { inherit pkgs; })
@@ -169,6 +170,7 @@
     tuple
     voxtype-vulkan
     wtype
+    quickemu
     xdg-desktop-portal-gtk
     xdg-desktop-portal-hyprland
     unstable.ruby_3_4
