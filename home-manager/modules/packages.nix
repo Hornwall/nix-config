@@ -59,7 +59,6 @@
     pkgs.tesseract
     pkgs.gnome-keyring
     pkgs.seahorse
-    pkgs.walker
     pkgs.libnotify
   ];
 }

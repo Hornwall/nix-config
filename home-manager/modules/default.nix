@@ -8,6 +8,7 @@
     ./programs/git.nix
     ./programs/zsh.nix
     ./programs/neovim.nix
+    ./programs/walker.nix
     ./packages.nix
     ./dotfiles.nix
   ];

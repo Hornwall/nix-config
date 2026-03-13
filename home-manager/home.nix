@@ -3,6 +3,7 @@
 {
   # Import all our modular configurations
   imports = [
+    inputs.walker.homeManagerModules.default
     ./modules
   ];
 
