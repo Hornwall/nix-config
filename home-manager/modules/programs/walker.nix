@@ -37,6 +37,10 @@
             provider = "websearch";
           }
           {
+            prefix = "#";
+            provider = "1password";
+          }
+          {
             prefix = ":";
             provider = "clipboard";
           }
