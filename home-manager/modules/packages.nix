@@ -42,6 +42,7 @@
     pkgs.lmstudio
     pkgs.gradia
     pkgs.prismlauncher
+    pkgs.unstable.openscreen
 
     # Hyprland & Window Manager
     pkgs.wofi
