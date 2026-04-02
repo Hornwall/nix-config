@@ -180,15 +180,14 @@
     zsh
     wget
     lsof
-    distrobox
     _1password-gui
     _1password-cli
     gnome-tweaks
     gnomeExtensions.pop-shell
     gnomeExtensions.dash-to-panel
+    retroarch-full
     docker-compose
     beyond-identity
-    tuple
     voxtype-vulkan
     wtype
     xdg-desktop-portal-gtk
@@ -199,7 +198,6 @@
     unstable.cursor-cli
     libsecret
     seahorse
-    microsoft-edge
   ];
 
   fonts.packages = with pkgs; [
