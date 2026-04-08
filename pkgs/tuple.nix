@@ -2,11 +2,11 @@
 
 stdenv.mkDerivation rec {
   pname = "tuple";
-  version = "v2026_02_19.0";
+  version = "v2026_04_02.0";
 
   src = fetchurl {
     url = "https://tuple-client-releases.s3.amazonaws.com/linux/${version}/x86_64/tuple";
-    hash = "sha256-pC+Tz6zWMGSUBQzI1a3Lo5VmBU4i4v0YgIkElUJ59qs=";
+    hash = "sha256-Jf1Gg3tFKqB3IhAEcDXNDOlBo52ictl9z2eooiz/7Ec=";
   };
 
   dontUnpack = true;
