@@ -55,10 +55,14 @@
    in {
      # Your custom packages
      # Accessible through 'nix build', 'nix shell', etc
-     packages = forAllSystems (system:
-        let pkgs = nixpkgs.legacyPackages.${system};
-        in import ./pkgs { inherit pkgs; }
-      );
+      packages = forAllSystems (system:
+         let
+           pkgs = nixpkgs.legacyPackages.${system};
+           unstablePkgs = nixpkgs-unstable.legacyPackages.${system};
+         in import ./pkgs {
+           inherit pkgs unstablePkgs;
+         }
+       );
      # Formatter for your nix files, available through 'nix fmt'
      # Other options beside 'alejandra' include 'nixpkgs-fmt'
      #formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);

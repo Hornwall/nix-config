@@ -1,10 +1,14 @@
 # Custom packages, that can be defined similarly to ones from nixpkgs
 # You can build them using 'nix build .#example' or (legacy) 'nix-build -A example'
 
-{ pkgs ? (import ../nixpkgs.nix) { } }: {
+{ pkgs ? (import ../nixpkgs.nix) { }
+, unstablePkgs ? null
+}: {
   agent-browser = pkgs.callPackage ./agent-browser.nix { };
   beyond-identity = pkgs.callPackage ./beyond-identity.nix { };
-  opencode = pkgs.callPackage ./opencode.nix { };
+  opencode = pkgs.callPackage ./opencode.nix {
+    bun = if unstablePkgs != null then unstablePkgs.bun else pkgs.bun;
+  };
   tuple = pkgs.callPackage ./tuple.nix { };
   voxtype = pkgs.callPackage ./voxtype.nix { vulkanSupport = true; };
   voxtype-cuda = if pkgs.stdenv.hostPlatform.isLinux then pkgs.callPackage ./voxtype.nix { cudaSupport = true; } else pkgs.callPackage ./voxtype.nix { };
