@@ -14,7 +14,7 @@
     ../common/docker.nix
     ../common/homepage.nix
     (import ./sunshine.nix { inherit inputs pkgs; })
-    (import ./llama-cpp.nix { inherit inputs pkgs; })
+    (import ./ollama.nix { inherit inputs pkgs; })
     (import ../common/hyprland.nix { inherit pkgs; })
     (import ../common/searxng.nix { inherit lib; })
   ];
