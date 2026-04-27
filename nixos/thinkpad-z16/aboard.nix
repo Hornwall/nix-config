@@ -1,7 +1,37 @@
+let
+  mkProxyVHost = port: {
+    addSSL = true;
+    sslCertificate = "/etc/ssl/certs/cert.pem";
+    sslCertificateKey = "/etc/ssl/certs/plain.key";
+
+    extraConfig = ''
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size   128k;
+      proxy_buffers   4 256k;
+      proxy_busy_buffers_size   256k;
+    '';
+
+    locations."/" = {
+      proxyPass = "http://localhost:${toString port}/";
+      proxyWebsockets = true;
+    };
+  };
+
+  aboardhrWtCount = 10;
+
+  aboardhrWtVHosts = builtins.listToAttrs (
+    map (n: {
+      name = "app.aboardhr-wt${toString n}.localhost";
+      value = mkProxyVHost (3000 + n);
+    }) (builtins.genList (i: i + 1) aboardhrWtCount)
+  );
+in
 {
   networking.extraHosts =
   ''
     127.0.0.1 app.aboardhr.localhost
+    127.0.0.1 *.localhost
     127.0.0.1 app.aboardhr.test
     127.0.0.1 whistle.aboardhr.localhost
     127.0.0.1 whistle.aboardhr.test
@@ -59,240 +89,20 @@
 
     logError = "stderr debug";
   
-    virtualHosts."app.aboardhr.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:3000/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."accounts.aboardhr.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:3003/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."accounts.teamtailor.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:3003/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."api.aboardhr.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:3000/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."app.aboardhr.test" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:3000/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."whistle.aboardhr.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:3000/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."whistle.aboardhr.test" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-
-      locations."/" = {
-        proxyPass = "http://localhost:3000/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."teamtailor-livereload.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:1337/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."tt.teamtailor.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:5500/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."app.teamtailor.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:5500/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."api.teamtailor.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:5500/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."www.teamtailor-ember.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:4200/";
-        proxyWebsockets = true;
-      };
-    };
-    virtualHosts."teamtailor-ember.localhost" = {
-      addSSL = true;
-      sslCertificate = "/etc/ssl/certs/cert.pem";
-      sslCertificateKey = "/etc/ssl/certs/plain.key";
-
-      extraConfig = ''
-        fastcgi_buffers 16 16k;
-        fastcgi_buffer_size 32k;
-        proxy_buffer_size   128k;
-        proxy_buffers   4 256k;
-        proxy_busy_buffers_size   256k;
-      '';
-
-      locations."/" = {
-        proxyPass = "http://localhost:4200/";
-        proxyWebsockets = true;
-      };
-    };
+    virtualHosts = {
+      "app.aboardhr.localhost" = mkProxyVHost 3000;
+      "accounts.aboardhr.localhost" = mkProxyVHost 3003;
+      "accounts.teamtailor.localhost" = mkProxyVHost 3003;
+      "api.aboardhr.localhost" = mkProxyVHost 3000;
+      "app.aboardhr.test" = mkProxyVHost 3000;
+      "whistle.aboardhr.localhost" = mkProxyVHost 3000;
+      "whistle.aboardhr.test" = mkProxyVHost 3000;
+      "teamtailor-livereload.localhost" = mkProxyVHost 1337;
+      "tt.teamtailor.localhost" = mkProxyVHost 5500;
+      "app.teamtailor.localhost" = mkProxyVHost 5500;
+      "api.teamtailor.localhost" = mkProxyVHost 5500;
+      "www.teamtailor-ember.localhost" = mkProxyVHost 4200;
+      "teamtailor-ember.localhost" = mkProxyVHost 4200;
+    } // aboardhrWtVHosts;
   };
 }
