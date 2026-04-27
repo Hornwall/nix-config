@@ -3,11 +3,13 @@
 
 { pkgs ? (import ../nixpkgs.nix) { }
 , unstablePkgs ? null
+, opencodeSrc ? null
 }: {
   agent-browser = pkgs.callPackage ./agent-browser.nix { };
   beyond-identity = pkgs.callPackage ./beyond-identity.nix { };
   opencode = pkgs.callPackage ./opencode.nix {
     bun = if unstablePkgs != null then unstablePkgs.bun else pkgs.bun;
+    inherit opencodeSrc;
   };
   tuple = pkgs.callPackage ./tuple.nix { };
   voxtype = pkgs.callPackage ./voxtype.nix { vulkanSupport = true; };

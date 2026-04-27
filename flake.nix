@@ -19,6 +19,11 @@
       inputs.hyprland.follows = "hyprland";
     };
 
+    opencode-src = {
+      url = "github:anomalyco/opencode/dev";
+      flake = false;
+    };
+
     elephant.url = "github:abenz1267/elephant";
 
     walker = {
@@ -56,13 +61,14 @@
      # Your custom packages
      # Accessible through 'nix build', 'nix shell', etc
       packages = forAllSystems (system:
-         let
-           pkgs = nixpkgs.legacyPackages.${system};
-           unstablePkgs = nixpkgs-unstable.legacyPackages.${system};
-         in import ./pkgs {
-           inherit pkgs unstablePkgs;
-         }
-       );
+          let
+            pkgs = nixpkgs.legacyPackages.${system};
+            unstablePkgs = nixpkgs-unstable.legacyPackages.${system};
+          in import ./pkgs {
+            inherit pkgs unstablePkgs;
+            opencodeSrc = inputs."opencode-src";
+          }
+        );
      # Formatter for your nix files, available through 'nix fmt'
      # Other options beside 'alejandra' include 'nixpkgs-fmt'
      #formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);

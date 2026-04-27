@@ -29,7 +29,7 @@
     pkgs.tldr
     pkgs.unstable.devenv
     pkgs.direnv
-    pkgs.unstable.opencode
+    pkgs.opencode
     pkgs.unstable.claude-code
 
     # Desktop Applications

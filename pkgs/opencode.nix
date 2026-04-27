@@ -6,6 +6,7 @@
 , models-dev
 , nodejs
 , nix-update-script
+, opencodeSrc ? null
 , ripgrep
 , sysctl
 , installShellFiles
@@ -14,12 +15,12 @@
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "opencode";
-  version = "1.4.3";
-  src = fetchFromGitHub {
+  version = "dev";
+  src = if opencodeSrc != null then opencodeSrc else fetchFromGitHub {
     owner = "anomalyco";
     repo = "opencode";
-    tag = "v${finalAttrs.version}";
-    hash = "sha256-m+Ue7FWiTjKMAn1QefAwOMfOb2Vybk0mJPV9zcbkOmE=";
+    rev = "61eabfc60c1005d1b2b11849d70696a3dcef293e";
+    hash = "sha256-D53S1bqrt1JoUDK0vU2+yxJdlCigBQrkaj2SeOcsw1U=";
   };
 
   node_modules = stdenvNoCC.mkDerivation {
@@ -41,12 +42,15 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     buildPhase = ''
       runHook preBuild
 
+      export BUN_INSTALL_CACHE_DIR=$(mktemp -d)
       bun install \
         --cpu="*" \
         --frozen-lockfile \
+        --filter ./ \
         --filter ./packages/app \
         --filter ./packages/opencode \
         --filter ./packages/desktop \
+        --filter ./packages/shared \
         --ignore-scripts \
         --no-progress \
         --os="*"
@@ -66,13 +70,10 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       runHook postInstall
     '';
 
+    # Required or the fixed-output derivation ends up referencing store paths.
     dontFixup = true;
 
-    outputHash =
-      if stdenvNoCC.hostPlatform.isDarwin then
-        lib.fakeHash
-      else
-        "sha256-hVXlQcUuvUudIB35Td6ucBYopM/QOSx59tQbCTqoB/0=";
+    outputHash = "sha256-shMfcEeS4T/gUKILrXmFTnXISg4CcL682YniuaNlb2I=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };
@@ -103,8 +104,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   '';
 
   env.MODELS_DEV_API_JSON = "${models-dev}/dist/_api.json";
+  env.OPENCODE_DISABLE_MODELS_FETCH = true;
   env.OPENCODE_VERSION = finalAttrs.version;
-  env.OPENCODE_CHANNEL = "stable";
+  env.OPENCODE_CHANNEL = "dev";
 
   buildPhase = ''
     runHook preBuild
@@ -149,7 +151,10 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     writableTmpDirAsHomeHook
   ];
   doInstallCheck = true;
-  versionCheckKeepEnvironment = [ "HOME" ];
+  versionCheckKeepEnvironment = [
+    "HOME"
+    "OPENCODE_DISABLE_MODELS_FETCH"
+  ];
   versionCheckProgramArg = "--version";
 
   passthru = {
@@ -171,7 +176,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     license = lib.licenses.mit;
     maintainers = with lib.maintainers; [
       delafthi
+      DuskyElf
       graham33
+      superherointj
     ];
     sourceProvenance = with lib.sourceTypes; [ fromSource ];
     platforms = [
@@ -181,5 +188,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       "x86_64-darwin"
     ];
     mainProgram = "opencode";
+    badPlatforms = [
+      # Broken as 2026-04-23: CPU lacks AVX support, strange crashes may occur.
+      "x86_64-darwin"
+    ];
   };
 })
