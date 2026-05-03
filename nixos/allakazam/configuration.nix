@@ -185,7 +185,7 @@
     gnome-tweaks
     gnomeExtensions.pop-shell
     gnomeExtensions.dash-to-panel
-    retroarch-full
+    retroarch
     docker-compose
     beyond-identity
     voxtype-vulkan
