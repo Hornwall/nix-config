@@ -7,6 +7,7 @@
 }: {
   agent-browser = pkgs.callPackage ./agent-browser.nix { };
   beyond-identity = pkgs.callPackage ./beyond-identity.nix { };
+  claude-code = pkgs.callPackage ./claude-code/package.nix { };
   opencode = pkgs.callPackage ./opencode.nix {
     bun = if unstablePkgs != null then unstablePkgs.bun else pkgs.bun;
     inherit opencodeSrc;
