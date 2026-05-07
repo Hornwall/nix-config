@@ -67,8 +67,6 @@
   # Enabled fwupd
   services.fwupd.enable = true;
 
-  services.intune.enable = true;
-
   # Enable flatpaks
   services.flatpak.enable = true;
 
