@@ -12,6 +12,7 @@
     bun = if unstablePkgs != null then unstablePkgs.bun else pkgs.bun;
     inherit opencodeSrc;
   };
+  pup = pkgs.callPackage ./pup.nix { };
   tuple = pkgs.callPackage ./tuple.nix { };
   voxtype = pkgs.callPackage ./voxtype.nix { vulkanSupport = true; };
   voxtype-cuda = if pkgs.stdenv.hostPlatform.isLinux then pkgs.callPackage ./voxtype.nix { cudaSupport = true; } else pkgs.callPackage ./voxtype.nix { };

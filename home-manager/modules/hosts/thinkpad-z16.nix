@@ -10,6 +10,7 @@
     pkgs.teams-for-linux
     pkgs.awscli2
     pkgs.sentry-cli
+    pkgs.pup
     # Add any ThinkPad Z16 specific packages here
   ];
 
