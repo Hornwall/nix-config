@@ -31,6 +31,7 @@
     pkgs.direnv
     pkgs.opencode
     pkgs.claude-code
+    pkgs.unstable.pi-coding-agent
 
     # Desktop Applications
     pkgs.spotify

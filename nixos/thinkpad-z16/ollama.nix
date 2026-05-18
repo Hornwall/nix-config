@@ -2,9 +2,8 @@
 {
   services.ollama = {
     enable = true;
-    package = pkgs.unstable.ollama;
-    loadModels = ["llama3.2:3b"];
-    acceleration = "vulkan";
+    package = pkgs.unstable.ollama-rocm;
+    acceleration = "rocm";
     environmentVariables = {
       HCC_AMDGPU_TARGET = "gfx1103"; # used to be necessary, but doesn't seem to anymore
     };
