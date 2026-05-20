@@ -45,6 +45,7 @@
     pkgs.gradia
     pkgs.prismlauncher
     pkgs.unstable.openscreen
+    pkgs.obsidian
 
     # Hyprland & Window Manager
     pkgs.wofi
