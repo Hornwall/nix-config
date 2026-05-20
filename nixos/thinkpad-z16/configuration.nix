@@ -37,6 +37,21 @@
   # Use latest kernel
   boot.kernelPackages = pkgs.linuxPackages_7_0;
 
+  # zram-backed swap as a safety net when large ollama models push RAM hard.
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 50;
+  };
+
+  # Userspace OOM killer reaps the heaviest cgroup before the kernel OOM
+  # picks a random victim (often the Wayland compositor).
+  systemd.oomd = {
+    enable = true;
+    enableUserSlices = true;
+    enableRootSlice = true;
+  };
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
