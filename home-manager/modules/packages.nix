@@ -65,4 +65,26 @@
     pkgs.seahorse
     pkgs.libnotify
   ];
+
+  home.file.".local/bin/obsidian" = {
+    executable = true;
+    force = true;
+    text = ''
+      #!${pkgs.bash}/bin/bash
+      set -euo pipefail
+
+      gui="${pkgs.unstable.obsidian}/bin/obsidian"
+      cli="${pkgs.unstable.obsidian}/bin/obsidian-cli"
+
+      if [[ $# -gt 0 && "$1" == obsidian://* ]]; then
+        exec "$gui" "$@"
+      fi
+
+      if [[ $# -eq 0 && ! -t 0 && ! -t 1 ]]; then
+        exec "$gui"
+      fi
+
+      exec "$cli" "$@"
+    '';
+  };
 }
