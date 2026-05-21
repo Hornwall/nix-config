@@ -200,8 +200,8 @@ hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + K", hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + J", hl.dsp.focus({ direction = "down" }))
 
-hl.bind("CTRL + ALT + " .. mainMod .. " + H", hl.dsp.workspace.move({ monitor = "left" }))
-hl.bind("CTRL + ALT + " .. mainMod .. " + L", hl.dsp.workspace.move({ monitor = "right" }))
+hl.bind("CTRL + ALT + " .. mainMod .. " + H", hl.dsp.workspace.move({ monitor = "l" }))
+hl.bind("CTRL + ALT + " .. mainMod .. " + L", hl.dsp.workspace.move({ monitor = "r" }))
 
 for i = 1, 10 do
     local key = i % 10
