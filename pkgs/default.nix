@@ -4,8 +4,10 @@
 { pkgs ? (import ../nixpkgs.nix) { }
 , unstablePkgs ? null
 , opencodeSrc ? null
+, abrdAdminPackage ? null
 }: {
   agent-browser = pkgs.callPackage ./agent-browser.nix { };
+  abrd-admin = if abrdAdminPackage != null then abrdAdminPackage else throw "abrd-admin requires abrdAdminPackage";
   beyond-identity = pkgs.callPackage ./beyond-identity.nix { };
   claude-code = pkgs.callPackage ./claude-code/package.nix { };
   opencode = pkgs.callPackage ./opencode.nix {

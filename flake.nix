@@ -24,6 +24,11 @@
       flake = false;
     };
 
+    aboard-admin-cli = {
+      url = "git+ssh://git@github.com/Teamtailor/aboard-admin-cli.git";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
     elephant.url = "github:abenz1267/elephant";
 
     walker = {
@@ -62,11 +67,18 @@
      # Accessible through 'nix build', 'nix shell', etc
       packages = forAllSystems (system:
           let
-            pkgs = nixpkgs.legacyPackages.${system};
+            pkgs = import nixpkgs {
+              inherit system;
+              config.allowUnfree = true;
+            };
             unstablePkgs = nixpkgs-unstable.legacyPackages.${system};
           in import ./pkgs {
             inherit pkgs unstablePkgs;
             opencodeSrc = inputs."opencode-src";
+            abrdAdminPackage = pkgs.callPackage (inputs.aboard-admin-cli + "/nix/package.nix") {
+              buildGoModule = pkgs.buildGo126Module;
+              version = inputs.aboard-admin-cli.shortRev or "dev";
+            };
           }
         );
      # Formatter for your nix files, available through 'nix fmt'

@@ -11,6 +11,7 @@
     pkgs.awscli2
     pkgs.sentry-cli
     pkgs.pup
+    pkgs.abrd-admin
     # Add any ThinkPad Z16 specific packages here
   ];
 

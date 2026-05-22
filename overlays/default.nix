@@ -8,6 +8,10 @@
         system = final.stdenv.hostPlatform.system;
         config.allowUnfree = true;
       };
+      abrdAdminPackage = final.callPackage (inputs.aboard-admin-cli + "/nix/package.nix") {
+        buildGoModule = final.buildGo126Module;
+        version = inputs.aboard-admin-cli.shortRev or "dev";
+      };
     };
 
   # This one contains whatever you want to overlay
