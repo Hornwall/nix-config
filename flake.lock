@@ -8,11 +8,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779448093,
-        "narHash": "sha256-xMnJmrdeWOdsS63W9/j0WOPQfHJjrFptLopHTIZU/Kc=",
+        "lastModified": 1779449233,
+        "narHash": "sha256-6BLWSrEm+WI44z1fqHyaiFo2OOVvCr8WZUmL1kVv7jM=",
         "ref": "refs/heads/main",
-        "rev": "fe710944ed78fa944de8897af7201d0050e943c6",
-        "revCount": 6,
+        "rev": "8ffa88962d945f6af9b6fafd6bffc9727cf5e462",
+        "revCount": 7,
         "type": "git",
         "url": "ssh://git@github.com/Teamtailor/aboard-admin-cli.git"
       },

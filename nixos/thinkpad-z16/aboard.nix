@@ -31,6 +31,7 @@ in
   networking.extraHosts =
   ''
     127.0.0.1 app.aboardhr.localhost
+    127.0.0.1 api.aboardhr.localhost
     127.0.0.1 *.localhost
     127.0.0.1 app.aboardhr.test
     127.0.0.1 whistle.aboardhr.localhost
