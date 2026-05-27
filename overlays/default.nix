@@ -12,6 +12,10 @@
         buildGoModule = final.buildGo126Module;
         version = inputs.aboard-admin-cli.shortRev or "dev";
       };
+      abrdPackage = final.callPackage (inputs.aboard-cli + "/nix/package.nix") {
+        buildGoModule = final.buildGo126Module;
+        version = inputs.aboard-cli.shortRev or "dev";
+      };
     };
 
   # This one contains whatever you want to overlay

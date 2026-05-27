@@ -5,8 +5,10 @@
 , unstablePkgs ? null
 , opencodeSrc ? null
 , abrdAdminPackage ? null
+, abrdPackage ? null
 }: {
   agent-browser = pkgs.callPackage ./agent-browser.nix { };
+  abrd = if abrdPackage != null then abrdPackage else throw "abrd requires abrdPackage";
   abrd-admin = if abrdAdminPackage != null then abrdAdminPackage else throw "abrd-admin requires abrdAdminPackage";
   beyond-identity = pkgs.callPackage ./beyond-identity.nix { };
   claude-code = pkgs.callPackage ./claude-code/package.nix { };

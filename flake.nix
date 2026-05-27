@@ -29,6 +29,11 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
+    aboard-cli = {
+      url = "git+ssh://git@github.com/Teamtailor/aboard-cli.git";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
     elephant.url = "github:abenz1267/elephant";
 
     walker = {
@@ -78,6 +83,10 @@
             abrdAdminPackage = pkgs.callPackage (inputs.aboard-admin-cli + "/nix/package.nix") {
               buildGoModule = pkgs.buildGo126Module;
               version = inputs.aboard-admin-cli.shortRev or "dev";
+            };
+            abrdPackage = pkgs.callPackage (inputs.aboard-cli + "/nix/package.nix") {
+              buildGoModule = pkgs.buildGo126Module;
+              version = inputs.aboard-cli.shortRev or "dev";
             };
           }
         );
