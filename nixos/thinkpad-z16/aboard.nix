@@ -1,8 +1,81 @@
+{ pkgs, lib, ... }:
 let
+  aboardhrWtCount = 10;
+
+  # Worktree dev slots: app/api.aboardhr-wt<N>.localhost -> localhost:(3000 + N).
+  # See the aboard repo's `aboard-devenv-env` skill, which spins envs into these.
+  aboardhrWtPorts = builtins.listToAttrs (
+    lib.concatMap (n: [
+      { name = "app.aboardhr-wt${toString n}.localhost"; value = 3000 + n; }
+      { name = "api.aboardhr-wt${toString n}.localhost"; value = 3000 + n; }
+    ]) (builtins.genList (i: i + 1) aboardhrWtCount)
+  );
+
+  # Single source of truth: host -> upstream port. The TLS cert's SANs and the
+  # nginx virtualHosts are both derived from this map, so they cannot drift.
+  vhostPorts = {
+    "app.aboardhr.localhost" = 3000;
+    "accounts.aboardhr.localhost" = 3003;
+    "accounts.teamtailor.localhost" = 3003;
+    "api.aboardhr.localhost" = 3000;
+    "app.aboardhr.test" = 3000;
+    "whistle.aboardhr.localhost" = 3000;
+    "whistle.aboardhr.test" = 3000;
+    "teamtailor-livereload.localhost" = 1337;
+    "tt.teamtailor.localhost" = 5500;
+    "app.teamtailor.localhost" = 5500;
+    "api.teamtailor.localhost" = 5500;
+    "www.teamtailor-ember.localhost" = 4200;
+    "teamtailor-ember.localhost" = 4200;
+  } // aboardhrWtPorts;
+
+  serverNames = builtins.attrNames vhostPorts;
+
+  # Dev PKI for the proxied hosts: a local root CA (the trust anchor) plus a
+  # non-CA leaf certificate -- with a SAN per proxied host (incl. the wtN slots)
+  # -- that nginx serves. Browsers reject a CA cert used directly as a server
+  # cert (MOZILLA_PKIX_ERROR_CA_CERT_USED_AS_END_ENTITY), hence the split.
+  #
+  # Outputs: ca.pem (trust this), cert.pem (leaf+CA fullchain, served), key.pem
+  # (leaf key). The CA private key is never persisted to $out. Everything
+  # regenerates automatically when `serverNames` changes, so bumping
+  # `aboardhrWtCount` is enough. The leaf key lands in the (world-readable) nix
+  # store, which is acceptable for a localhost-only development certificate.
+  aboardDevCert =
+    pkgs.runCommand "aboard-dev-cert" { nativeBuildInputs = [ pkgs.openssl ]; } ''
+      mkdir -p $out
+      dn="/C=SE/ST=Stockholm/L=Stockholm/O=Teamtailor/OU=dev"
+
+      # Root CA (trust anchor) -- key stays in the build dir, not $out.
+      openssl req -x509 -newkey rsa:4096 -nodes -days 3650 \
+        -keyout ca-key.pem -out $out/ca.pem -subj "$dn/CN=Aboard dev CA" \
+        -addext "basicConstraints=critical,CA:TRUE,pathlen:0" \
+        -addext "keyUsage=critical,keyCertSign,cRLSign"
+
+      # Leaf key + CSR.
+      openssl req -newkey rsa:4096 -nodes \
+        -keyout $out/key.pem -out leaf.csr -subj "$dn/CN=Aboard dev"
+
+      # Sign the leaf with SANs, CA:FALSE, serverAuth.
+      cat > leaf.ext <<'EOF'
+      basicConstraints = critical, CA:FALSE
+      keyUsage = critical, digitalSignature, keyEncipherment
+      extendedKeyUsage = serverAuth
+      subjectAltName = @alt
+      [alt]
+      ${lib.concatStringsSep "\n" (lib.imap1 (i: name: "DNS.${toString i} = ${name}") serverNames)}
+      EOF
+      openssl x509 -req -in leaf.csr -CA $out/ca.pem -CAkey ca-key.pem \
+        -CAcreateserial -days 3650 -extfile leaf.ext -out leaf.pem
+
+      # nginx serves the full chain (leaf then CA).
+      cat leaf.pem $out/ca.pem > $out/cert.pem
+    '';
+
   mkProxyVHost = port: {
     addSSL = true;
-    sslCertificate = "/etc/ssl/certs/cert.pem";
-    sslCertificateKey = "/etc/ssl/certs/plain.key";
+    sslCertificate = "${aboardDevCert}/cert.pem";
+    sslCertificateKey = "${aboardDevCert}/key.pem";
 
     extraConfig = ''
       fastcgi_buffers 16 16k;
@@ -17,15 +90,6 @@ let
       proxyWebsockets = true;
     };
   };
-
-  aboardhrWtCount = 10;
-
-  aboardhrWtVHosts = builtins.listToAttrs (
-    map (n: {
-      name = "app.aboardhr-wt${toString n}.localhost";
-      value = mkProxyVHost (3000 + n);
-    }) (builtins.genList (i: i + 1) aboardhrWtCount)
-  );
 in
 {
   networking.extraHosts =
@@ -39,46 +103,40 @@ in
     127.0.0.1 teamtailor-livereload.localhost
     127.0.0.1 teamtailor-ember.localhost
     127.0.0.1 *.teamtailor.localhost
+    ${lib.concatStringsSep "\n    " (
+      map (name: "127.0.0.1 ${name}") (builtins.attrNames aboardhrWtPorts)
+    )}
   '';
 
-  security.pki.certificates=[''
-  -----BEGIN CERTIFICATE-----
-  MIIGLzCCBBegAwIBAgIUM4gnYIJ75rrDMTg0rOxUkRo0JCkwDQYJKoZIhvcNAQEL
-  BQAwgaYxCzAJBgNVBAYTAlNFMRIwEAYDVQQIDAlTdG9ja2hvbG0xEjAQBgNVBAcM
-  CVN0b2NraG9sbTETMBEGA1UECgwKVGVhbXRhaWxvcjEMMAoGA1UECwwDZGV2MR0w
-  GwYDVQQDDBQqLmFib2FyZGhyLmxvY2FsaG9zdDEtMCsGCSqGSIb3DQEJARYeaGFu
-  bmVzLmhvcm53YWxsQHRlYW10YWlsb3IuY29tMB4XDTI0MDUwMzA5NDAzMFoXDTI1
-  MDUwMzA5NDAzMFowgaYxCzAJBgNVBAYTAlNFMRIwEAYDVQQIDAlTdG9ja2hvbG0x
-  EjAQBgNVBAcMCVN0b2NraG9sbTETMBEGA1UECgwKVGVhbXRhaWxvcjEMMAoGA1UE
-  CwwDZGV2MR0wGwYDVQQDDBQqLmFib2FyZGhyLmxvY2FsaG9zdDEtMCsGCSqGSIb3
-  DQEJARYeaGFubmVzLmhvcm53YWxsQHRlYW10YWlsb3IuY29tMIICIjANBgkqhkiG
-  9w0BAQEFAAOCAg8AMIICCgKCAgEAnhhL0JO7de4u5XT1G4yB4oVAC+FKB8W/Zpls
-  vqPEH0IlBIIVhU3VR7o1/2HNAklz/x/4BHAtq29wjfPkXxKXOXRC+1gmevTMuZ4y
-  c44kc/0s17eHUV96CNv+W1dX/ZlhaV6hbc85l19laWo84xsL4XN0EWQyg0xYWJa2
-  tD3JE+S3B+WTGUpUG6a48rUKdninMECJ/jBVCt9nCeche9r5SDgrrMCTH/5H1jR+
-  XH8Y5tKa00kSwNE6FKmWisfjJzsHYqHYrC59ZF2AsSmyAziLM7vn+DZVDwuWz5pA
-  OjUSZNM21e0r4hHT9JdnrCCYBGiozVMsSnEpl8IS2PwTfw2wXeqUjPEM8XHzDh/H
-  vESuKSew5QT6npqcyUdpzIGb9eARUyS6m7WDg6lM4Fgbxc4nTcnI59mtxQ0oTLy3
-  u3yrdYeVEsxwPgC79Fjf0N6FMhkG+e5+GGbXxSPWgEPpj88qf7BAQqa921q17P+K
-  yg/+dhdqyRWoTPb6B7V8f4MgbKpNEcBUIpHupRGH5fZ7/aysR4DIO8ReJRHOi90B
-  qnDFoAHyWx/drC/NYC5pqRmBUTCSNir3aBtwdyhHeSfA/KtYVHm4sry1WXN+HEvA
-  kIo7jEqwNMWNHPpf0kKyz6+1jv4tmK5wTpWn8WD9w1fJd4YOf/9kHmuGOIS7+5no
-  fsN3FD0CAwEAAaNTMFEwHQYDVR0OBBYEFILax3All3Zf+60cno5dqneODxSTMB8G
-  A1UdIwQYMBaAFILax3All3Zf+60cno5dqneODxSTMA8GA1UdEwEB/wQFMAMBAf8w
-  DQYJKoZIhvcNAQELBQADggIBADJr5Gs3QApKflwERYh45yAChRd4EqDqzeWRFuCR
-  TmgxstG2YY6j01biaxEtA7djJl4kTO4bSP0499I9vxIrYy1dDLnRRH7rY7l9rP4N
-  XyDbbH7vRQrPYfBj463gkT341SPrjSdDpJ0/QWJYvILx7LD2xb74ZT+frw6BfV4r
-  /4pZ66DqZgJ4H/zQCOtiDmyBKJGlCvc6QApSGk96xwEX4GA9k0q2PeTpvuCmdI0J
-  K6PAAHmG6vBF7c+rOpx8xMRPttOKBuHO6LM/qOSfXlDusZ8CfLZiGZIoKdyX8iMR
-  Ro40LZQQ17CgSlliQlO9eWZXwULoMGN4cH3V0EDNARChMezQ+OW3vYWHDBphFFAp
-  JKdm57/odmmPSm+MS4FCf3aQnbFkcGcWfixcdZlyCNmY9iSbiheuQY44Bzk19YiU
-  cNG/Y6zDvJpVngj/Pas6v790TueLI3lT6UGIoNfN8ERTHXYCG7jam4hTni82/XnH
-  OX0hbXj2bFXuJoqxUOswLnbeRa0G90VI3GnLPtrQPb9vtkS8eJ567w+RegkWxq3W
-  ssrl27iMPg8MyGjE/ow6SXPXKjMqRctvHSJNroAqy12A1JHYw6NnbKymINEXj5oY
-  D7cxxCoMkhnH8awai2qbrFTX7XJlryWVuNkPZM6qXdjtdQSAd0C0uALzVMNLkFj0
-  qzwO
-  -----END CERTIFICATE-----
-  ''];
+  # Trust the dev root CA so the proxied https hosts validate cleanly.
+  # The system store covers CLI/system-OpenSSL consumers (curl, git, ruby...).
+  security.pki.certificateFiles = [ "${aboardDevCert}/ca.pem" ];
+
+  # Browsers on Linux keep their own NSS trust stores and ignore the system
+  # store, so trust the cert in each of them explicitly.
+
+  # Firefox: honor OS roots (ImportEnterpriseRoots) and pin our cert directly
+  # (Install) so it validates regardless of how Linux enterprise-roots resolve.
+  programs.firefox = {
+    enable = true;
+    package = pkgs.unstable.firefox;
+    policies.Certificates = {
+      ImportEnterpriseRoots = true;
+      Install = [ "${aboardDevCert}/ca.pem" ];
+    };
+  };
+
+  # Chromium/Chrome read ~/.pki/nssdb -- import the cert there as a trusted CA.
+  system.activationScripts.aboardDevCertChromium = {
+    deps = [ "users" ];
+    text = ''
+      db="/home/hannes/.pki/nssdb"
+      ${pkgs.coreutils}/bin/mkdir -p "$db"
+      ${pkgs.nss.tools}/bin/certutil -d "sql:$db" -D -n "aboard-dev" 2>/dev/null || true
+      ${pkgs.nss.tools}/bin/certutil -d "sql:$db" -A -t "C,," -n "aboard-dev" -i "${aboardDevCert}/ca.pem"
+      ${pkgs.coreutils}/bin/chown -R hannes:users "/home/hannes/.pki"
+    '';
+  };
 
   services.nginx = {
     enable = true;
@@ -90,20 +148,6 @@ in
 
     logError = "stderr debug";
   
-    virtualHosts = {
-      "app.aboardhr.localhost" = mkProxyVHost 3000;
-      "accounts.aboardhr.localhost" = mkProxyVHost 3003;
-      "accounts.teamtailor.localhost" = mkProxyVHost 3003;
-      "api.aboardhr.localhost" = mkProxyVHost 3000;
-      "app.aboardhr.test" = mkProxyVHost 3000;
-      "whistle.aboardhr.localhost" = mkProxyVHost 3000;
-      "whistle.aboardhr.test" = mkProxyVHost 3000;
-      "teamtailor-livereload.localhost" = mkProxyVHost 1337;
-      "tt.teamtailor.localhost" = mkProxyVHost 5500;
-      "app.teamtailor.localhost" = mkProxyVHost 5500;
-      "api.teamtailor.localhost" = mkProxyVHost 5500;
-      "www.teamtailor-ember.localhost" = mkProxyVHost 4200;
-      "teamtailor-ember.localhost" = mkProxyVHost 4200;
-    } // aboardhrWtVHosts;
+    virtualHosts = builtins.mapAttrs (_name: port: mkProxyVHost port) vhostPorts;
   };
 }

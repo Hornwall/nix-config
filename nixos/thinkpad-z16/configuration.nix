@@ -160,7 +160,8 @@
     extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
     packages = with pkgs; [
-      unstable.firefox
+      # firefox is installed via programs.firefox (see aboard.nix) so its
+      # cert-trust policies apply.
       tree
     ];
   };
