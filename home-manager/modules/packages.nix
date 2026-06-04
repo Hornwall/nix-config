@@ -22,7 +22,7 @@
     pkgs.heroku
     pkgs.solargraph
     pkgs.gnupg
-    pkgs.nodePackages_latest.typescript-language-server
+    pkgs.typescript-language-server
     pkgs.ngrok
     pkgs.fzf
     pkgs.zeal
