@@ -1,78 +1,28 @@
-require'nvim-treesitter.configs'.setup {
-  -- One of "all", "maintained" (parsers with maintainers), or a list of languages
-  ensure_installed = {
-    "css",
-    "dockerfile",
-    "go",
-    "hcl",
-    "html",
-    "erb",
-    "javascript",
-    "json",
-    "lua",
-    "python",
-    "ruby",
-    "rust",
-    "scss",
-    "typescript",
-    "vue",
-    "yaml",
-  },
+-- nvim-treesitter (main-branch rewrite).
+--
+-- Parsers are provided precompiled via Nix
+-- (programs.neovim -> pkgs.vimPlugins.nvim-treesitter.withAllGrammars), so they
+-- are already on the runtimepath and we never need :TSInstall / :TSUpdate here.
+--
+-- The main branch dropped the old module system (`highlight`, `indent`,
+-- `ensure_installed`, `define_modules`). Highlighting is now started per buffer
+-- via `vim.treesitter.start()`, and indentation via `nvim-treesitter`'s
+-- `indentexpr()`.
 
-  highlight = {
-    enable = true,
-    use_languagetree = true
-  },
-  textobjects = {
-    select = {
-      enable = true,
-      lookahead = true,
-      keymaps = {
-        ["af"] = "@function.outer",
-        ["if"] = "@function.inner",
-        ["ac"] = "@class.outer",
-        ["ic"] = "@class.inner",
-        ["aa"] = "@parameter.outer",
-        ["ia"] = "@parameter.inner",
-        ["ab"] = "@block.outer",
-        ["ib"] = "@block.inner",
-      },
-    },
-    move = {
-      enable = true,
-      set_jumps = true,
-      goto_next_start = {
-        ["]m"] = "@function.outer",
-        ["]]"] = "@class.outer",
-      },
-      goto_next_end = {
-        ["]M"] = "@function.outer",
-        ["]["] = "@class.outer",
-      },
-      goto_previous_start = {
-        ["[m"] = "@function.outer",
-        ["[["] = "@class.outer",
-      },
-      goto_previous_end = {
-        ["[M"] = "@function.outer",
-        ["[]"] = "@class.outer",
-      },
-    },
-    lsp_interop = {
-      enable = true,
-      peek_definition_code = {
-        -- ["df"] = "@function.outer",
-        -- ["dF"] = "@class.outer",
-      },
-    },
-    swap = {
-      enable = true,
-      swap_next = {
-        ["<leader>a"] = "@parameter.inner",
-      },
-      swap_previous = {
-        ["<leader>A"] = "@parameter.inner",
-      },
-    },
-  },
-}
+require("nvim-treesitter").setup {}
+
+local group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true })
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = group,
+  callback = function(args)
+    -- Only enable for filetypes that actually have a parser available.
+    -- pcall guards filetypes with no installed grammar.
+    if not pcall(vim.treesitter.start, args.buf) then
+      return
+    end
+
+    -- Treesitter-based indentation (experimental upstream, opt-in per buffer).
+    vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end,
+})

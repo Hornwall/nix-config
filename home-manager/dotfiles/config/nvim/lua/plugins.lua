@@ -245,18 +245,23 @@ return packer.startup(function()
     end,
   }
 
-  -- Treesitter
- --use {
- --  "nvim-treesitter/nvim-treesitter",
- --  config = function()
- --    require "plugins.configs.treesitter"
- --  end,
- --  run = ":TSUpdate"
- --}
+  -- Treesitter (main-branch rewrite). Parsers come precompiled from Nix
+  -- (programs.neovim -> nvim-treesitter.withAllGrammars), so no :TSUpdate.
   use {
-      "nvim-treesitter/nvim-treesitter-textobjects",
-      after = "nvim-treesitter",
-    }
+    "nvim-treesitter/nvim-treesitter",
+    branch = "main",
+    config = function()
+      require "plugins.configs.treesitter"
+    end,
+  }
+  use {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    branch = "main",
+    after = "nvim-treesitter",
+    config = function()
+      require "plugins.configs.treesitter-textobjects"
+    end,
+  }
   use {
     "folke/trouble.nvim",
     requires = "kyazdani42/nvim-web-devicons",
