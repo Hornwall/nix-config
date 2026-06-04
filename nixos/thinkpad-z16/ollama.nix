@@ -21,14 +21,17 @@
     OOMScoreAdjust = 500;
   };
 
-  services.open-webui.enable = true;
+  services.open-webui = {
+    enable = true;
+    environment = {
+      # Use the locally running ollama instance
+      OLLAMA_BASE_URL = "http://127.0.0.1:11434";
 
-  #services.open-webui = {
-  #  enable = true;
-  #  environment = {
-  #    ENABLE_WEB_SEARCH              = "True";
-  #    ENABLE_SEARCH_QUERY_GENERATION = "True";
-  #    WEB_SEARCH_ENGINE              = "duckduckgo";
-  #  };
-  #};
+      # Web search via the local SearXNG instance (see ../common/searxng.nix)
+      ENABLE_WEB_SEARCH              = "True";
+      ENABLE_SEARCH_QUERY_GENERATION = "True";
+      WEB_SEARCH_ENGINE              = "searxng";
+      SEARXNG_QUERY_URL             = "http://127.0.0.1:8888/search?q=<query>";
+    };
+  };
 }
