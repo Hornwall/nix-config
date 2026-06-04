@@ -1,4 +1,4 @@
-{ pkgs }:
+{ inputs, pkgs }:
 {
   #programs.hyperland = {
   #  enable = true;
@@ -9,7 +9,13 @@
     xwayland.enable = true;
     package = pkgs.unstable.hyprland;
     plugins = [
-      pkgs.hyprlandPlugins.hyprsplit
+      # nixpkgs' hyprsplit (0.54.2) lags hyprland (0.55.x) and no longer
+      # compiles against it, so build the plugin from the pinned hyprsplit
+      # input source against the unstable hyprland we actually run.
+      (pkgs.unstable.hyprlandPlugins.hyprsplit.overrideAttrs {
+        src = inputs.hyprsplit;
+        version = "0.55-unstable";
+      })
     ];
   };
 

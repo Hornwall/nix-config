@@ -3,7 +3,6 @@
   services.ollama = {
     enable = true;
     package = pkgs.unstable.ollama-rocm;
-    acceleration = "rocm";
     environmentVariables = {
       HCC_AMDGPU_TARGET = "gfx1103"; # used to be necessary, but doesn't seem to anymore
       OLLAMA_MAX_LOADED_MODELS = "1";

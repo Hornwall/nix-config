@@ -16,7 +16,7 @@
     ./qemu.nix
     ../common/homepage.nix
     (import ./ollama.nix { inherit inputs pkgs; })
-    (import ../common/hyprland.nix { inherit pkgs; })
+    (import ../common/hyprland.nix { inherit inputs pkgs; })
     (import ../common/searxng.nix { inherit lib; })
   ];
 
