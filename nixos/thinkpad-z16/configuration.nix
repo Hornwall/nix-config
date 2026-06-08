@@ -120,6 +120,9 @@
   # one. This sets up /dev/tpmrm0 access for the 'tss' group.
   security.tpm2.enable = true;
   security.tpm2.tctiEnvironment.enable = true;
+  # byndid's HybridHal talks to the TPM exclusively through tpm2-abrmd over the
+  # system D-Bus (com.intel.tss2.Tabrmd); it does not fall back to /dev/tpmrm0.
+  security.tpm2.abrmd.enable = true;
 
   # Enable sound.
   security.rtkit.enable = true;

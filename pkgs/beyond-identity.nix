@@ -1,5 +1,5 @@
 { lib, stdenv, fetchurl, dpkg, buildFHSEnv, runCommand, makeWrapper, util-linux
-, glibc, glib, openssl, tpm2-tss
+, glibc, glib, openssl, tpm2-tss, tpm2-abrmd
 , gtk3, gnome-keyring, polkit, polkit_gnome
 , webkitgtk_4_1, libsoup_3, cairo, gdk-pixbuf, xz
 }:
@@ -91,7 +91,7 @@ let
 
      targetPkgs = pkgs: [
        beyond-identity
-       glib glibc openssl tpm2-tss
+       glib glibc openssl tpm2-tss tpm2-abrmd
        gtk3 gnome-keyring
        polkit polkit_gnome
        webkitgtk_4_1 libsoup_3 cairo gdk-pixbuf xz
