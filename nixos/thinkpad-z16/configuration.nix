@@ -115,6 +115,12 @@
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
+  # Enable the firmware TPM (AMD fTPM must be enabled in UEFI). Beyond Identity
+  # 2.111+ stores credentials in TPM-sealed keys and refuses to start without
+  # one. This sets up /dev/tpmrm0 access for the 'tss' group.
+  security.tpm2.enable = true;
+  security.tpm2.tctiEnvironment.enable = true;
+
   # Enable sound.
   security.rtkit.enable = true;
   services.pipewire = {
@@ -157,7 +163,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.hannes = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "docker" "tss" ]; # tss: TPM access for Beyond Identity
     shell = pkgs.zsh;
     packages = with pkgs; [
       # firefox is installed via programs.firefox (see aboard.nix) so its

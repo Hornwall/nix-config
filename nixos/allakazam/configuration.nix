@@ -185,7 +185,6 @@
     gnomeExtensions.dash-to-panel
     retroarch
     docker-compose
-    beyond-identity
     voxtype-vulkan
     wtype
     xdg-desktop-portal-gtk
