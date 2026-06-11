@@ -123,6 +123,24 @@
   # byndid's HybridHal talks to the TPM exclusively through tpm2-abrmd over the
   # system D-Bus (com.intel.tss2.Tabrmd); it does not fall back to /dev/tpmrm0.
   security.tpm2.abrmd.enable = true;
+  # The browser detects the Beyond Identity authenticator by polling its local
+  # webserver. The deb's postinst normally enables the user service; on NixOS we
+  # have to wire it up ourselves.
+  systemd.packages = [ pkgs.beyond-identity ];
+  systemd.user.services.beyond-identity-webserver = {
+    wantedBy = [ "default.target" ];
+    # The 2.111 "webserver v3" spins its tao/GTK main loop at 100% CPU
+    # (https://github.com/tauri-apps/tao/issues/635). The HTTP server runs on
+    # separate tokio threads, so capping the cgroup keeps auth working while
+    # containing the busy loop. Remove once fixed upstream.
+    serviceConfig.CPUQuota = "20%";
+  };
+  # The webserver can't run inside the FHS env (bwrap's user namespace breaks
+  # its /proc-based client validation), but byndid hardcodes /usr/bin/pkcheck
+  # for its polkit policy manager. Provide it at that path.
+  systemd.tmpfiles.rules = [
+    "L+ /usr/bin/pkcheck - - - - ${pkgs.polkit}/bin/pkcheck"
+  ];
 
   # Enable sound.
   security.rtkit.enable = true;

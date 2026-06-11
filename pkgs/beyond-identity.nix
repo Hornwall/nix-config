@@ -7,8 +7,11 @@
 let
   pname = "beyond-identity";
   version = "2.111.0-4";
+  # tpm2-abrmd must be on the rpath: tctildr dlopens libtss2-tcti-tabrmd.so.0
+  # by soname, and dlopen falls back to the executable's DT_RPATH (forced, so
+  # not RUNPATH-scoped) when resolving it.
   libPath = lib.makeLibraryPath ([
-    glib glibc openssl tpm2-tss gtk3 gnome-keyring polkit polkit_gnome
+    glib glibc openssl tpm2-tss tpm2-abrmd gtk3 gnome-keyring polkit polkit_gnome
     webkitgtk_4_1 libsoup_3 cairo gdk-pixbuf xz
   ]);
   meta = with lib; {
@@ -114,4 +117,16 @@ in runCommand pname {
   makeWrapper ${util-linux}/bin/setpriv $out/bin/${pname} \
     --add-flags "--ambient-caps -all ${fhsEnv}/bin/beyond-identity-fhs"
   ln -s ${beyond-identity}/share $out/share
+  # Expose the user unit (beyond-identity-webserver.service) so systemd.packages
+  # picks it up; the browser detects the authenticator by polling this webserver
+  # on localhost. It must run OUTSIDE the FHS env: it validates clients by
+  # mapping their loopback port to a pid via /proc/[pid]/fd, and bwrap's user
+  # namespace blocks that for processes outside the sandbox ("Could not find
+  # pid for port"). Its two FHS-only needs are met another way: the tabrmd TCTI
+  # via the executable rpath, and the hardcoded /usr/bin/pkcheck via a tmpfiles
+  # symlink in the system config.
+  mkdir -p $out/lib/systemd/user
+  substitute ${beyond-identity}/lib/systemd/user/beyond-identity-webserver.service \
+    $out/lib/systemd/user/beyond-identity-webserver.service \
+    --replace "/bin/kill" "${util-linux}/bin/kill"
 ''
