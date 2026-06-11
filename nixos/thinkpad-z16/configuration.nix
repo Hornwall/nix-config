@@ -133,7 +133,7 @@
     # (https://github.com/tauri-apps/tao/issues/635). The HTTP server runs on
     # separate tokio threads, so capping the cgroup keeps auth working while
     # containing the busy loop. Remove once fixed upstream.
-    serviceConfig.CPUQuota = "20%";
+    serviceConfig.CPUQuota = "5%";
   };
   # The webserver can't run inside the FHS env (bwrap's user namespace breaks
   # its /proc-based client validation), but byndid hardcodes /usr/bin/pkcheck
