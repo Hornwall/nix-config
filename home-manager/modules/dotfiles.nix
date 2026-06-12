@@ -35,7 +35,7 @@ in
     default = { };
     description = "Per-host dotfile source overrides keyed by target path.";
     example = {
-      ".config/hyprpanel/config.json" = ../dotfiles/hosts/thinkpad-z16/hyprpanel/config.json;
+      ".config/ironbar/config.toml" = ../dotfiles/hosts/allakazam/ironbar/config.toml;
     };
   };
 

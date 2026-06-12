@@ -53,7 +53,8 @@
     pkgs.hyprpaper
     pkgs.hypridle
     pkgs.hyprlock
-    pkgs.hyprpanel
+    pkgs.ironbar
+    pkgs.swaynotificationcenter
     pkgs.hyprcursor
     pkgs.hyprpolkitagent
     pkgs.brightnessctl

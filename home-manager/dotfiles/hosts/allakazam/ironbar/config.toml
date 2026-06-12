@@ -1,0 +1,141 @@
+# Ironbar — allakazam (desktop) override. Identical to the base config in
+# home-manager/dotfiles/config/ironbar/config.toml but with the battery module
+# removed (desktop has no battery), mirroring the old hyprpanel per-host setup.
+
+position = "top"
+height = 36
+anchor_to_edges = true
+
+# ── start ──────────────────────────────────────────────────────────────────
+[[start]]
+type = "custom"
+class = "dashboard"
+
+[[start.bar]]
+type = "button"
+name = "dashboard-btn"
+label = ""
+on_click = "popup:toggle"
+
+[[start.popup]]
+type = "box"
+orientation = "vertical"
+class = "dashboard-popup"
+
+[[start.popup.widgets]]
+type = "label"
+label = "Shortcuts"
+class = "popup-heading"
+
+[[start.popup.widgets]]
+type = "box"
+orientation = "horizontal"
+
+[[start.popup.widgets.widgets]]
+type = "button"
+label = "󰈹 Firefox"
+on_click = "!firefox"
+
+[[start.popup.widgets.widgets]]
+type = "button"
+label = " Slack"
+on_click = "!slack"
+
+[[start.popup.widgets.widgets]]
+type = "button"
+label = " Apps"
+on_click = "!wofi --show drun"
+
+[[start.popup.widgets]]
+type = "label"
+label = "Power"
+class = "popup-heading"
+
+[[start.popup.widgets]]
+type = "box"
+orientation = "horizontal"
+
+[[start.popup.widgets.widgets]]
+type = "button"
+label = "⏻ Shutdown"
+class = "power-shutdown"
+on_click = "!systemctl poweroff"
+
+[[start.popup.widgets.widgets]]
+type = "button"
+label = " Restart"
+class = "power-restart"
+on_click = "!systemctl reboot"
+
+[[start.popup.widgets.widgets]]
+type = "button"
+label = "󰍃 Logout"
+class = "power-logout"
+on_click = "!hyprctl dispatch exit"
+
+[[start.popup.widgets.widgets]]
+type = "button"
+label = "󰒲 Sleep"
+class = "power-sleep"
+on_click = "!systemctl suspend"
+
+[[start]]
+type = "workspaces"
+all_monitors = false
+sort = "name"
+
+[[start]]
+type = "focused"
+truncate = { mode = "end", length = 80 }
+
+# ── center ─────────────────────────────────────────────────────────────────
+[[center]]
+type = "music"
+player_type = "mpris"
+format = "{title} — {artist}"
+truncate = { mode = "end", length = 60 }
+
+# ── end ────────────────────────────────────────────────────────────────────
+[[end]]
+type = "volume"
+format = "{icon} {percentage}%"
+
+[[end]]
+type = "network_manager"
+
+[[end]]
+type = "bluetooth"
+
+[[end]]
+type = "custom"
+class = "voxtype"
+[[end.bar]]
+type = "label"
+label = "{{500:/home/hannes/.config/ironbar/scripts/voxtype-icon.sh}}"
+
+[[end]]
+type = "custom"
+class = "recording"
+[[end.bar]]
+type = "label"
+label = "{{500:/home/hannes/.config/ironbar/scripts/recording-icon.sh}}"
+
+[[end]]
+type = "tray"
+
+[[end]]
+type = "custom"
+class = "weather"
+[[end.bar]]
+type = "label"
+label = "{{1800000:/home/hannes/.config/ironbar/scripts/weather.sh}}"
+
+[[end]]
+type = "clock"
+format = "%a %b %d  %H:%M"
+format_popup = "%H:%M:%S"
+locale = "sv_SE"
+
+[[end]]
+type = "notifications"
+show_count = true

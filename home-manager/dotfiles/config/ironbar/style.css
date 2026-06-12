@@ -1,0 +1,137 @@
+/* Ironbar theme — ported from the hyprpanel dark-teal scheme.
+ * Palette:
+ *   bar bg      #161719
+ *   button bg   #1e1f22
+ *   accent      #68b5ab (teal)
+ *   text        #b7bcba
+ *   muted/hover #5c656e
+ *   red         #d1434c
+ * GTK4 CSS (subset of web CSS). Hot-reloaded by ironbar on save.
+ */
+
+* {
+  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", sans-serif;
+  font-size: 14px;
+  border: none;
+  border-radius: 0;
+}
+
+.background {
+  background-color: #161719;
+  color: #b7bcba;
+}
+
+#bar {
+  background-color: #161719;
+}
+
+.widget {
+  color: #b7bcba;
+  margin: 0 2px;
+  padding: 0 6px;
+}
+
+/* Buttons / interactive widgets */
+button,
+.widget button {
+  background-color: #1e1f22;
+  color: #68b5ab;
+  padding: 0 8px;
+  margin: 4px 2px;
+  border-radius: 6px;
+}
+
+button:hover,
+.widget button:hover {
+  background-color: #5c656e;
+  color: #b7bcba;
+}
+
+/* Accent the icon-led modules */
+.clock,
+.volume,
+.networkmanager,
+.bluetooth,
+.battery,
+.tray,
+.notifications,
+.weather,
+.dashboard {
+  color: #68b5ab;
+}
+
+.focused {
+  color: #b7bcba;
+}
+
+/* Workspaces */
+.workspaces .item {
+  background-color: #1e1f22;
+  color: #b7bcba;
+  margin: 4px 2px;
+  padding: 0 8px;
+  border-radius: 6px;
+}
+
+.workspaces .item:hover {
+  color: #68b5ab;
+}
+
+.workspaces .item.focused,
+.workspaces .item.active {
+  color: #161719;
+  background-color: #68b5ab;
+}
+
+/* Music (center) */
+.music {
+  color: #68b5ab;
+}
+
+/* Recording indicator — pulsing red while active (empty/invisible otherwise) */
+.recording {
+  color: #ff0000;
+}
+.recording .label {
+  animation: recording-pulse 1.5s ease-in-out infinite;
+}
+@keyframes recording-pulse {
+  0%   { opacity: 1.0; }
+  50%  { opacity: 0.4; }
+  100% { opacity: 1.0; }
+}
+
+/* Voxtype */
+.voxtype {
+  color: #68b5ab;
+}
+
+/* Notification count badge */
+.notifications .count {
+  color: #b4befe;
+}
+
+/* ── Popups ──────────────────────────────────────────────────────────────── */
+.popup {
+  background-color: #1e1f22;
+  border: 1px solid #5c656e;
+  border-radius: 8px;
+  padding: 10px;
+  color: #b7bcba;
+}
+
+.popup-heading {
+  color: #68b5ab;
+  font-weight: bold;
+  margin: 6px 2px 2px 2px;
+}
+
+.dashboard-popup button {
+  margin: 3px;
+  padding: 6px 10px;
+}
+
+.power-shutdown { color: #d1434c; }
+.power-restart  { color: #fab387; }
+.power-logout   { color: #a6e3a1; }
+.power-sleep    { color: #89dceb; }
