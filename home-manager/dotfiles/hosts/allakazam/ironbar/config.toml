@@ -79,14 +79,12 @@ label = "󰒲 Sleep"
 class = "power-sleep"
 on_click = "!systemctl suspend"
 
+# Dots instead of numbers: blank labels, circles drawn in style.css
 [[start]]
 type = "workspaces"
 all_monitors = false
 sort = "name"
-
-[[start]]
-type = "focused"
-truncate = { mode = "end", length = 80 }
+format = ""
 
 # ── center ─────────────────────────────────────────────────────────────────
 [[center]]
@@ -100,11 +98,26 @@ truncate = { mode = "end", length = 60 }
 type = "volume"
 format = "{icon} {percentage}%"
 
+# One icon per device by default (docker bridges, veth, …). Desktop is
+# wired, so allow both wired and wifi here.
+# The module is display-only, so wire the click up to nmtui ourselves.
 [[end]]
 type = "network_manager"
+icon_size = 16
+types_whitelist = ["wired", "wifi"]
+on_click_left = "ghostty -e nmtui"
+tooltip = "Network (click to manage)"
 
+# Icon-only (no "On" label), sized to match the wifi icon
 [[end]]
 type = "bluetooth"
+icon_size = 16
+
+[end.format]
+enabled = "󰂯"
+disabled = "󰂲"
+connected = "󰂱"
+connected_battery = "󰂱"
 
 [[end]]
 type = "custom"

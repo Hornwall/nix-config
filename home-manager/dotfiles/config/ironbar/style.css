@@ -1,137 +1,279 @@
-/* Ironbar theme — ported from the hyprpanel dark-teal scheme.
+/* Ironbar theme — hyprpanel dark-teal palette.
+ * Structure follows the official examples (examples/{minimal,desktop}/style.css):
+ * GTK4 CSS — reset backgrounds via element names (box/button/label) using the
+ * longhand properties. GTK themes paint button chrome with background-IMAGE,
+ * so `background-image: none` in the universal reset is load-bearing.
  * Palette:
  *   bar bg      #161719
- *   button bg   #1e1f22
+ *   surface     #1e1f22
  *   accent      #68b5ab (teal)
+ *   secondary   #688fb3 (blue)
  *   text        #b7bcba
- *   muted/hover #5c656e
+ *   muted       #5c656e
  *   red         #d1434c
- * GTK4 CSS (subset of web CSS). Hot-reloaded by ironbar on save.
+ *   lavender    #b4befe (notifications)
  */
 
 * {
-  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", sans-serif;
-  font-size: 14px;
-  border: none;
-  border-radius: 0;
+    font-family: "FiraCode Nerd Font", "Fira Code", monospace;
+    font-size: 13.5px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background-image: none;
 }
 
-.background {
-  background-color: #161719;
-  color: #b7bcba;
+/* The critical flat reset — kills the GTK theme's button/label chrome */
+box, button, label, calendar, image {
+    background-color: #0000;
+}
+
+window {
+    background-color: #161719;
 }
 
 #bar {
-  background-color: #161719;
+    background-color: #161719;
+    color: #b7bcba;
 }
 
-.widget {
-  color: #b7bcba;
-  margin: 0 2px;
-  padding: 0 6px;
+/* Popups & dropdown menus */
+popover, popover contents {
+    border-radius: 12px;
+    padding: 0;
 }
 
-/* Buttons / interactive widgets */
-button,
-.widget button {
-  background-color: #1e1f22;
-  color: #68b5ab;
-  padding: 0 8px;
-  margin: 4px 2px;
-  border-radius: 6px;
+popover {
+    background-color: #1e1f22;
 }
 
-button:hover,
-.widget button:hover {
-  background-color: #5c656e;
-  color: #b7bcba;
+popover contents {
+    background-color: #1e1f22;
 }
 
-/* Accent the icon-led modules */
-.clock,
-.volume,
-.networkmanager,
-.bluetooth,
-.battery,
-.tray,
-.notifications,
-.weather,
-.dashboard {
-  color: #68b5ab;
+.popup {
+    padding: 14px;
+    color: #b7bcba;
 }
 
-.focused {
-  color: #b7bcba;
+/* Buttons — flat; hover feedback is a colour shift only */
+button {
+    color: #68b5ab;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
-/* Workspaces */
+button:hover, button:active,
+.network_manager:hover {
+    background-color: rgba(104, 181, 171, 0.13);
+    border-radius: 9px;
+}
+
+/* Breathing room between speaker and mic readouts */
+.volume .source {
+    margin-left: 12px;
+}
+
+/* Inset the wifi hover pill to match button hover height */
+.network_manager {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+/* Glyph icon — match the 16px wifi image icon */
+.bluetooth label {
+    font-size: 16px;
+}
+
+label {
+    color: #b7bcba;
+}
+
+/* Space the right-hand modules apart */
+#end > * + * {
+    margin-left: 6px;
+}
+
+/* Icon-led modules pick up the accent. Symbolic image icons (wifi etc.)
+ * recolor via `color` on the image/icon node, not the label. */
+.clock label,
+.volume label,
+.network_manager label,
+.network_manager .icon,
+.network_manager image,
+.bluetooth label,
+.battery label,
+.dashboard label,
+.power-profile label {
+    color: #68b5ab;
+}
+
+.clock label {
+    font-weight: 600;
+}
+
+/* Sliders (volume/music popups) */
+scale highlight {
+    background-color: #68b5ab;
+}
+
+slider {
+    border-radius: 100%;
+}
+
+/* --- workspaces --- */
+
+/* Dots: hollow ring = inactive, filled = focused (labels blanked via
+ * `format = ""` in config.toml) */
 .workspaces .item {
-  background-color: #1e1f22;
-  color: #b7bcba;
-  margin: 4px 2px;
-  padding: 0 8px;
-  border-radius: 6px;
+    /* 10px content + 2x2px border = 14px dot; bar is 36px → 11px top/bottom
+     * margin keeps the button square so border-radius makes a true circle */
+    min-width: 10px;
+    min-height: 10px;
+    padding: 0;
+    margin: 11px 5px;
+    border-radius: 100%;
+    border: 2px solid #5c656e;
+    background-color: #0000;
+}
+
+/* The (empty) label still reserves a text line's height — collapse it so the
+ * button can actually be 14px tall */
+.workspaces .item label {
+    font-size: 1px;
 }
 
 .workspaces .item:hover {
-  color: #68b5ab;
+    border-color: #b7bcba;
 }
 
-.workspaces .item.focused,
-.workspaces .item.active {
-  color: #161719;
-  background-color: #68b5ab;
+.workspaces .item.visible {
+    border-color: #b7bcba;
 }
 
-/* Music (center) */
-.music {
-  color: #68b5ab;
+.workspaces .item.focused {
+    border-color: #68b5ab;
+    background-color: #68b5ab;
 }
 
-/* Recording indicator — pulsing red while active (empty/invisible otherwise) */
-.recording {
-  color: #ff0000;
+.workspaces .item.urgent {
+    border-color: #d1434c;
+    background-color: #d1434c;
 }
-.recording .label {
-  animation: recording-pulse 1.5s ease-in-out infinite;
+
+/* --- music --- */
+
+.music label {
+    color: #b7bcba;
 }
+
+.music .icon-box {
+    color: #68b5ab;
+}
+
+.popup-music .album-art {
+    margin-right: 14px;
+    border-radius: 5px;
+}
+
+/* --- recording indicator (pulses red while wf-recorder runs) --- */
+
+.recording label {
+    color: #ff5555;
+    animation: recording-pulse 1.5s ease-in-out infinite;
+}
+
 @keyframes recording-pulse {
-  0%   { opacity: 1.0; }
-  50%  { opacity: 0.4; }
-  100% { opacity: 1.0; }
+    0%   { opacity: 1.0; }
+    50%  { opacity: 0.35; }
+    100% { opacity: 1.0; }
 }
 
-/* Voxtype */
-.voxtype {
-  color: #68b5ab;
+/* --- voxtype --- */
+
+.voxtype label {
+    color: #68b5ab;
 }
 
-/* Notification count badge */
+/* --- weather (secondary info) --- */
+
+.weather label {
+    color: #688fb3;
+}
+
+/* --- notifications --- */
+
+.notifications label {
+    color: #b4befe;
+}
+
 .notifications .count {
-  color: #b4befe;
+    font-size: 0.8em;
+    padding: 0.18em;
+    background-color: #b4befe;
+    color: #161719;
+    border-radius: 8px;
+    font-weight: 700;
 }
 
-/* ── Popups ──────────────────────────────────────────────────────────────── */
-.popup {
-  background-color: #1e1f22;
-  border: 1px solid #5c656e;
-  border-radius: 8px;
-  padding: 10px;
-  color: #b7bcba;
+/* --- battery --- */
+
+.battery.low label {
+    color: #d1434c;
 }
+
+/* --- tray --- */
+
+.tray popover contents {
+    padding: 14px;
+}
+
+/* --- calendar popup --- */
+
+.popup-clock .calendar .today {
+    background-color: #68b5ab;
+    color: #161719;
+    border-radius: 0.25em;
+}
+
+/* --- dashboard / power menu popup --- */
 
 .popup-heading {
-  color: #68b5ab;
-  font-weight: bold;
-  margin: 6px 2px 2px 2px;
+    color: #68b5ab;
+    font-weight: 700;
+    font-size: 12px;
+    margin: 8px 4px 4px 4px;
 }
 
 .dashboard-popup button {
-  margin: 3px;
-  padding: 6px 10px;
+    background-color: #2a2b2f;
+    color: #b7bcba;
+    margin: 3px;
+    padding: 7px 12px;
+    border-radius: 10px;
 }
 
-.power-shutdown { color: #d1434c; }
-.power-restart  { color: #fab387; }
-.power-logout   { color: #a6e3a1; }
-.power-sleep    { color: #89dceb; }
+.dashboard-popup button:hover {
+    background-color: #3a3c41;
+}
+
+/* --- power profile popup --- */
+
+.power-profile-popup button {
+    background-color: #2a2b2f;
+    color: #b7bcba;
+    margin: 3px;
+    padding: 7px 12px;
+    border-radius: 10px;
+}
+
+.power-profile-popup button:hover {
+    background-color: #3a3c41;
+    color: #68b5ab;
+}
+
+.dashboard-popup .power-shutdown label { color: #d1434c; }
+.dashboard-popup .power-restart label  { color: #fab387; }
+.dashboard-popup .power-logout label   { color: #a6e3a1; }
+.dashboard-popup .power-sleep label    { color: #89dceb; }
+
