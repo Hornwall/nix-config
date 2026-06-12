@@ -7,6 +7,7 @@
 position = "top"
 height = 36
 anchor_to_edges = true
+popup_autohide = true
 
 # ── start ──────────────────────────────────────────────────────────────────
 # Dashboard / power menu (replaces hyprpanel's "dashboard" module)
@@ -17,7 +18,7 @@ class = "dashboard"
 [[start.bar]]
 type = "button"
 name = "dashboard-btn"
-label = ""
+label = "󰍜"
 on_click = "popup:toggle"
 
 [[start.popup]]
@@ -41,12 +42,12 @@ on_click = "!firefox"
 
 [[start.popup.widgets.widgets]]
 type = "button"
-label = " Slack"
+label = "󰒱 Slack"
 on_click = "!slack"
 
 [[start.popup.widgets.widgets]]
 type = "button"
-label = " Apps"
+label = "󰀻 Apps"
 on_click = "!wofi --show drun"
 
 [[start.popup.widgets]]
@@ -66,7 +67,7 @@ on_click = "!systemctl poweroff"
 
 [[start.popup.widgets.widgets]]
 type = "button"
-label = " Restart"
+label = "󰜉 Restart"
 class = "power-restart"
 on_click = "!systemctl reboot"
 
@@ -170,10 +171,12 @@ class = "voxtype"
 type = "label"
 label = "{{500:/home/hannes/.config/ironbar/scripts/voxtype-icon.sh}}"
 
-# Screen-recording indicator (empty unless wf-recorder is running)
+# Screen-recording indicator — show_if collapses the module entirely
+# (margins included) when wf-recorder isn't running
 [[end]]
 type = "custom"
 class = "recording"
+show_if = "poll:1000:pgrep -x wf-recorder"
 [[end.bar]]
 type = "label"
 label = "{{500:/home/hannes/.config/ironbar/scripts/recording-icon.sh}}"

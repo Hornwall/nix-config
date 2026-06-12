@@ -80,8 +80,14 @@ button:hover, button:active,
     margin-bottom: 4px;
 }
 
-/* Glyph icon — match the 16px wifi image icon */
-.bluetooth label {
+/* Standalone glyph icons — uniform 16px to match the image icons
+ * (wifi, battery). Volume/weather glyphs live inline with their text and
+ * stay text-sized. */
+.bluetooth label,
+.dashboard label,
+.power-profile label,
+.voxtype label,
+.notifications .button label {
     font-size: 16px;
 }
 
@@ -112,13 +118,60 @@ label {
     font-weight: 600;
 }
 
-/* Sliders (volume/music popups) */
-scale highlight {
+/* Sliders (volume/music popups). The global background reset strips GTK's
+ * scale internals, so every part needs explicit colors. */
+scale > trough {
+    background-color: #2a2b2f;
+    border-radius: 6px;
+    min-height: 6px;
+    min-width: 80px;
+}
+
+scale.vertical > trough {
+    min-width: 6px;
+    min-height: 80px;
+}
+
+scale > trough > highlight {
+    background-color: #68b5ab;
+    border-radius: 6px;
+}
+
+scale > trough > slider {
+    background-color: #b7bcba;
+    min-width: 14px;
+    min-height: 14px;
+    border-radius: 100%;
+}
+
+/* Toggles (mute switches etc.) */
+switch {
+    background-color: #2a2b2f;
+    border-radius: 100px;
+    min-width: 40px;
+    min-height: 20px;
+}
+
+switch:checked {
     background-color: #68b5ab;
 }
 
-slider {
+switch > slider {
+    background-color: #b7bcba;
     border-radius: 100%;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+/* Device selector dropdowns */
+dropdown > button, dropdown popover row {
+    background-color: #2a2b2f;
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+dropdown popover row:hover, dropdown popover row:selected {
+    background-color: #3a3c41;
 }
 
 /* --- workspaces --- */
@@ -222,6 +275,12 @@ slider {
     color: #d1434c;
 }
 
+/* The image icon and text label baseline-align differently in the battery
+ * box — nudge the label down to optically center it with the icon */
+.battery .label {
+    margin-top: 2px;
+}
+
 /* --- tray --- */
 
 .tray popover contents {
@@ -255,6 +314,36 @@ slider {
 
 .dashboard-popup button:hover {
     background-color: #3a3c41;
+}
+
+/* --- bluetooth popup --- */
+
+.popup-bluetooth .header {
+    margin-bottom: 10px;
+}
+
+.popup-bluetooth .header .label {
+    margin-left: 8px;
+}
+
+.popup-bluetooth .device {
+    background-color: #2a2b2f;
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin: 4px 0;
+}
+
+.popup-bluetooth .device .icon-box {
+    margin-right: 10px;
+}
+
+.popup-bluetooth .device .status {
+    color: #5c656e;
+    font-size: 11.5px;
+}
+
+.popup-bluetooth .device .switch {
+    margin-left: 12px;
 }
 
 /* --- power profile popup --- */

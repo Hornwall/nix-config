@@ -16,6 +16,6 @@ state=$(vox status --format json --icon-theme omarchy 2>/dev/null | jq -r '.alt 
 case "$state" in
   recording)    printf '󰻃' ;;
   transcribing) printf '󰦨' ;;
-  error)        printf '' ;;
-  *)            printf '' ;;  # idle / unknown / daemon not running
+  error)        printf '󰍭' ;;
+  *)            printf '󰍬' ;;  # idle / unknown / daemon not running
 esac

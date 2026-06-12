@@ -80,6 +80,9 @@
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
+  # Swedish time conventions: ISO dates, 24h clock, weeks start on Monday
+  # (GTK calendars follow LC_TIME for first-day-of-week).
+  i18n.extraLocaleSettings.LC_TIME = "sv_SE.UTF-8";
   # console = {
   #   font = "Lat2-Terminus16";
   #   keyMap = "us";
