@@ -12,6 +12,7 @@
   abrd-admin = if abrdAdminPackage != null then abrdAdminPackage else throw "abrd-admin requires abrdAdminPackage";
   beyond-identity = pkgs.callPackage ./beyond-identity.nix { };
   claude-code = pkgs.callPackage ./claude-code/package.nix { };
+  graphify = pkgs.callPackage ./graphify/package.nix { };
   opencode = pkgs.callPackage ./opencode.nix {
     bun = if unstablePkgs != null then unstablePkgs.bun else pkgs.bun;
     inherit opencodeSrc;

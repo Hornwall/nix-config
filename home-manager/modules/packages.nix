@@ -31,6 +31,7 @@
     pkgs.direnv
     pkgs.opencode
     pkgs.claude-code
+    pkgs.graphify
     pkgs.unstable.pi-coding-agent
 
     # Desktop Applications
