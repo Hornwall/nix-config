@@ -33,7 +33,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"]])
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"]])
     hl.exec_cmd("gnome-keyring-daemon --start --components=ssh")
-    hl.exec_cmd("hyprpanel")
+    hl.exec_cmd("swaync")
+    hl.exec_cmd("ironbar")
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd(terminal)
     hl.exec_cmd("firefox")
@@ -179,7 +180,7 @@ hl.device({
 local mainMod = "SUPER"
 
 hl.bind(mainMod .. " + Q",              hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + CTRL + ALT + P", hl.dsp.exec_cmd("hyprpanel"))
+hl.bind(mainMod .. " + CTRL + ALT + P", hl.dsp.exec_cmd("ironbar toggle"))
 hl.bind(mainMod .. " + SHIFT + Q",      hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + M",      hl.dsp.exit())
 hl.bind(mainMod .. " + E",              hl.dsp.exec_cmd(fileManager))
