@@ -100,18 +100,26 @@ label {
     margin-left: 6px;
 }
 
-/* Icon-led modules pick up the accent. Symbolic image icons (wifi etc.)
- * recolor via `color` on the image/icon node, not the label. */
-.clock label,
-.volume label,
-.network_manager label,
+/* Icons are teal. Symbolic image icons (wifi, battery) recolor via `color`
+ * on the image/icon node; glyph icons via their label. Inline glyphs that
+ * share a label with text (volume, weather) get teal via Pango markup in
+ * the format string / script output instead. */
 .network_manager .icon,
 .network_manager image,
+.battery image,
 .bluetooth label,
-.battery label,
 .dashboard label,
 .power-profile label {
     color: #68b5ab;
+}
+
+/* Text is white */
+.clock label,
+.volume label,
+.battery .label,
+.weather label,
+.music label {
+    color: #ffffff;
 }
 
 .clock label {
@@ -248,11 +256,6 @@ dropdown popover row:hover, dropdown popover row:selected {
     color: #68b5ab;
 }
 
-/* --- weather (secondary info) --- */
-
-.weather label {
-    color: #688fb3;
-}
 
 /* --- notifications --- */
 
@@ -344,6 +347,13 @@ dropdown popover row:hover, dropdown popover row:selected {
 
 .popup-bluetooth .device .switch {
     margin-left: 12px;
+}
+
+/* --- weather popup --- */
+
+.weather-popup .forecast {
+    color: #ffffff;
+    margin-top: 4px;
 }
 
 /* --- power profile popup --- */

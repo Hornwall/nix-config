@@ -101,7 +101,7 @@ truncate = { mode = "end", length = 60 }
 # ── end ────────────────────────────────────────────────────────────────────
 [[end]]
 type = "volume"
-format = "{icon} {percentage}%"
+format = "<span foreground='#68b5ab'>{icon}</span> {percentage}%"
 
 # One icon per device by default (docker bridges, veth, …) — wifi only.
 # The module is display-only, so wire the click up to nmtui ourselves.
@@ -187,12 +187,31 @@ type = "tray"
 
 # Weather (Stockholm, metric). hyprpanel showed this inside the clock popup,
 # which ironbar's clock can't do — so it lives on the bar as its own module.
+# Click for hourly + coming-days forecast.
 [[end]]
 type = "custom"
 class = "weather"
+name = "weather"
+
 [[end.bar]]
-type = "label"
+type = "button"
 label = "{{1800000:/home/hannes/.config/ironbar/scripts/weather.sh}}"
+on_click = "popup:toggle"
+
+[[end.popup]]
+type = "box"
+orientation = "vertical"
+class = "weather-popup"
+
+[[end.popup.widgets]]
+type = "label"
+label = "Stockholm"
+class = "popup-heading"
+
+[[end.popup.widgets]]
+type = "label"
+label = "{{1800000:/home/hannes/.config/ironbar/scripts/weather-forecast.sh}}"
+class = "forecast"
 
 [[end]]
 type = "clock"

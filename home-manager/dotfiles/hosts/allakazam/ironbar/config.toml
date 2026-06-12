@@ -97,7 +97,7 @@ truncate = { mode = "end", length = 60 }
 # ── end ────────────────────────────────────────────────────────────────────
 [[end]]
 type = "volume"
-format = "{icon} {percentage}%"
+format = "<span foreground='#68b5ab'>{icon}</span> {percentage}%"
 
 # One icon per device by default (docker bridges, veth, …). Desktop is
 # wired, so allow both wired and wifi here.
@@ -141,9 +141,27 @@ type = "tray"
 [[end]]
 type = "custom"
 class = "weather"
+name = "weather"
+
 [[end.bar]]
-type = "label"
+type = "button"
 label = "{{1800000:/home/hannes/.config/ironbar/scripts/weather.sh}}"
+on_click = "popup:toggle"
+
+[[end.popup]]
+type = "box"
+orientation = "vertical"
+class = "weather-popup"
+
+[[end.popup.widgets]]
+type = "label"
+label = "Stockholm"
+class = "popup-heading"
+
+[[end.popup.widgets]]
+type = "label"
+label = "{{1800000:/home/hannes/.config/ironbar/scripts/weather-forecast.sh}}"
+class = "forecast"
 
 [[end]]
 type = "clock"
