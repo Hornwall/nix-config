@@ -73,10 +73,12 @@
         opacity: 0;
       }
 
+      /* Frosted glass: Hyprland's `layerrule = blur, walker` frosts the
+         wallpaper behind these translucent surfaces. */
       .box-wrapper {
-        background-color: @window_bg_color;
-        border: 1px solid @accent_alt_color;
-        border-radius: 14px;
+        background-color: alpha(@window_bg_color, 0.66);
+        border: 1px solid alpha(#ffffff, 0.09);
+        border-radius: 16px;
         padding: 16px;
         box-shadow:
           0 22px 42px rgba(0, 0, 0, 0.45),
@@ -88,7 +90,7 @@
       }
 
       .input {
-        background-color: @panel_bg_color;
+        background-color: alpha(@panel_bg_color, 0.55);
         color: @theme_fg_color;
         border: 1px solid @border_color;
         border-radius: 10px;
@@ -150,7 +152,7 @@
       }
 
       .preview {
-        background-color: @panel_bg_color;
+        background-color: alpha(@panel_bg_color, 0.55);
         border: 1px solid @border_color;
         border-radius: 10px;
         color: @theme_fg_color;

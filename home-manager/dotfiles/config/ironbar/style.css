@@ -1,13 +1,19 @@
-/* Ironbar theme — hyprpanel dark-teal palette.
+/* Ironbar theme — Ghostty palette, lightly frosted bar.
+ * The bar attaches flush to top + sides (only the bottom corners round) and is
+ * mostly opaque; Hyprland's `layerrule = blur, ironbar` frosts the sliver of
+ * wallpaper visible through the slight transparency. Widget surfaces are fully
+ * opaque so content stays crisp.
  * Structure follows the official examples (examples/{minimal,desktop}/style.css):
  * GTK4 CSS — reset backgrounds via element names (box/button/label) using the
  * longhand properties. GTK themes paint button chrome with background-IMAGE,
  * so `background-image: none` in the universal reset is load-bearing.
  * Palette:
- *   bar bg      #161719
- *   surface     #1e1f22
+ *   bar bg      rgba(22,23,25,.9)    (#161719 @ 90%)
+ *   popover     rgba(30,31,34,.96)   (#1e1f22, near-opaque)
+ *   card        #2a2b2f  (sliders, switches, menu items — opaque)
  *   accent      #68b5ab (teal)
  *   secondary   #688fb3 (blue)
+ *   tertiary    #ab78ad (mauve)
  *   text        #b7bcba
  *   muted       #5c656e
  *   red         #d1434c
@@ -28,27 +34,41 @@ box, button, label, calendar, image {
     background-color: #0000;
 }
 
+/* Bar attaches flush to the top and sides; only the bottom corners are
+ * rounded so it reads as a tab. A faint frost (Hyprland blurs behind it) but
+ * mostly opaque so content stays crisp. */
 window {
-    background-color: #161719;
+    background-color: transparent;
 }
 
 #bar {
-    background-color: #161719;
+    background-color: rgba(22, 23, 25, 0.9);
     color: #b7bcba;
+    border-radius: 0 0 16px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    /* Match Hyprland gaps_out (12px) so the first/last items line up with the
+     * window edges below. */
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
-/* Popups & dropdown menus */
+/* Popups & dropdown menus — near-opaque frosted surfaces */
 popover, popover contents {
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 0;
 }
 
 popover {
-    background-color: #1e1f22;
+    background-color: rgba(30, 31, 34, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
 }
 
 popover contents {
-    background-color: #1e1f22;
+    background-color: transparent;
 }
 
 .popup {

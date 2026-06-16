@@ -68,12 +68,13 @@ hl.config({
 
 hl.config({
     general = {
-        gaps_in = 5,
-        gaps_out = 5,
-        border_size = 1,
+        gaps_in = 6,
+        gaps_out = 12,
+        border_size = 0,
+        -- Borderless — colours kept for reference if re-enabled.
         col = {
-            active_border = { colors = { "rgba(68b5abee)", "rgba(688fb3ee)" }, angle = 45 },
-            inactive_border = "rgba(5c656eaa)",
+            active_border = "rgba(68b5abff)",
+            inactive_border = "rgba(5c656e55)",
         },
         resize_on_border = false,
         allow_tearing = false,
@@ -81,21 +82,27 @@ hl.config({
     },
 
     decoration = {
-        rounding = 10,
+        rounding = 14,
         rounding_power = 2,
         active_opacity = 1.0,
-        inactive_opacity = 1.0,
+        inactive_opacity = 0.92,
         shadow = {
-            enabled = true,
-            range = 4,
-            render_power = 3,
-            color = "rgba(1a1a1aee)",
+            enabled = false,
         },
+        -- Frosted-glass backdrop.
         blur = {
             enabled = true,
-            size = 3,
-            passes = 1,
-            vibrancy = 0.1696,
+            size = 6,
+            passes = 3,
+            new_optimizations = true,
+            ignore_opacity = true,
+            noise = 0.012,
+            contrast = 1.1,
+            brightness = 1.0,
+            vibrancy = 0.25,
+            vibrancy_darkness = 0.05,
+            popups = true,
+            popups_ignorealpha = 0.2,
         },
     },
 
@@ -103,6 +110,12 @@ hl.config({
         enabled = true,
     },
 })
+
+-- Glass: frost the wallpaper behind layer-shell surfaces. The .conf form is:
+--   layerrule = blur, <ironbar|walker|swaync-control-center|swaync-notification-window>
+--   layerrule = ignorezero, <same>
+-- Port these once the layer-rule binding is confirmed in the Lua API; until
+-- then hyprland.conf (the live config) carries them.
 
 hl.curve("easeOutQuint",   { type = "bezier", points = { { 0.23, 1 },    { 0.32, 1 }   } })
 hl.curve("easeInOutCubic", { type = "bezier", points = { { 0.65, 0.05 }, { 0.36, 1 }   } })
