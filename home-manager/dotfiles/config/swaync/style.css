@@ -1,0 +1,222 @@
+/* SwayNotificationCenter theme — matches the Ghostty/ironbar desktop.
+ * The control-center and notification-window layers are frosted by Hyprland
+ * (`layerrule = blur, swaync-*` in hyprland.conf), so the panel uses a
+ * translucent background while individual notification cards stay opaque for
+ * readability — same approach as the ironbar bar vs. its widgets.
+ * Palette:
+ *   bg       #161719   surface #1e1f22   card #2a2b2f / #3a3c41
+ *   accent   #68b5ab (teal)   secondary #688fb3 (blue)
+ *   text     #b7bcba   muted #5c656e   red #d1434c   lavender #b4befe
+ */
+
+@define-color bg       #161719;
+@define-color surface  #1e1f22;
+@define-color card     #2a2b2f;
+@define-color card_hi  #3a3c41;
+@define-color accent   #68b5ab;
+@define-color text     #b7bcba;
+@define-color muted    #5c656e;
+@define-color red      #d1434c;
+
+* {
+  font-family: "FiraCode Nerd Font", "Fira Code", monospace;
+  font-size: 13.5px;
+  background: none;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+}
+
+/* Fullscreen backdrop behind the control center — keep it invisible */
+.blank-window {
+  background: transparent;
+}
+
+/* ── notification cards (shared by toasts + control center) ──────────────── */
+
+.notification-row {
+  outline: none;
+}
+
+.notification {
+  margin: 5px 10px;
+  background-color: transparent;
+}
+
+/* The card surface — a lighter opaque grey (the ironbar widget colour) so cards
+ * stand out against the darker, more frosted panel behind them. */
+.notification-background {
+  background-color: #2a2b2f;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.floating-notifications .notification-background,
+.control-center .notification-background {
+  background-color: #2a2b2f;
+}
+
+.notification-background .notification-default-action {
+  background-color: transparent;
+  border-radius: 12px;
+  padding: 0;
+}
+
+.notification-content {
+  padding: 11px 14px;
+}
+
+.notification-content .summary {
+  color: @text;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.notification-content .time {
+  color: @muted;
+  font-size: 11.5px;
+}
+
+.notification-content .body {
+  color: #d4d8d6;
+}
+
+/* Push text off the app icon */
+.notification-content .text-box {
+  margin-left: 12px;
+}
+
+.notification-content .app-icon {
+  color: @accent;
+}
+
+.body-image,
+.notification-content .image {
+  border-radius: 10px;
+}
+
+/* Critical notifications get a red edge */
+.notification.critical .notification-background {
+  border: 1px solid @red;
+}
+
+/* Close button — red circle, top corner */
+.notification-background .close-button {
+  background-color: @card;
+  color: @text;
+  border-radius: 100%;
+  margin: 8px;
+  padding: 0;
+  min-width: 22px;
+  min-height: 22px;
+}
+
+.notification-background .close-button:hover {
+  background-color: @red;
+  color: @bg;
+}
+
+/* Action buttons under a notification */
+.notification-action {
+  background-color: @card;
+  color: @text;
+  border-radius: 9px;
+  margin: 6px 4px 0 4px;
+  padding: 6px 10px;
+}
+
+.notification-action:hover {
+  background-color: @card_hi;
+  color: @accent;
+}
+
+/* ── grouped notifications ──────────────────────────────────────────────── */
+
+.notification-group-header {
+  color: @muted;
+  padding: 4px 8px;
+}
+
+.notification-group-icon {
+  color: @accent;
+}
+
+.notification-group-close-button {
+  background-color: @card;
+  color: @text;
+  border-radius: 9px;
+  padding: 4px 8px;
+}
+
+.notification-group-close-button:hover {
+  background-color: @card_hi;
+  color: @accent;
+}
+
+/* ── control center panel ───────────────────────────────────────────────── */
+
+.control-center {
+  background-color: rgba(20, 21, 23, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+/* The cards already carry 12px side margins; pull the list back so they don't
+ * crowd the panel edge while still leaving breathing room. */
+.control-center-list {
+  background: transparent;
+  margin: 0 -4px;
+}
+
+.control-center-list-placeholder {
+  color: @muted;
+  font-size: 15px;
+}
+
+/* Title row ("Notifications" + Clear all) */
+.widget-title {
+  color: @text;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 2px 4px 10px 4px;
+}
+
+.widget-title > button {
+  background-color: @card;
+  color: @text;
+  border-radius: 9px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.widget-title > button:hover {
+  background-color: @card_hi;
+  color: @accent;
+}
+
+/* Do Not Disturb toggle */
+.widget-dnd {
+  color: @text;
+  margin: 4px 4px 10px 4px;
+  font-weight: 600;
+}
+
+.widget-dnd > switch {
+  background-color: @card;
+  border-radius: 100px;
+  min-width: 42px;
+  min-height: 22px;
+}
+
+.widget-dnd > switch:checked {
+  background-color: @accent;
+}
+
+.widget-dnd > switch slider {
+  background-color: @text;
+  border-radius: 100%;
+  min-width: 18px;
+  min-height: 18px;
+}

@@ -46,11 +46,10 @@ window {
     color: #b7bcba;
     border-radius: 0 0 16px 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-    /* Match Hyprland gaps_out (12px) so the first/last items line up with the
-     * window edges below. */
-    padding-left: 12px;
-    padding-right: 12px;
+    /* Inset the bar on the sides (half of Hyprland's gaps_out); stays attached
+     * to the top edge. */
+    margin-left: 6px;
+    margin-right: 6px;
     padding-top: 2px;
     padding-bottom: 2px;
 }
