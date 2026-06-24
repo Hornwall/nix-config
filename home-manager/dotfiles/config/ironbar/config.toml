@@ -48,7 +48,7 @@ on_click = "!slack"
 [[start.popup.widgets.widgets]]
 type = "button"
 label = "󰀻 Apps"
-on_click = "!wofi --show drun"
+on_click = "!walker"
 
 [[start.popup.widgets]]
 type = "label"
