@@ -150,7 +150,12 @@
   services.pipewire = {
     enable = true;
     alsa.enable = true;
-    alsa.support32Bit = true;
+    # Forced off: pulls in a 32-bit pipewire whose libcamera->numpy->openblas
+    # chain forces a multi-hour, uncached i686 openblas build. The Steam module
+    # turns this on (programs/steam.nix), hence mkForce. Steam keeps working
+    # (it needs 32-bit graphics, not 32-bit ALSA audio). Only 32-bit apps using
+    # the ALSA API directly lose sound; Pulse/pipewire-pulse games are fine.
+    alsa.support32Bit = lib.mkForce false;
     pulse.enable = true;
     # If you want to use JACK applications, uncomment this
     #jack.enable = true;
