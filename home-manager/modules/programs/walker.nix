@@ -76,7 +76,7 @@
       /* Frosted glass: Hyprland's `layerrule = blur, walker` frosts the
          wallpaper behind these translucent surfaces. */
       .box-wrapper {
-        background-color: alpha(@window_bg_color, 0.66);
+        background-color: alpha(@window_bg_color, 0.92);
         border: 1px solid alpha(#ffffff, 0.09);
         border-radius: 16px;
         padding: 16px;
@@ -90,7 +90,7 @@
       }
 
       .input {
-        background-color: alpha(@panel_bg_color, 0.55);
+        background-color: alpha(@panel_bg_color, 0.85);
         color: @theme_fg_color;
         border: 1px solid @border_color;
         border-radius: 10px;
@@ -152,7 +152,7 @@
       }
 
       .preview {
-        background-color: alpha(@panel_bg_color, 0.55);
+        background-color: alpha(@panel_bg_color, 0.85);
         border: 1px solid @border_color;
         border-radius: 10px;
         color: @theme_fg_color;
