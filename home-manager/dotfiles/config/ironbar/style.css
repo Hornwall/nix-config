@@ -319,23 +319,66 @@ dropdown popover row:hover, dropdown popover row:selected {
 
 /* --- dashboard / power menu popup --- */
 
-.popup-heading {
-    color: #68b5ab;
-    font-weight: 700;
-    font-size: 12px;
-    margin: 8px 4px 4px 4px;
+.dashboard-popup {
+    padding: 10px;
+    min-width: 340px;
 }
 
+/* Greeting + date header — two single-line labels so each centers cleanly */
+.dashboard-greeting {
+    margin: 8px 8px 2px 8px;
+}
+
+.dashboard-date {
+    margin: 0 8px 12px 8px;
+}
+
+.popup-heading {
+    color: #7d858d;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    margin: 12px 8px 6px 8px;
+}
+
+/* Quick-launch app grid: three equal tiles per row */
+.app-grid {
+    margin: 0;
+}
+
+.app-tile {
+    min-width: 96px;
+}
+
+.app-tile label {
+    /* center the icon+name within each tile */
+    margin: 0 auto;
+}
+
+/* Live system stats (CPU / RAM / disk bars) */
+.dashboard-stats {
+    font-family: "FiraCode Nerd Font", "Fira Code", monospace;
+    margin: 4px 10px 6px 10px;
+}
+
+/* Shortcut / power tiles: rounded cards on a faint surface, hairline border,
+ * accent glow + lift on hover. */
 .dashboard-popup button {
-    background-color: #2a2b2f;
+    background-color: rgba(255, 255, 255, 0.035);
     color: #b7bcba;
-    margin: 3px;
-    padding: 7px 12px;
-    border-radius: 10px;
+    margin: 4px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 140ms ease,
+                border-color 140ms ease,
+                box-shadow 140ms ease;
 }
 
 .dashboard-popup button:hover {
-    background-color: #3a3c41;
+    background-color: rgba(104, 181, 171, 0.12);
+    border-color: rgba(104, 181, 171, 0.4);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
 /* --- bluetooth popup --- */
@@ -394,4 +437,10 @@ dropdown popover row:hover, dropdown popover row:selected {
 .dashboard-popup .power-restart label  { color: #fab387; }
 .dashboard-popup .power-logout label   { color: #a6e3a1; }
 .dashboard-popup .power-sleep label    { color: #89dceb; }
+
+/* Hover borders tinted to each tile's accent */
+.dashboard-popup .power-shutdown:hover { border-color: rgba(209, 67, 76, 0.5);  background-color: rgba(209, 67, 76, 0.12); }
+.dashboard-popup .power-restart:hover  { border-color: rgba(250, 179, 135, 0.5); background-color: rgba(250, 179, 135, 0.12); }
+.dashboard-popup .power-logout:hover   { border-color: rgba(166, 227, 161, 0.5); background-color: rgba(166, 227, 161, 0.12); }
+.dashboard-popup .power-sleep:hover    { border-color: rgba(137, 220, 235, 0.5); background-color: rgba(137, 220, 235, 0.12); }
 

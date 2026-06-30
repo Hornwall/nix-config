@@ -26,38 +26,91 @@ type = "box"
 orientation = "vertical"
 class = "dashboard-popup"
 
+# Header: greeting + date/time, two single-line labels so each centers
+# (refreshes every 30s)
 [[start.popup.widgets]]
 type = "label"
-label = "Shortcuts"
+class = "dashboard-greeting"
+label = "{{30000:/home/hannes/.config/ironbar/scripts/dashboard-header.sh greeting}}"
+
+[[start.popup.widgets]]
+type = "label"
+class = "dashboard-date"
+label = "{{30000:/home/hannes/.config/ironbar/scripts/dashboard-header.sh date}}"
+
+# ── Quick launch ─────────────────────────────────────────────────────────
+[[start.popup.widgets]]
+type = "label"
+label = "QUICK LAUNCH"
 class = "popup-heading"
 
 [[start.popup.widgets]]
 type = "box"
 orientation = "horizontal"
+class = "app-grid"
 
 [[start.popup.widgets.widgets]]
 type = "button"
-label = "󰈹 Firefox"
+label = "󰈹  Firefox"
+class = "app-tile"
 on_click = "!firefox"
 
 [[start.popup.widgets.widgets]]
 type = "button"
-label = "󰒱 Slack"
+label = "󰒱  Slack"
+class = "app-tile"
 on_click = "!slack"
 
 [[start.popup.widgets.widgets]]
 type = "button"
-label = "󰀻 Apps"
+label = "󰓇  Spotify"
+class = "app-tile"
+on_click = "!spotify"
+
+[[start.popup.widgets]]
+type = "box"
+orientation = "horizontal"
+class = "app-grid"
+
+[[start.popup.widgets.widgets]]
+type = "button"
+label = "󰠮  Obsidian"
+class = "app-tile"
+on_click = "!obsidian"
+
+[[start.popup.widgets.widgets]]
+type = "button"
+label = "  Terminal"
+class = "app-tile"
+on_click = "!ghostty"
+
+[[start.popup.widgets.widgets]]
+type = "button"
+label = "󰀻  All apps"
+class = "app-tile"
 on_click = "!walker"
+
+# ── System ───────────────────────────────────────────────────────────────
+[[start.popup.widgets]]
+type = "label"
+label = "SYSTEM"
+class = "popup-heading"
 
 [[start.popup.widgets]]
 type = "label"
-label = "Power"
+class = "dashboard-stats"
+label = "{{3000:/home/hannes/.config/ironbar/scripts/dashboard-stats.sh}}"
+
+# ── Power ────────────────────────────────────────────────────────────────
+[[start.popup.widgets]]
+type = "label"
+label = "POWER"
 class = "popup-heading"
 
 [[start.popup.widgets]]
 type = "box"
 orientation = "horizontal"
+class = "power-grid"
 
 [[start.popup.widgets.widgets]]
 type = "button"
