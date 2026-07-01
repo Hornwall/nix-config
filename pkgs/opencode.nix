@@ -43,9 +43,12 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       runHook preBuild
 
       export BUN_INSTALL_CACHE_DIR=$(mktemp -d)
+      # NOTE: --frozen-lockfile dropped intentionally. The committed bun.lock was
+      # generated with an older bun; nixpkgs' bun 1.3.x re-resolves it, so frozen
+      # mode aborts. Letting bun update the lock keeps the FOD reproducible via
+      # outputHash. Restore --frozen-lockfile once upstream's lock matches.
       bun install \
         --cpu="*" \
-        --frozen-lockfile \
         --filter ./ \
         --filter ./packages/app \
         --filter ./packages/opencode \
@@ -73,7 +76,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     # Required or the fixed-output derivation ends up referencing store paths.
     dontFixup = true;
 
-    outputHash = "sha256-9OZ7LI4F6PAtSU3+qZTSWKzkcwdZ0X7ESbR/fjjusIw=";
+    outputHash = "sha256-LBFsPspa2/9UcsTiPgDmmocPDsOKNo0G6PI9oHcLWmU=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   };

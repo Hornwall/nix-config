@@ -27,7 +27,10 @@
     };
 
     opencode-src = {
-      url = "github:anomalyco/opencode/dev";
+      # Pinned to a known-good rev (bun@1.3.13, matches nixpkgs). Newer dev revs
+      # bump to bun@1.3.14 and/or have broken build.ts. Bump deliberately once
+      # upstream is healthy again.
+      url = "github:anomalyco/opencode/61eabfc60c1005d1b2b11849d70696a3dcef293e";
       flake = false;
     };
 

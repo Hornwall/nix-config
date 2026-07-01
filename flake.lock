@@ -669,17 +669,17 @@
     "opencode-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1782818264,
-        "narHash": "sha256-vjY/wP9moI17f/Nw5TEfWTvxyTkoHgCj53bsMJLeN30=",
+        "lastModified": 1777280547,
+        "narHash": "sha256-D53S1bqrt1JoUDK0vU2+yxJdlCigBQrkaj2SeOcsw1U=",
         "owner": "anomalyco",
         "repo": "opencode",
-        "rev": "b329fcceb21e2061bcdb24173fdfbc4d25f73414",
+        "rev": "61eabfc60c1005d1b2b11849d70696a3dcef293e",
         "type": "github"
       },
       "original": {
         "owner": "anomalyco",
-        "ref": "dev",
         "repo": "opencode",
+        "rev": "61eabfc60c1005d1b2b11849d70696a3dcef293e",
         "type": "github"
       }
     },
