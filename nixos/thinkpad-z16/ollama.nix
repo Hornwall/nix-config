@@ -4,11 +4,13 @@
     enable = true;
     package = pkgs.unstable.ollama-rocm;
     environmentVariables = {
-      HCC_AMDGPU_TARGET = "gfx1103"; # used to be necessary, but doesn't seem to anymore
       OLLAMA_MAX_LOADED_MODELS = "1";
       OLLAMA_KEEP_ALIVE = "5m";
     };
-    rocmOverrideGfx = "11.0.2";
+    # Ollama drops the 780M iGPU by default and runs on the discrete
+    # RX 6550M, which is RDNA2 (gfx1032). Spoofing it as RDNA3 (11.x)
+    # causes GPU memory access faults, so use the gfx1030 kernels.
+    rocmOverrideGfx = "10.3.0";
   };
 
   # Keep ollama from taking the whole machine down with it.
