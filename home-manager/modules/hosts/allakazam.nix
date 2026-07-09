@@ -7,6 +7,7 @@
   # Example: Additional packages for the ThinkPad Z16
   home.packages = with pkgs; [
     # Add any allakazam specific packages here
+    heroic
   ];
 
   # Example: Host-specific environment variables
