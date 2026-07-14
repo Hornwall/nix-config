@@ -1,6 +1,7 @@
 gtk-titlebar = false
 
 shell-integration = zsh
+command = tmux new-session -A -s main
 
 background-opacity = 0.95
 
