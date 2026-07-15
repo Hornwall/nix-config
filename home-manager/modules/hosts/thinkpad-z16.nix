@@ -1,5 +1,27 @@
 { config, lib, pkgs, ... }:
 
+let
+  # Keep this aligned with aboardhrWtCount in nixos/thinkpad-z16/aboard.nix.
+  aboardhrWtCount = 10;
+
+  aboardFeature = pkgs.writeShellApplication {
+    name = "aboard-feature";
+    runtimeInputs = with pkgs; [
+      coreutils
+      direnv
+      git
+      gnugrep
+      gnused
+      iproute2
+      tmux
+      unstable.devenv
+    ];
+    text = ''
+      export ABOARD_FEATURE_SLOT_COUNT=${toString aboardhrWtCount}
+      ${builtins.readFile ../scripts/aboard-feature.sh}
+    '';
+  };
+in
 {
   # Host-specific configuration for ThinkPad Z16
   # This could include specific packages, settings, or overrides for this machine
@@ -13,6 +35,7 @@
     pkgs.pup
     pkgs.abrd-admin
     pkgs.abrd
+    aboardFeature
     # Add any ThinkPad Z16 specific packages here
   ];
 
