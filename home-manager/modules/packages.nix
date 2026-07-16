@@ -47,6 +47,7 @@
     pkgs.prismlauncher
     pkgs.unstable.openscreen
     pkgs.obsidian
+    pkgs.proton-pass
 
     # Hyprland & Window Manager
     pkgs.wofi

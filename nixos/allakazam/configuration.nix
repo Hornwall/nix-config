@@ -9,6 +9,7 @@
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     ../common/keyboard-layout.nix
+    ../common/packages.nix
     ../common/1password.nix
     ../common/gnome.nix
     ../common/docker.nix
