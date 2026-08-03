@@ -19,6 +19,14 @@
       inputs.hyprland.follows = "hyprland";
     };
 
+    nixpkgs-hyprland = {
+      # Hyprland pinned to 0.55.4: hyprsplit doesn't compile against the
+      # reworked state/* API in hyprland 0.56 yet (shezdy/hyprsplit#90).
+      # Drop this input and go back to pkgs.unstable in
+      # nixos/common/hyprland.nix once upstream supports 0.56.
+      url = "github:nixos/nixpkgs/753cc8a3a87467296ddd1fa93f0cc3e81120ee46";
+    };
+
     hyprsplit = {
       # Used only as a source for the hyprsplit plugin, which we build
       # against pkgs.unstable.hyprland in nixos/common/hyprland.nix.
