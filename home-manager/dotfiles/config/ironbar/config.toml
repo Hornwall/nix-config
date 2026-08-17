@@ -188,7 +188,7 @@ class = "power-profile"
 
 [[end.bar]]
 type = "button"
-label = "{{5000:/home/hannes/.config/ironbar/scripts/power-profile-icon.sh}}"
+label = "{{watch:/home/hannes/.config/ironbar/scripts/power-profile-icon.sh --watch}}"
 on_click = "popup:toggle"
 
 [[end.popup]]
@@ -198,7 +198,7 @@ class = "power-profile-popup"
 
 [[end.popup.widgets]]
 type = "label"
-label = "Power profile: {{2000:powerprofilesctl get}}"
+label = "Power profile"
 class = "popup-heading"
 
 [[end.popup.widgets]]
@@ -216,23 +216,23 @@ type = "button"
 label = "󰌪 Power saver"
 on_click = "!powerprofilesctl set power-saver"
 
-# Voxtype status (custom module; polls the voxtype daemon every 500ms)
+# Voxtype status
 [[end]]
 type = "custom"
 class = "voxtype"
 [[end.bar]]
 type = "label"
-label = "{{500:/home/hannes/.config/ironbar/scripts/voxtype-icon.sh}}"
+label = "{{watch:/home/hannes/.config/ironbar/scripts/voxtype-icon.sh --watch}}"
 
 # Screen-recording indicator — show_if collapses the module entirely
 # (margins included) when wf-recorder isn't running
 [[end]]
 type = "custom"
 class = "recording"
-show_if = "poll:1000:pgrep -x wf-recorder"
+show_if = "poll:2000:pgrep -x wf-recorder"
 [[end.bar]]
 type = "label"
-label = "{{500:/home/hannes/.config/ironbar/scripts/recording-icon.sh}}"
+label = "󰻃"
 
 # System tray
 [[end]]

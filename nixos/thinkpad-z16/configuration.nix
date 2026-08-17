@@ -116,8 +116,9 @@
   # services.xserver.xkb.layout = "us";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
 
-  # Enable CUPS to print documents.
+  # Enable CUPS and allow discovered printers' .local hostnames to resolve.
   services.printing.enable = true;
+  services.avahi.nssmdns4 = true;
 
   # Enable the firmware TPM (AMD fTPM must be enabled in UEFI). Beyond Identity
   # 2.111+ stores credentials in TPM-sealed keys and refuses to start without

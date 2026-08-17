@@ -178,15 +178,15 @@ type = "custom"
 class = "voxtype"
 [[end.bar]]
 type = "label"
-label = "{{500:/home/hannes/.config/ironbar/scripts/voxtype-icon.sh}}"
+label = "{{watch:/home/hannes/.config/ironbar/scripts/voxtype-icon.sh --watch}}"
 
 [[end]]
 type = "custom"
 class = "recording"
-show_if = "poll:1000:pgrep -x wf-recorder"
+show_if = "poll:2000:pgrep -x wf-recorder"
 [[end.bar]]
 type = "label"
-label = "{{500:/home/hannes/.config/ironbar/scripts/recording-icon.sh}}"
+label = "󰻃"
 
 [[end]]
 type = "tray"

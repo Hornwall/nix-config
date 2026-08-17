@@ -20,7 +20,7 @@
     pkgs.yarn
     pkgs.devbox
     pkgs.heroku
-    pkgs.solargraph
+    pkgs.ruby-lsp
     pkgs.gnupg
     pkgs.typescript-language-server
     pkgs.ngrok

@@ -11,11 +11,28 @@ vox() {
   fi
 }
 
-state=$(vox status --format json --icon-theme omarchy 2>/dev/null | jq -r '.alt // "idle"' 2>/dev/null)
+voxtype_icon() {
+  state=$(vox status --format json --icon-theme omarchy 2>/dev/null | jq -r '.alt // "idle"' 2>/dev/null)
 
-case "$state" in
-  recording)    printf '󰻃' ;;
-  transcribing) printf '󰦨' ;;
-  error)        printf '󰍭' ;;
-  *)            printf '󰍬' ;;  # idle / unknown / daemon not running
-esac
+  case "$state" in
+    recording) printf '󰻃' ;;
+    transcribing) printf '󰦨' ;;
+    error) printf '󰍭' ;;
+    *) printf '󰍬' ;;
+  esac
+}
+
+if [[ ${1:-} == "--watch" ]]; then
+  vox status --follow --format json --icon-theme omarchy 2>/dev/null |
+    jq --unbuffered -r '.alt // "idle"' 2>/dev/null |
+    while read -r state; do
+      case "$state" in
+        recording) printf '󰻃\n' ;;
+        transcribing) printf '󰦨\n' ;;
+        error) printf '󰍭\n' ;;
+        *) printf '󰍬\n' ;;
+      esac
+    done
+else
+  voxtype_icon
+fi

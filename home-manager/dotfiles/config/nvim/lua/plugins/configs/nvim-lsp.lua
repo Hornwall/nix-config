@@ -31,20 +31,69 @@ vim.lsp.config("ts_ls", {
 })
 vim.lsp.enable("ts_ls")
 
--- vim.lsp.config("solargraph", {
---   capabilities = capabilities,
--- })
--- vim.lsp.enable("solargraph")
+local function has_devenv(root_dir)
+  if not root_dir then
+    return false
+  end
 
--- Standardrb
-vim.opt.signcolumn = "yes" -- otherwise it bounces in and out, not strictly needed though
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "ruby",
-  group = vim.api.nvim_create_augroup("RubyLSP", { clear = true }), -- also this is not /needed/ but it's good practice 
-  callback = function()
-    vim.lsp.start {
-      name = "standard",
-      cmd = { "standardrb", "--lsp" },
+  return vim.uv.fs_stat(root_dir .. "/devenv.nix") ~= nil
+    or vim.uv.fs_stat(root_dir .. "/devenv.yaml") ~= nil
+end
+
+local function start_ruby_server(dispatchers, config, project_command, fallback_command, fallback_env)
+  local command = fallback_command
+  local spawn_options = {
+    cwd = config.root_dir,
+    env = fallback_env,
+  }
+
+  if has_devenv(config.root_dir) then
+    -- Do not leak Neovim's Nix Ruby provider environment into devenv.
+    command = {
+      "env",
+      "-u", "GEM_HOME",
+      "-u", "GEM_PATH",
+      "-u", "BUNDLE_GEMFILE",
+      "devenv", "-q", "shell",
     }
+    vim.list_extend(command, project_command)
+    spawn_options.env = nil
+  end
+
+  return vim.lsp.rpc.start(command, dispatchers, spawn_options)
+end
+
+vim.lsp.config("ruby_lsp", {
+  cmd = function(dispatchers, config)
+    return start_ruby_server(
+      dispatchers,
+      config,
+      { "bundle", "exec", "ruby-lsp" },
+      { "ruby-lsp" },
+      {
+        GEM_HOME = vim.fn.stdpath("data") .. "/ruby-lsp/gems",
+        GEM_PATH = "",
+      }
+    )
+  end,
+  capabilities = capabilities,
+  init_options = {
+    -- StandardRB handles formatting in the separate client below.
+    formatter = "none",
+  },
+})
+vim.lsp.enable("ruby_lsp")
+
+vim.lsp.config("standardrb", {
+  cmd = function(dispatchers, config)
+    return start_ruby_server(
+      dispatchers,
+      config,
+      { "bundle", "exec", "standardrb", "--lsp" },
+      { "standardrb", "--lsp" }
+    )
   end,
 })
+vim.lsp.enable("standardrb")
+
+vim.opt.signcolumn = "yes" -- otherwise it bounces in and out
