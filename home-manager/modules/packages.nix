@@ -48,7 +48,7 @@
     pkgs.unstable.openscreen
     pkgs.obsidian
     pkgs.proton-pass
-    pkgs.unstable.ladybird
+    #pkgs.unstable.ladybird
 
     # Hyprland & Window Manager
     pkgs.wofi
