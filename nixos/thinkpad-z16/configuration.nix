@@ -36,7 +36,7 @@
   };
 
   # Use latest kernel
-  boot.kernelPackages = pkgs.unstable.linuxPackages_7_1;
+  boot.kernelPackages = pkgs.linuxPackages_7_2;
 
   # zram-backed swap as a safety net when large ollama models push RAM hard.
   zramSwap = {
