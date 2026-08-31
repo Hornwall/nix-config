@@ -56,7 +56,6 @@
     pkgs.hypridle
     pkgs.hyprlock
     pkgs.quickshell
-    pkgs.swaynotificationcenter
     pkgs.hyprcursor
     pkgs.hyprpolkitagent
     pkgs.brightnessctl

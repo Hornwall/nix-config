@@ -33,7 +33,6 @@ hl.on("hyprland.start", function()
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"]])
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"]])
     hl.exec_cmd("gnome-keyring-daemon --start --components=ssh")
-    hl.exec_cmd("swaync")
     hl.exec_cmd("qs -n")
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd(terminal)
@@ -112,7 +111,7 @@ hl.config({
 })
 
 -- Glass: frost the wallpaper behind layer-shell surfaces. The .conf form is:
---   layerrule = blur, <quickshell-bar|walker|swaync-control-center|swaync-notification-window>
+--   layerrule = blur, <quickshell-bar|quickshell-notifications|walker>
 --   layerrule = ignorezero, <same>
 -- Port these once the layer-rule binding is confirmed in the Lua API; until
 -- then hyprland.conf (the live config) carries them.

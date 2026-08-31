@@ -65,12 +65,6 @@ PanelWindow {
         interval: 2000
     }
 
-    ScriptValue {
-        id: notificationCount
-        command: ["sh", "-c", "swaync-client -c 2>/dev/null || echo 0"]
-        interval: 2000
-    }
-
     Rectangle {
         anchors.fill: parent
         radius: 16
@@ -132,9 +126,11 @@ PanelWindow {
                 ? bar.player.trackTitle + (bar.player.trackArtist ? " — " + bar.player.trackArtist : "")
                 : ""
             textColor: "#b7bcba"
-            onClicked: {
-                if (bar.player && bar.player.canTogglePlaying)
-                    bar.player.isPlaying = !bar.player.isPlaying;
+            onClicked: mouse => {
+                if (mouse.button === Qt.MiddleButton && bar.player && bar.player.canTogglePlaying)
+                    bar.player.togglePlaying();
+                else
+                    mediaPopup.visible = !mediaPopup.visible;
             }
         }
 
@@ -147,6 +143,7 @@ PanelWindow {
             spacing: 1
 
             BarButton {
+                id: audioButton
                 text: {
                     if (!bar.sink || !bar.sink.audio)
                         return "󰕾 --";
@@ -156,9 +153,11 @@ PanelWindow {
                     return (volume < 35 ? "󰕿 " : volume < 70 ? "󰖀 " : "󰕾 ") + volume + "%";
                 }
                 textColor: "#ffffff"
-                onClicked: {
-                    if (bar.sink && bar.sink.audio)
+                onClicked: mouse => {
+                    if (mouse.button === Qt.RightButton && bar.sink && bar.sink.audio)
                         bar.sink.audio.muted = !bar.sink.audio.muted;
+                    else
+                        audioPopup.visible = !audioPopup.visible;
                 }
                 onWheel: wheel => {
                     if (bar.sink && bar.sink.audio) {
@@ -169,18 +168,22 @@ PanelWindow {
             }
 
             BarButton {
+                id: networkButton
                 text: !bar.networkDevice ? "󰤭"
                     : bar.networkDevice.type === DeviceType.Wired ? "󰈀" : "󰤨"
-                onClicked: Quickshell.execDetached(["ghostty", "-e", "nmtui"])
+                onClicked: networkPopup.visible = !networkPopup.visible
             }
 
             BarButton {
+                id: bluetoothButton
                 visible: bar.bluetoothAdapter !== null
                 text: !bar.bluetoothAdapter || !bar.bluetoothAdapter.enabled ? "󰂲"
                     : bar.bluetoothConnected ? "󰂱" : "󰂯"
-                onClicked: {
-                    if (bar.bluetoothAdapter)
+                onClicked: mouse => {
+                    if (mouse.button === Qt.RightButton && bar.bluetoothAdapter)
                         bar.bluetoothAdapter.enabled = !bar.bluetoothAdapter.enabled;
+                    else
+                        bluetoothPopup.visible = !bluetoothPopup.visible;
                 }
             }
 
@@ -265,10 +268,11 @@ PanelWindow {
             }
 
             BarButton {
-                text: "󰂚" + (notificationCount.text !== "0" && notificationCount.text !== ""
-                    ? " " + notificationCount.text : "")
-                textColor: "#b4befe"
-                onClicked: Quickshell.execDetached(["swaync-client", "-t", "-sw"])
+                id: notificationButton
+                property int count: bar.shell.notificationServer.trackedNotifications.values.length
+                text: (bar.shell.doNotDisturb ? "󰂛" : "󰂚") + (count > 0 ? " " + count : "")
+                textColor: bar.shell.doNotDisturb ? "#ab78ad" : "#b4befe"
+                onClicked: notificationPopup.visible = !notificationPopup.visible
             }
         }
     }
@@ -276,6 +280,27 @@ PanelWindow {
     DashboardPopup {
         id: dashboardPopup
         anchorItem: dashboardButton
+    }
+
+    MediaPopup {
+        id: mediaPopup
+        anchorItem: music
+        player: bar.player
+    }
+
+    AudioPopup {
+        id: audioPopup
+        anchorItem: audioButton
+    }
+
+    NetworkPopup {
+        id: networkPopup
+        anchorItem: networkButton
+    }
+
+    BluetoothPopup {
+        id: bluetoothPopup
+        anchorItem: bluetoothButton
     }
 
     WeatherPopup {
@@ -286,5 +311,11 @@ PanelWindow {
     PowerProfilePopup {
         id: profilePopup
         anchorItem: profileButton
+    }
+
+    NotificationCenterPopup {
+        id: notificationPopup
+        anchorItem: notificationButton
+        shell: bar.shell
     }
 }
