@@ -67,6 +67,7 @@
     pkgs.gnome-keyring
     pkgs.seahorse
     pkgs.libnotify
+    pkgs.gjs # Calendar agenda adapter for Quickshell
   ];
 
   home.file.".local/bin/obsidian" = {
