@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Emit a single glyph for the current voxtype state, for ironbar's custom label.
-# hyprpanel mapped the daemon's "alt" state to an icon; ironbar needs the glyph
+# Emit a single glyph for the current voxtype state in the Quickshell bar.
+# Map the daemon's "alt" state to the glyph shown by the custom label.
 # printed directly, so we do that mapping here.
 
 vox() {

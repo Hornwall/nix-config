@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Live system stats for the ironbar dashboard popup: CPU, RAM and root-disk
+# Live system stats for the Quickshell dashboard popup: CPU, RAM and root-disk
 # usage, each as a nerd-font glyph + mini unicode bar + percentage.
-# Polled by ironbar (a few seconds). Pango markup; colours match the theme.
+# Polled by Quickshell every few seconds.
 accent='#68b5ab'   # teal  — bar fill
 muted='#3a4046'    # empty bar track
 text='#b7bcba'

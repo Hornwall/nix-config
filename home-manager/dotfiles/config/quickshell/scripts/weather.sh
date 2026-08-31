@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Stockholm weather for the ironbar bar: flat nerd-font condition glyph +
+# Stockholm weather for the Quickshell bar: flat nerd-font condition glyph +
 # temperature (metric). The glyph is text, so it inherits the label colour.
-# Polled every 30 min by ironbar. Prints nothing on failure so the widget
+# Polled every 30 min by Quickshell. Prints nothing on failure so the widget
 # just disappears rather than showing an error.
 data=$(curl -fsS --max-time 5 \
   'https://api.open-meteo.com/v1/forecast?latitude=59.3293&longitude=18.0686&current=temperature_2m,weather_code&temperature_unit=celsius&timezone=Europe%2FStockholm' \

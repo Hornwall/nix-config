@@ -34,7 +34,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"]])
     hl.exec_cmd("gnome-keyring-daemon --start --components=ssh")
     hl.exec_cmd("swaync")
-    hl.exec_cmd("ironbar")
+    hl.exec_cmd("qs -n")
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd(terminal)
     hl.exec_cmd("firefox")
@@ -112,7 +112,7 @@ hl.config({
 })
 
 -- Glass: frost the wallpaper behind layer-shell surfaces. The .conf form is:
---   layerrule = blur, <ironbar|walker|swaync-control-center|swaync-notification-window>
+--   layerrule = blur, <quickshell-bar|walker|swaync-control-center|swaync-notification-window>
 --   layerrule = ignorezero, <same>
 -- Port these once the layer-rule binding is confirmed in the Lua API; until
 -- then hyprland.conf (the live config) carries them.
@@ -193,7 +193,7 @@ hl.device({
 local mainMod = "SUPER"
 
 hl.bind(mainMod .. " + Q",              hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + CTRL + ALT + P", hl.dsp.exec_cmd("ironbar toggle"))
+hl.bind(mainMod .. " + CTRL + ALT + P", hl.dsp.exec_cmd("qs ipc call bar toggle"))
 hl.bind(mainMod .. " + SHIFT + Q",      hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + M",      hl.dsp.exit())
 hl.bind(mainMod .. " + E",              hl.dsp.exec_cmd(fileManager))

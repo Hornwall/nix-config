@@ -44,5 +44,6 @@ in
     NIX_CONFIG_PATH = "/var/nix-config";
   };
 
-  # No ironbar override: the laptop uses the base bar (which includes battery).
+  # Quickshell enables battery and power-profile widgets when UPower reports a
+  # laptop battery.
 }

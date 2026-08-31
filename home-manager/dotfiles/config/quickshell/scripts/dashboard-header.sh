@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Header text for the ironbar dashboard popup. Emitted as two SEPARATE
+# Legacy header helper retained for dashboard experiments. Emits two separate
 # single-line labels (see config.toml) so each centers cleanly — a single
 # multi-line label would block-center but left-justify each line.
 #   $1 = "greeting" → time-of-day greeting
 #   $1 = "date"     → formatted date + time
-# Pango markup; polled by ironbar.
+# Pango markup.
 case "$1" in
   date)
     line=$(LC_TIME=sv_SE.UTF-8 date '+%A %e %B  ·  %H:%M')

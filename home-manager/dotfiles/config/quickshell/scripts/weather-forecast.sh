@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Forecast for the ironbar weather popup: today's 3-hourly forecast plus
+# Forecast for the Quickshell weather popup: today's 3-hourly forecast plus
 # today and the next two days. Output is Pango markup for a single multi-line
 # label — teal glyphs, white text, muted times.
 TEAL='#68b5ab'

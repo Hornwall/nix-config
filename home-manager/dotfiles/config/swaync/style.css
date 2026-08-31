@@ -1,8 +1,8 @@
-/* SwayNotificationCenter theme — matches the Ghostty/ironbar desktop.
+/* SwayNotificationCenter theme — matches the Ghostty/Quickshell desktop.
  * The control-center and notification-window layers are frosted by Hyprland
  * (`layerrule = blur, swaync-*` in hyprland.conf), so the panel uses a
  * translucent background while individual notification cards stay opaque for
- * readability — same approach as the ironbar bar vs. its widgets.
+ * readability — same approach as the Quickshell bar vs. its widgets.
  * Palette:
  *   bg       #161719   surface #1e1f22   card #2a2b2f / #3a3c41
  *   accent   #68b5ab (teal)   secondary #688fb3 (blue)
@@ -43,7 +43,7 @@
   background-color: transparent;
 }
 
-/* The card surface — a lighter opaque grey (the ironbar widget colour) so cards
+/* The card surface — a lighter opaque grey (the bar widget colour) so cards
  * stand out against the darker, more frosted panel behind them. */
 .notification-background {
   background-color: #2a2b2f;

@@ -15,8 +15,6 @@
     NIX_CONFIG_PATH = "/home/hannes/code/nix-config";
   };
 
-  # Desktop has no battery, so use a battery-less copy of the ironbar config.
-  hornwall.dotfiles.overrides = {
-    ".config/ironbar/config.toml" = ../../dotfiles/hosts/allakazam/ironbar/config.toml;
-  };
+  # Quickshell detects battery-backed systems dynamically, so the desktop uses
+  # the same bar configuration as the laptops.
 }

@@ -55,7 +55,7 @@
     pkgs.hyprpaper
     pkgs.hypridle
     pkgs.hyprlock
-    pkgs.ironbar
+    pkgs.quickshell
     pkgs.swaynotificationcenter
     pkgs.hyprcursor
     pkgs.hyprpolkitagent

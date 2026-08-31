@@ -35,7 +35,7 @@ in
     default = { };
     description = "Per-host dotfile source overrides keyed by target path.";
     example = {
-      ".config/ironbar/config.toml" = ../dotfiles/hosts/allakazam/ironbar/config.toml;
+      ".config/hypr/hypridle.conf" = ../dotfiles/config/hypr/hypridle.conf;
     };
   };
 
