@@ -46,6 +46,7 @@ ShellRoot {
     }
 
     VolumeOsd {}
+    BrightnessOsd {}
 
     Variants {
         model: Quickshell.screens
