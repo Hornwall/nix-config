@@ -63,7 +63,7 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: root.notification ? root.notification.appName : ""
-                    color: "#7d858d"
+                    color: "#9aa4ac"
                     elide: Text.ElideRight
                     font.family: "FiraCode Nerd Font"
                     font.pixelSize: 10
@@ -74,7 +74,7 @@ Rectangle {
                     implicitWidth: 28
                     implicitHeight: 26
                     text: "󰅖"
-                    accent: "#7d858d"
+                    accent: "#9aa4ac"
                     onClicked: root.notification.dismiss()
                 }
             }

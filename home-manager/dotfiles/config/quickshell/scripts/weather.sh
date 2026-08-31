@@ -1,28 +1,53 @@
 #!/usr/bin/env bash
-# Stockholm weather for the Quickshell bar: flat nerd-font condition glyph +
-# temperature (metric). The glyph is text, so it inherits the label colour.
-# Polled every 30 min by Quickshell. Prints nothing on failure so the widget
-# just disappears rather than showing an error.
-data=$(curl -fsS --max-time 5 \
-  'https://api.open-meteo.com/v1/forecast?latitude=59.3293&longitude=18.0686&current=temperature_2m,weather_code&temperature_unit=celsius&timezone=Europe%2FStockholm' \
-  2>/dev/null) || exit 0
-read -r temp code < <(
-  jq -r '[(.current.temperature_2m | round), .current.weather_code] | @tsv' <<<"$data"
-)
-[[ $temp =~ ^-?[0-9]+$ && $code =~ ^[0-9]+$ ]] || exit 0
+# Fetch structured weather data for the Quickshell weather service.
+set -euo pipefail
 
-# WMO weather interpretation codes returned by Open-Meteo.
-case "$code" in
-  95|96|99)                   icon='󰖓' ;;
-  71|73|75|77|85|86)         icon='󰖘' ;;
-  51|53|55|56|57|61|63|65|66|67|80|81|82) icon='󰖗' ;;
-  45|48)                      icon='󰖑' ;;
-  1|2)                        icon='󰖕' ;;
-  3)                          icon='󰖐' ;;
-  0)                          icon='󰖙' ;;
-  *)                          icon='󰖕' ;;
-esac
+data=$(curl -fsS --max-time 10 \
+  'https://api.open-meteo.com/v1/forecast?latitude=59.3293&longitude=18.0686&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,precipitation,is_day&hourly=temperature_2m,weather_code,precipitation_probability,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&temperature_unit=celsius&wind_speed_unit=kmh&timezone=Europe%2FStockholm&forecast_days=7' \
+  2>/dev/null)
 
-# Icon teal + sized to match the 16px image icons via Pango markup (custom
-# labels render markup); temp text takes the label colour from CSS.
-printf "<span foreground='#68b5ab' size='12pt'>%s</span> %s°C" "$icon" "$temp"
+jq -c '
+  . as $root
+  | ([range(0; ($root.hourly.time | length))
+      | select($root.hourly.time[.] >= $root.current.time)][0] // 0) as $start
+  | (if ($start + 24) < ($root.hourly.time | length)
+      then ($start + 24)
+      else ($root.hourly.time | length)
+    end) as $stop
+  | {
+      location: "Stockholm",
+      updated: $root.current.time,
+      current: {
+        temperature: ($root.current.temperature_2m | round),
+        apparentTemperature: ($root.current.apparent_temperature | round),
+        humidity: $root.current.relative_humidity_2m,
+        weatherCode: $root.current.weather_code,
+        windSpeed: ($root.current.wind_speed_10m | round),
+        precipitation: $root.current.precipitation,
+        isDay: ($root.current.is_day == 1)
+      },
+      hourly: [
+        range($start; $stop; 3) as $i
+        | {
+            time: $root.hourly.time[$i],
+            temperature: ($root.hourly.temperature_2m[$i] | round),
+            weatherCode: $root.hourly.weather_code[$i],
+            precipitationProbability: $root.hourly.precipitation_probability[$i],
+            isDay: ($root.hourly.is_day[$i] == 1)
+          }
+      ],
+      daily: [
+        range(0; ($root.daily.time | length)) as $i
+        | {
+            date: $root.daily.time[$i],
+            weatherCode: $root.daily.weather_code[$i],
+            minimum: ($root.daily.temperature_2m_min[$i] | round),
+            maximum: ($root.daily.temperature_2m_max[$i] | round),
+            precipitationProbability: $root.daily.precipitation_probability_max[$i],
+            sunrise: $root.daily.sunrise[$i],
+            sunset: $root.daily.sunset[$i],
+            uvIndex: $root.daily.uv_index_max[$i]
+          }
+      ]
+    }
+' <<<"$data"

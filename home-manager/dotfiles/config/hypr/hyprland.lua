@@ -111,7 +111,7 @@ hl.config({
 })
 
 -- Glass: frost the wallpaper behind layer-shell surfaces. The .conf form is:
---   layerrule = blur, <quickshell-bar|quickshell-notifications|walker>
+--   layerrule = blur, <quickshell-bar|quickshell-notifications|quickshell-osd|walker>
 --   layerrule = ignorezero, <same>
 -- Port these once the layer-rule binding is confirmed in the Lua API; until
 -- then hyprland.conf (the live config) carries them.

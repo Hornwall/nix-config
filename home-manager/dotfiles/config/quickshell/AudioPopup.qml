@@ -101,7 +101,7 @@ PopupWindow {
         Layout.fillWidth: true
         Layout.topMargin: 4
         text: ""
-        color: "#7d858d"
+        color: "#9aa4ac"
         font.family: "FiraCode Nerd Font"
         font.pixelSize: 11
         font.weight: Font.Bold

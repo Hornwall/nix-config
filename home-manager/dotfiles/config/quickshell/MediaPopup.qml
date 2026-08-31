@@ -106,7 +106,7 @@ PopupWindow {
                         Layout.fillWidth: true
                         visible: root.player && root.player.trackAlbum !== ""
                         text: root.player ? root.player.trackAlbum : ""
-                        color: "#7d858d"
+                        color: "#9aa4ac"
                         elide: Text.ElideRight
                         font.family: "FiraCode Nerd Font"
                         font.pixelSize: 10
@@ -168,7 +168,7 @@ PopupWindow {
 
                 Text {
                     text: root.formatTime(root.player ? root.player.position : 0)
-                    color: "#7d858d"
+                    color: "#9aa4ac"
                     font.family: "FiraCode Nerd Font"
                     font.pixelSize: 10
                 }
@@ -177,7 +177,7 @@ PopupWindow {
 
                 Text {
                     text: root.formatTime(root.player ? root.player.length : 0)
-                    color: "#7d858d"
+                    color: "#9aa4ac"
                     font.family: "FiraCode Nerd Font"
                     font.pixelSize: 10
                 }
@@ -189,7 +189,7 @@ PopupWindow {
 
                 Text {
                     text: "PLAYERS"
-                    color: "#7d858d"
+                    color: "#9aa4ac"
                     font.family: "FiraCode Nerd Font"
                     font.pixelSize: 10
                     font.weight: Font.Bold

@@ -37,6 +37,7 @@ PanelWindow {
         right: true
     }
     margins {
+        top: 0
         left: 6
         right: 6
     }
@@ -45,12 +46,6 @@ PanelWindow {
 
     PwObjectTracker {
         objects: [bar.sink]
-    }
-
-    ScriptValue {
-        id: weather
-        command: [Quickshell.env("HOME") + "/.config/quickshell/scripts/weather.sh"]
-        interval: 1800000
     }
 
     ScriptValue {
@@ -67,10 +62,22 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        radius: 16
+        radius: 0
+        topLeftRadius: 0
+        topRightRadius: 0
+        bottomLeftRadius: 16
+        bottomRightRadius: 16
         color: "#e6161719"
-        border.width: 1
-        border.color: "#0fffffff"
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
+            implicitHeight: 1
+            color: "#0fffffff"
+        }
 
         RowLayout {
             id: start
@@ -188,22 +195,17 @@ PanelWindow {
             }
 
             BarButton {
+                id: powerButton
                 visible: bar.battery.ready && bar.battery.isLaptopBattery
                 text: {
                     const percent = Math.round(bar.battery.percentage * 100);
-                    const icon = percent < 15 ? "󰁺" : percent < 40 ? "󰁾"
+                    const batteryIcon = bar.battery.state === UPowerDeviceState.Charging ? "󰂄"
+                        : percent < 15 ? "󰁺" : percent < 40 ? "󰁾"
                         : percent < 70 ? "󰂀" : percent < 90 ? "󰂂" : "󰁹";
-                    return icon + " " + percent + "%";
+                    return batteryIcon + " " + percent + "%";
                 }
                 textColor: bar.battery.percentage < 0.15 ? "#d1434c" : "#ffffff"
-            }
-
-            BarButton {
-                id: profileButton
-                visible: bar.battery.ready && bar.battery.isLaptopBattery
-                text: PowerProfiles.profile === PowerProfile.Performance ? "󰓅"
-                    : PowerProfiles.profile === PowerProfile.PowerSaver ? "󰌪" : "󰾅"
-                onClicked: profilePopup.visible = !profilePopup.visible
+                onClicked: powerPopup.visible = !powerPopup.visible
             }
 
             BarButton {
@@ -251,8 +253,14 @@ PanelWindow {
 
             BarButton {
                 id: weatherButton
-                visible: weather.text !== ""
-                text: weather.text.replace(/<[^>]*>/g, "")
+                visible: bar.shell.weather.weatherData !== null
+                text: {
+                    const weather = bar.shell.weather;
+                    if (!weather.weatherData)
+                        return "";
+                    return weather.iconFor(weather.weatherData.current.weatherCode, weather.weatherData.current.isDay)
+                        + " " + weather.weatherData.current.temperature + "°C";
+                }
                 textColor: "#ffffff"
                 onClicked: weatherPopup.visible = !weatherPopup.visible
             }
@@ -263,8 +271,10 @@ PanelWindow {
             }
 
             BarButton {
+                id: clockButton
                 text: Qt.locale("sv_SE").toString(clock.date, "ddd MMM dd  HH:mm")
                 textColor: "#ffffff"
+                onClicked: calendarPopup.visible = !calendarPopup.visible
             }
 
             BarButton {
@@ -306,11 +316,18 @@ PanelWindow {
     WeatherPopup {
         id: weatherPopup
         anchorItem: weatherButton
+        weather: bar.shell.weather
     }
 
-    PowerProfilePopup {
-        id: profilePopup
-        anchorItem: profileButton
+    PowerPopup {
+        id: powerPopup
+        anchorItem: powerButton
+    }
+
+    CalendarPopup {
+        id: calendarPopup
+        anchorItem: clockButton
+        clock: clock
     }
 
     NotificationCenterPopup {

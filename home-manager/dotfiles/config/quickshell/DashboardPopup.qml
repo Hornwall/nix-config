@@ -69,7 +69,7 @@ PopupWindow {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.bottomMargin: 4
                 text: Qt.locale("sv_SE").toString(clock.date, "dddd d MMMM  ·  HH:mm")
-                color: "#7d858d"
+                color: "#9aa4ac"
                 font.family: "FiraCode Nerd Font"
                 font.pixelSize: 13
             }
@@ -155,7 +155,7 @@ PopupWindow {
         Layout.fillWidth: true
         Layout.topMargin: 5
         text: ""
-        color: "#7d858d"
+        color: "#9aa4ac"
         font.family: "FiraCode Nerd Font"
         font.pixelSize: 11
         font.weight: Font.Bold

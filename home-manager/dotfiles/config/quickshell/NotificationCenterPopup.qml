@@ -46,7 +46,7 @@ PopupWindow {
                 Text {
                     Layout.fillWidth: true
                     text: "NOTIFICATIONS"
-                    color: "#7d858d"
+                    color: "#9aa4ac"
                     font.family: "FiraCode Nerd Font"
                     font.pixelSize: 11
                     font.weight: Font.Bold
@@ -57,7 +57,7 @@ PopupWindow {
                     implicitWidth: 74
                     implicitHeight: 30
                     text: root.shell.doNotDisturb ? "󰂛  DND" : "󰂚  DND"
-                    accent: root.shell.doNotDisturb ? "#ab78ad" : "#7d858d"
+                    accent: root.shell.doNotDisturb ? "#ab78ad" : "#9aa4ac"
                     onClicked: root.shell.doNotDisturb = !root.shell.doNotDisturb
                 }
 
@@ -77,7 +77,7 @@ PopupWindow {
                 Layout.fillHeight: true
                 text: "󰂚\nAll caught up"
                 horizontalAlignment: Text.AlignHCenter
-                color: "#7d858d"
+                color: "#9aa4ac"
                 font.family: "FiraCode Nerd Font"
                 font.pixelSize: 14
                 lineHeight: 1.5

@@ -52,7 +52,7 @@ PopupWindow {
                 Text {
                     Layout.fillWidth: true
                     text: "BLUETOOTH"
-                    color: "#7d858d"
+                    color: "#9aa4ac"
                     font.family: "FiraCode Nerd Font"
                     font.pixelSize: 11
                     font.weight: Font.Bold
@@ -62,7 +62,7 @@ PopupWindow {
                 Text {
                     visible: root.adapter && root.adapter.discovering
                     text: "Scanning…"
-                    color: "#7d858d"
+                    color: "#9aa4ac"
                     font.family: "FiraCode Nerd Font"
                     font.pixelSize: 10
                 }
@@ -71,7 +71,7 @@ PopupWindow {
                     implicitWidth: 82
                     implicitHeight: 30
                     text: root.adapter && root.adapter.enabled ? "󰂯  On" : "󰂲  Off"
-                    accent: root.adapter && root.adapter.enabled ? "#68b5ab" : "#7d858d"
+                    accent: root.adapter && root.adapter.enabled ? "#68b5ab" : "#9aa4ac"
                     onClicked: {
                         if (root.adapter)
                             root.adapter.enabled = !root.adapter.enabled;
@@ -103,7 +103,7 @@ PopupWindow {
                         visible: root.sortedDevices.length === 0
                         Layout.alignment: Qt.AlignHCenter
                         text: "Searching for devices…"
-                        color: "#7d858d"
+                        color: "#9aa4ac"
                         font.family: "FiraCode Nerd Font"
                         font.pixelSize: 12
                     }
@@ -169,7 +169,7 @@ PopupWindow {
                                                 ? " · " + Math.round(deviceRow.modelData.battery * 100) + "%" : "")
                                             : deviceRow.modelData.pairing ? "Pairing…"
                                             : deviceRow.modelData.paired ? "Paired" : "Available"
-                                        color: deviceRow.modelData.connected ? "#68b5ab" : "#7d858d"
+                                        color: deviceRow.modelData.connected ? "#68b5ab" : "#9aa4ac"
                                         font.family: "FiraCode Nerd Font"
                                         font.pixelSize: 10
                                     }

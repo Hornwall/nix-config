@@ -51,7 +51,7 @@ PopupWindow {
                 Text {
                     Layout.fillWidth: true
                     text: "NETWORK"
-                    color: "#7d858d"
+                    color: "#9aa4ac"
                     font.family: "FiraCode Nerd Font"
                     font.pixelSize: 11
                     font.weight: Font.Bold
@@ -71,7 +71,7 @@ PopupWindow {
                     implicitWidth: 86
                     implicitHeight: 30
                     text: Networking.wifiEnabled ? "󰖩  Wi-Fi" : "󰖪  Wi-Fi"
-                    accent: Networking.wifiEnabled ? "#68b5ab" : "#7d858d"
+                    accent: Networking.wifiEnabled ? "#68b5ab" : "#9aa4ac"
                     onClicked: Networking.wifiEnabled = !Networking.wifiEnabled
                 }
             }
@@ -161,7 +161,7 @@ PopupWindow {
                                         Text {
                                             text: (networkRow.modelData.known ? "Saved · " : "")
                                                 + WifiSecurityType.toString(networkRow.modelData.security)
-                                            color: "#7d858d"
+                                            color: "#9aa4ac"
                                             font.family: "FiraCode Nerd Font"
                                             font.pixelSize: 10
                                         }

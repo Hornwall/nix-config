@@ -11,6 +11,11 @@ ShellRoot {
     property bool toastVisible: false
     property int toastSerial: 0
     property alias notificationServer: notifications
+    property alias weather: weatherService
+
+    WeatherService {
+        id: weatherService
+    }
 
     NotificationServer {
         id: notifications
@@ -31,6 +36,8 @@ ShellRoot {
             }
         }
     }
+
+    VolumeOsd {}
 
     Variants {
         model: Quickshell.screens
