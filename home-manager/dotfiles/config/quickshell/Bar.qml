@@ -24,6 +24,21 @@ PanelWindow {
     property var sink: Pipewire.defaultAudioSink
     property var battery: UPower.displayDevice
 
+    function togglePopup(target) {
+        const wasVisible = target.visible;
+        const popups = [
+            dashboardPopup, mediaPopup, audioPopup, networkPopup,
+            bluetoothPopup, weatherPopup, powerPopup, calendarPopup,
+            notificationPopup
+        ];
+
+        for (const popup of popups)
+            popup.visible = false;
+
+        if (!wasVisible)
+            target.visible = true;
+    }
+
     screen: modelData
     visible: shell.barVisible
     aboveWindows: true
@@ -90,7 +105,7 @@ PanelWindow {
             BarButton {
                 id: dashboardButton
                 text: "󰍜"
-                onClicked: dashboardPopup.visible = !dashboardPopup.visible
+                onClicked: bar.togglePopup(dashboardPopup)
             }
 
             Repeater {
@@ -137,7 +152,7 @@ PanelWindow {
                 if (mouse.button === Qt.MiddleButton && bar.player && bar.player.canTogglePlaying)
                     bar.player.togglePlaying();
                 else
-                    mediaPopup.visible = !mediaPopup.visible;
+                    bar.togglePopup(mediaPopup);
             }
         }
 
@@ -164,7 +179,7 @@ PanelWindow {
                     if (mouse.button === Qt.RightButton && bar.sink && bar.sink.audio)
                         bar.sink.audio.muted = !bar.sink.audio.muted;
                     else
-                        audioPopup.visible = !audioPopup.visible;
+                        bar.togglePopup(audioPopup);
                 }
                 onWheel: wheel => {
                     if (bar.sink && bar.sink.audio) {
@@ -178,7 +193,7 @@ PanelWindow {
                 id: networkButton
                 text: !bar.networkDevice ? "󰤭"
                     : bar.networkDevice.type === DeviceType.Wired ? "󰈀" : "󰤨"
-                onClicked: networkPopup.visible = !networkPopup.visible
+                onClicked: bar.togglePopup(networkPopup)
             }
 
             BarButton {
@@ -190,7 +205,7 @@ PanelWindow {
                     if (mouse.button === Qt.RightButton && bar.bluetoothAdapter)
                         bar.bluetoothAdapter.enabled = !bar.bluetoothAdapter.enabled;
                     else
-                        bluetoothPopup.visible = !bluetoothPopup.visible;
+                        bar.togglePopup(bluetoothPopup);
                 }
             }
 
@@ -205,7 +220,7 @@ PanelWindow {
                     return batteryIcon + " " + percent + "%";
                 }
                 textColor: bar.battery.percentage < 0.15 ? "#d1434c" : "#ffffff"
-                onClicked: powerPopup.visible = !powerPopup.visible
+                onClicked: bar.togglePopup(powerPopup)
             }
 
             BarButton {
@@ -235,8 +250,11 @@ PanelWindow {
                     }
 
                     MouseArea {
+                        id: trayMouse
                         anchors.fill: parent
                         acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: function(mouse) {
                             if (mouse.button === Qt.MiddleButton) {
                                 trayItem.modelData.secondaryActivate();
@@ -262,7 +280,7 @@ PanelWindow {
                         + " " + weather.weatherData.current.temperature + "°C";
                 }
                 textColor: "#ffffff"
-                onClicked: weatherPopup.visible = !weatherPopup.visible
+                onClicked: bar.togglePopup(weatherPopup)
             }
 
             SystemClock {
@@ -274,7 +292,7 @@ PanelWindow {
                 id: clockButton
                 text: Qt.locale("sv_SE").toString(clock.date, "ddd MMM dd  HH:mm")
                 textColor: "#ffffff"
-                onClicked: calendarPopup.visible = !calendarPopup.visible
+                onClicked: bar.togglePopup(calendarPopup)
             }
 
             BarButton {
@@ -282,7 +300,7 @@ PanelWindow {
                 property int count: bar.shell.notificationServer.trackedNotifications.values.length
                 text: (bar.shell.doNotDisturb ? "󰂛" : "󰂚") + (count > 0 ? " " + count : "")
                 textColor: bar.shell.doNotDisturb ? "#ab78ad" : "#b4befe"
-                onClicked: notificationPopup.visible = !notificationPopup.visible
+                onClicked: bar.togglePopup(notificationPopup)
             }
         }
     }

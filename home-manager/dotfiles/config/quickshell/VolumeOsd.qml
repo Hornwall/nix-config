@@ -95,6 +95,13 @@ Scope {
                                     ? root.sink.audio.volume : 0))
                             radius: parent.radius
                             color: "#68b5ab"
+
+                            Behavior on width {
+                                NumberAnimation {
+                                    duration: 120
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
                         }
                     }
 

@@ -47,12 +47,10 @@ PopupWindow {
     implicitWidth: 338
     implicitHeight: content.implicitHeight + 24
 
-    Rectangle {
+    PopupPanel {
         anchors.fill: parent
-        radius: 14
-        color: "#f51e1f22"
-        border.width: 1
-        border.color: "#14ffffff"
+        shown: root.visible
+        onCloseRequested: root.visible = false
 
         ColumnLayout {
             id: content

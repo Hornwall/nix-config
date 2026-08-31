@@ -35,14 +35,13 @@ PopupWindow {
         active: root.visible
     }
 
-    Rectangle {
+    PopupPanel {
         id: panel
         implicitWidth: root.implicitWidth
         implicitHeight: content.implicitHeight + 24
-        radius: 14
-        color: "#f51e1f22"
-        border.width: 1
-        border.color: "#14ffffff"
+        shown: root.visible
+        transformOrigin: Item.TopLeft
+        onCloseRequested: root.visible = false
 
         ColumnLayout {
             id: content

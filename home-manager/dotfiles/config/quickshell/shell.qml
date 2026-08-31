@@ -5,13 +5,21 @@ import Quickshell.Services.Notifications
 ShellRoot {
     id: root
 
-    property bool barVisible: true
-    property bool doNotDisturb: false
+    property alias barVisible: persistentState.barVisible
+    property alias doNotDisturb: persistentState.doNotDisturb
     property var latestNotification: null
     property bool toastVisible: false
     property int toastSerial: 0
     property alias notificationServer: notifications
     property alias weather: weatherService
+
+    PersistentProperties {
+        id: persistentState
+        reloadableId: "shell-state"
+
+        property bool barVisible: true
+        property bool doNotDisturb: false
+    }
 
     WeatherService {
         id: weatherService
