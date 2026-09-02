@@ -13,6 +13,7 @@ ShellRoot {
     property alias notificationServer: notifications
     property alias weather: weatherService
     property alias githubReviews: githubReviewService
+    property alias githubPullRequests: githubPullRequestService
 
     PersistentProperties {
         id: persistentState
@@ -28,6 +29,10 @@ ShellRoot {
 
     GithubReviewService {
         id: githubReviewService
+    }
+
+    GithubPullRequestService {
+        id: githubPullRequestService
     }
 
     NotificationServer {
