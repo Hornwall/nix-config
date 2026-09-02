@@ -12,6 +12,7 @@ ShellRoot {
     property int toastSerial: 0
     property alias notificationServer: notifications
     property alias weather: weatherService
+    property alias githubReviews: githubReviewService
 
     PersistentProperties {
         id: persistentState
@@ -23,6 +24,10 @@ ShellRoot {
 
     WeatherService {
         id: weatherService
+    }
+
+    GithubReviewService {
+        id: githubReviewService
     }
 
     NotificationServer {
@@ -60,6 +65,14 @@ ShellRoot {
         model: Quickshell.screens
 
         NotificationToasts {
+            shell: root
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        EmptyWorkspaceWidgets {
             shell: root
         }
     }
