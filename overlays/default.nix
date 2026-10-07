@@ -32,7 +32,13 @@
   unstable-packages = final: _prev: {
     unstable = import inputs.nixpkgs-unstable {
       system = final.stdenv.hostPlatform.system;
-      config.allowUnfree = true;
+      config = {
+        allowUnfree = true;
+        permittedInsecurePackages = [
+          # Required by openscreen 1.4.0.
+          "electron-41.10.6"
+        ];
+      };
     };
   };
 }
