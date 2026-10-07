@@ -59,6 +59,11 @@
       inputs.elephant.follows = "elephant";
     };
 
+    tether = {
+      url = "github:zackb/tether";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -135,6 +140,7 @@
          modules = [
            nixos-hardware.nixosModules.lenovo-thinkpad-z
            hyprland.nixosModules.default
+           inputs.tether.nixosModules.default
            ./nixos/thinkpad-z16/configuration.nix
          ];
        };
