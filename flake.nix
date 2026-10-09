@@ -14,26 +14,6 @@
 
     hyprland.url = "github:hyprwm/Hyprland";
 
-    hyprland-plugins = {
-      url = "github:hyprwm/hyprland-plugins";
-      inputs.hyprland.follows = "hyprland";
-    };
-
-    nixpkgs-hyprland = {
-      # Hyprland pinned to 0.55.4: hyprsplit doesn't compile against the
-      # reworked state/* API in hyprland 0.56 yet (shezdy/hyprsplit#90).
-      # Drop this input and go back to pkgs.unstable in
-      # nixos/common/hyprland.nix once upstream supports 0.56.
-      url = "github:nixos/nixpkgs/753cc8a3a87467296ddd1fa93f0cc3e81120ee46";
-    };
-
-    hyprsplit = {
-      # Used only as a source for the hyprsplit plugin, which we build
-      # against pkgs.unstable.hyprland in nixos/common/hyprland.nix.
-      url = "github:shezdy/hyprsplit";
-      flake = false;
-    };
-
     opencode-src = {
       # Pinned to a known-good rev (bun@1.3.13, matches nixpkgs). Newer dev revs
       # bump to bun@1.3.14 and/or have broken build.ts. Bump deliberately once
@@ -75,7 +55,6 @@
      nixpkgs-unstable,
      home-manager,
      hyprland,
-     hyprland-plugins,
      ...
    } @ inputs: let
      inherit (self) outputs;

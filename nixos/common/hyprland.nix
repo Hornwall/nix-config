@@ -1,14 +1,4 @@
-{ inputs, pkgs }:
-let
-  # Hyprland comes from the pinned nixpkgs-hyprland input (0.55.4), not
-  # pkgs.unstable: hyprsplit doesn't compile against hyprland 0.56's reworked
-  # state/* API yet (shezdy/hyprsplit#90). Switch back to pkgs.unstable and
-  # drop the input once upstream supports 0.56.
-  hyprPkgs = import inputs.nixpkgs-hyprland {
-    system = pkgs.stdenv.hostPlatform.system;
-    config.allowUnfree = true;
-  };
-in
+{ pkgs }:
 {
   #programs.hyperland = {
   #  enable = true;
@@ -17,16 +7,7 @@ in
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
-    package = hyprPkgs.hyprland;
-    plugins = [
-      # nixpkgs' hyprsplit (0.54.2) lags hyprland (0.55.x) and no longer
-      # compiles against it, so build the plugin from the pinned hyprsplit
-      # input source against the hyprland we actually run.
-      (hyprPkgs.hyprlandPlugins.hyprsplit.overrideAttrs {
-        src = inputs.hyprsplit;
-        version = "0.55-unstable";
-      })
-    ];
+    package = pkgs.unstable.hyprland;
   };
 
   # Route portal requests to the Hyprland backend under Hyprland sessions.
