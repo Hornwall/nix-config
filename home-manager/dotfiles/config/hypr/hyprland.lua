@@ -39,6 +39,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("firefox")
     hl.exec_cmd("slack")
     hl.exec_cmd("voxtype daemon")
+    hl.exec_cmd("tetherd")
 end)
 
 -------------------------------
