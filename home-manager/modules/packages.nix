@@ -11,6 +11,7 @@
     pkgs.gcc
     pkgs.nodejs
     pkgs.gnumake
+    pkgs.unzip
     pkgs.ripgrep
     pkgs.jq
     pkgs.wl-clipboard
