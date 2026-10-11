@@ -32,6 +32,7 @@
     pkgs.opencode
     pkgs.claude-code
     pkgs.graphify
+    pkgs.xtool
     pkgs.unstable.pi-coding-agent
 
     # Desktop Applications

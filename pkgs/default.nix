@@ -19,6 +19,7 @@
   };
   pup = pkgs.callPackage ./pup.nix { };
   tuple = pkgs.callPackage ./tuple.nix { };
+  xtool = pkgs.callPackage ./xtool.nix { };
   voxtype = pkgs.callPackage ./voxtype.nix { vulkanSupport = true; };
   voxtype-cuda = if pkgs.stdenv.hostPlatform.isLinux then pkgs.callPackage ./voxtype.nix { cudaSupport = true; } else pkgs.callPackage ./voxtype.nix { };
   voxtype-onnx = pkgs.callPackage ./voxtype.nix { onnxSupport = true; };

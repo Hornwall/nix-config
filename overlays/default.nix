@@ -36,7 +36,7 @@
         allowUnfree = true;
         permittedInsecurePackages = [
           # Required by openscreen 1.4.0.
-          "electron-41.10.6"
+          "electron-41.10.7"
         ];
       };
     };
