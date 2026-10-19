@@ -4,21 +4,20 @@ let
   # Keep this aligned with aboardhrWtCount in nixos/thinkpad-z16/aboard.nix.
   aboardhrWtCount = 10;
 
-  aboardFeature = pkgs.writeShellApplication {
-    name = "aboard-feature";
+  aboardWorktree = pkgs.writeShellApplication {
+    name = "aboard-wt";
     runtimeInputs = with pkgs; [
       coreutils
       direnv
       git
-      gnugrep
-      gnused
-      iproute2
+      python3
       tmux
       unstable.devenv
     ];
     text = ''
-      export ABOARD_FEATURE_SLOT_COUNT=${toString aboardhrWtCount}
-      ${builtins.readFile ../scripts/aboard-feature.sh}
+      export ABOARD_WT_SLOT_COUNT=${toString aboardhrWtCount}
+      export ABOARD_WT_EXE="$0"
+      exec python3 ${../scripts/aboard-wt.py} "$@"
     '';
   };
 in
@@ -35,7 +34,7 @@ in
     pkgs.pup
     pkgs.abrd-admin
     pkgs.abrd
-    aboardFeature
+    aboardWorktree
     # Add any ThinkPad Z16 specific packages here
   ];
 

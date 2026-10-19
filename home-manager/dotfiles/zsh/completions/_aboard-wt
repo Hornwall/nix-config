@@ -1,0 +1,49 @@
+#compdef aboard-wt
+
+_aboard-wt() {
+  local context state state_descr line
+  typeset -A opt_args
+  local -a commands candidates
+  commands=(
+    'create:Create and seed an isolated workspace'
+    'open:Open the editor and development tmux windows'
+    'list:List workspaces and URLs'
+    'setup:Retry interrupted workspace setup'
+    'up:Run the full stack in the foreground'
+    'stop:Stop services and preserve data'
+    'remove:Confirm workspace and database deletion'
+  )
+
+  _arguments -C \
+    '1:command:->command' \
+    '*::argument:->arguments'
+
+  case "$state" in
+    command)
+      _describe 'command' commands
+      ;;
+    arguments)
+      case "$line[1]" in
+        create)
+          _arguments \
+            '--branch[Existing local or remote branch]:branch:->branches' \
+            '--base[Base for a new branch]:branch:->branches' \
+            '--no-open[Prepare without opening tmux]' \
+            '1:workspace name:'
+          ;;
+        open|setup|up|stop|remove)
+          _arguments '1:workspace:->workspaces'
+          ;;
+      esac
+      ;;
+  esac
+
+  case "$state" in
+    branches|workspaces)
+      candidates=("${(@f)$(aboard-wt _complete "$state" 2>/dev/null)}")
+      compadd -a candidates
+      ;;
+  esac
+}
+
+_aboard-wt "$@"

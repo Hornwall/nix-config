@@ -1,5 +1,5 @@
 # Append autocomplete scripts installed by brew
-fpath=('/usr/local/share/zsh/site-functions' $fpath)
+fpath=("$HOME/.zsh/completions" '/usr/local/share/zsh/site-functions' $fpath)
 
 # Enable completion
 autoload -Uz compinit
