@@ -11,6 +11,8 @@ Rectangle {
     required property string hint
     property bool hovered: mouse.containsMouse
 
+    signal triggered
+
     width: 26
     height: 26
     radius: 8
@@ -31,6 +33,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: Quickshell.execDetached(["agent-run", root.action, root.url])
+        onClicked: {
+            Quickshell.execDetached(["agent-run", root.action, root.url]);
+            root.triggered();
+        }
     }
 }

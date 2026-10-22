@@ -8,7 +8,7 @@ Rectangle {
     required property var shell
     property int pullRequestCount: shell.githubReviews.pullRequests.length
     property int bodyHeight: pullRequestCount > 0
-        ? Math.min(pullRequestCount, 6) * 78 - 6 : 90
+        ? Math.min(pullRequestCount, 6) * 94 - 6 : 90
 
     function relativeTime(value) {
         const seconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000));
@@ -19,6 +19,34 @@ Rectangle {
         if (seconds < 86400)
             return Math.floor(seconds / 3600) + "h ago";
         return Math.floor(seconds / 86400) + "d ago";
+    }
+
+    function riskColor(risk) {
+        if (risk === "high")
+            return "#d1434c";
+        if (risk === "medium")
+            return "#f9e2af";
+        return "#a6e3a1";
+    }
+
+    function triageLine(pullRequest) {
+        const triage = shell.githubReviews.triage[pullRequest.url];
+        if (pullRequest.isDraft)
+            return "Draft, not triaged";
+        if (!triage || (triage.status === "running" && !triage.summary))
+            return "Triaging…";
+        if (triage.status === "error" && !triage.summary)
+            return "Triage failed: " + triage.error;
+        return triage.summary;
+    }
+
+    function triageMeta(pullRequest) {
+        const triage = shell.githubReviews.triage[pullRequest.url];
+        if (!triage || !triage.risk)
+            return "";
+        const flags = (triage.flags || []).join(", ").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+        return "  ·  <font color=\"" + riskColor(triage.risk) + "\">● " + triage.risk + "</font>  ·  ~"
+            + triage.minutes + " min" + (flags !== "" ? "  ·  " + flags : "");
     }
 
     function agentActions(pullRequest) {
@@ -107,6 +135,7 @@ Rectangle {
         Item {
             Layout.fillWidth: true
             Layout.preferredHeight: root.bodyHeight
+            Layout.fillHeight: true
 
             Text {
                 anchors.centerIn: parent
@@ -134,9 +163,10 @@ Rectangle {
                     id: pullRequest
 
                     required property var modelData
+                    required property int index
                     property string hint: ""
                     width: pullRequestList.width
-                    height: 72
+                    height: 88
                     radius: 11
                     color: rowHover.hovered ? "#1f68b5ab" : "#092a2b2f"
                     border.width: 1
@@ -144,6 +174,13 @@ Rectangle {
 
                     HoverHandler {
                         id: rowHover
+                    }
+
+                    StackRail {
+                        id: stackRail
+                        pullRequests: pullRequestList.model
+                        index: pullRequest.index
+                        gap: pullRequestList.spacing
                     }
 
                     Column {
@@ -158,6 +195,7 @@ Rectangle {
                             width: parent.width
                             text: pullRequest.modelData.repository + " #" + pullRequest.modelData.number
                                 + (pullRequest.modelData.isDraft ? "  ·  draft" : "")
+                                + (stackRail.label !== "" ? "  ·  " + stackRail.label : "")
                             color: "#b4befe"
                             elide: Text.ElideRight
                             font.family: "FiraCode Nerd Font"
@@ -176,9 +214,20 @@ Rectangle {
 
                         Text {
                             width: parent.width
+                            text: root.triageLine(pullRequest.modelData)
+                            color: "#a9b1ba"
+                            elide: Text.ElideRight
+                            font.family: "FiraCode Nerd Font"
+                            font.pixelSize: 11
+                        }
+
+                        Text {
+                            width: parent.width
+                            textFormat: Text.StyledText
                             text: pullRequest.hint !== "" ? pullRequest.hint
                                 : "@" + pullRequest.modelData.author + "  ·  "
                                     + root.relativeTime(pullRequest.modelData.updatedAt)
+                                    + root.triageMeta(pullRequest.modelData)
                             color: pullRequest.hint !== "" ? "#68b5ab" : "#7d8690"
                             elide: Text.ElideRight
                             font.family: "FiraCode Nerd Font"
@@ -202,7 +251,10 @@ Rectangle {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: Quickshell.execDetached(["xdg-open", pullRequest.modelData.url])
+                        onClicked: {
+                            Quickshell.execDetached(["xdg-open", pullRequest.modelData.url]);
+                            root.shell.workOverlayOpen = false;
+                        }
                     }
 
                     Row {
@@ -222,6 +274,7 @@ Rectangle {
                                 hint: modelData.hint
                                 url: pullRequest.modelData.url
                                 onHoveredChanged: pullRequest.hint = hovered ? hint : ""
+                                onTriggered: root.shell.workOverlayOpen = false
                             }
                         }
                     }

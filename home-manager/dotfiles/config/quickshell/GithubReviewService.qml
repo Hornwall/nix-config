@@ -9,6 +9,8 @@ Scope {
     property bool loading: false
     property string error: ""
     property var lastUpdated: null
+    // Background triage by `agent-run triage`, keyed by PR url.
+    property var triage: ({})
 
     function refresh() {
         if (fetchProcess.running)
@@ -33,6 +35,7 @@ Scope {
                     root.pullRequests = result.pullRequests || [];
                     root.error = result.error || "";
                     root.lastUpdated = new Date();
+                    root.startTriage();
                 } catch (exception) {
                     root.error = "Invalid response from GitHub";
                 }
@@ -44,6 +47,35 @@ Scope {
             if (exitCode !== 0)
                 root.error = "Could not load GitHub review requests";
         }
+    }
+
+    function startTriage() {
+        const urls = pullRequests.filter(pullRequest => !pullRequest.isDraft)
+            .map(pullRequest => pullRequest.url);
+        if (urls.length > 0)
+            Quickshell.execDetached(["agent-run", "triage"].concat(urls));
+    }
+
+    Process {
+        id: triageProcess
+        command: ["agent-run", "triage", "--watch"]
+        running: true
+
+        stdout: SplitParser {
+            onRead: data => {
+                try {
+                    root.triage = JSON.parse(data);
+                } catch (exception) {}
+            }
+        }
+
+        onExited: (exitCode, exitStatus) => triageRestartTimer.start()
+    }
+
+    Timer {
+        id: triageRestartTimer
+        interval: 5000
+        onTriggered: triageProcess.running = true
     }
 
     Timer {

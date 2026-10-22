@@ -151,6 +151,11 @@ class Workspaces:
             self.write_config(path, slot)
             shutil.copyfile(self.repo / ".env.development", path / ".env.development")
             (path / ".env.development").chmod(0o600)
+            # Holds the private gem source credentials (e.g. packager.dev for Avo).
+            if (self.repo / ".bundle" / "config").is_file():
+                (path / ".bundle").mkdir(exist_ok=True)
+                shutil.copyfile(self.repo / ".bundle" / "config", path / ".bundle" / "config")
+                (path / ".bundle" / "config").chmod(0o600)
         print(f"Workspace: {path}\nURL: {self.url(slot)}", flush=True)
         print(f"If setup fails, retry with: aboard-wt setup {name}", flush=True)
         self.setup(name)

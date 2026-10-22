@@ -13,7 +13,7 @@ import sys
 import time
 
 
-ACTIONS = ("review", "second-opinion", "fix-ci", "address-comments", "rebase")
+ACTIONS = ("review", "second-opinion", "fix-ci", "address-comments", "rebase", "rebase-stack")
 REVIEW_ACTIONS = {"review", "second-opinion"}
 DEFAULT_AGENTS = {
     "review": "pi",
@@ -21,14 +21,24 @@ DEFAULT_AGENTS = {
     "fix-ci": "claude",
     "address-comments": "claude",
     "rebase": "claude",
+    "rebase-stack": "claude",
 }
 SESSION = "agents"
 SHELLS = {"zsh", "bash", "sh", "fish"}
 REVIEW_MAX_AGE_DAYS = 14
+# Only turns at least this long notify when they finish.
+DONE_NOTIFY_SECONDS = 30
 CODE_DIR = Path(os.environ.get("AGENT_RUN_CODE_DIR", "~/code")).expanduser()
 ABOARD_REPO = Path(os.environ.get("ABOARD_REPO", "~/code/aboard")).expanduser().resolve()
 DATA_DIR = Path(os.environ.get("XDG_DATA_HOME", "~/.local/share")).expanduser() / "agent-run"
 WORKTREE_ROOT = DATA_DIR / "worktrees"
+TRIAGE_DIR = Path(os.environ.get("XDG_CACHE_HOME", "~/.cache")).expanduser() / "agent-run" / "triage"
+TRIAGE_MODEL = "haiku"
+# Diffs are cut here (~40k tokens) so one huge PR can't run up the bill.
+TRIAGE_MAX_DIFF = 150_000
+TRIAGE_RETRY_SECONDS = 3600
+LOCK_FILES = {"Gemfile.lock", "yarn.lock", "package-lock.json", "pnpm-lock.yaml", "flake.lock", "Cargo.lock",
+              "poetry.lock", "composer.lock", "mix.lock", "bun.lockb"}
 
 
 class AgentRunError(Exception):
@@ -64,6 +74,12 @@ def parse_url(url):
     return match[1], match[2], int(match[3])
 
 
+def stack_lines(pr):
+    return "\n".join(f"- #{member['number']} {member['headRefName']}"
+                     + (f" ({member['worktree']})" if member.get("worktree") else "")
+                     for member in pr.get("stack", []))
+
+
 def prompt(action, pr):
     url, base, number = pr["url"], pr["baseRefName"], pr["number"]
     context = f"Pull request #{number} \"{pr['title']}\" ({url}), base branch {base}."
@@ -89,6 +105,15 @@ explain why you disagree, then summarise what you did per comment. Do not reply 
 The branch conflicts with {base}. Run `git fetch origin` and rebase onto origin/{base}, resolving conflicts
 by keeping the intent of both sides. Run the tests touching the conflicted files. Ask me before
 force-pushing.""",
+        "rebase-stack": f"""{context}
+It is the base of this stack of pull requests, bottom first (branch, then the worktree it is checked out in):
+{stack_lines(pr)}
+You are in a checkout of the top branch. Run `git fetch origin`, then rebase the whole stack onto
+origin/{base} at once with `git rebase --update-refs origin/{base}`, resolving conflicts by keeping the intent of
+both sides. Git skips branches that are checked out in other worktrees; afterwards point each of those at its
+rebased commit, with `git -C <worktree> reset --hard <commit>` if that worktree has no local changes, and
+otherwise stop and ask me. Run the tests touching the conflicted files. Then show me each branch with its new
+commit, and ask me before force-pushing them all with `git push --force-with-lease origin <branches>`.""",
     }[action]
 
 
@@ -108,10 +133,12 @@ def parent_pid(pid):
 
 def window_of(pid):
     """The Hyprland window address owning pid or one of its ancestors."""
-    if not shutil.which("hyprctl"):
+    clients = run("hyprctl", "clients", "-j", capture=True, check=False) if shutil.which("hyprctl") else None
+    if not clients or clients.returncode or not clients.stdout.strip():
         return None
+    # One process can own several windows (e.g. Ghostty); take the most recently focused.
     windows = {client["pid"]: client["address"] for client in
-               json.loads(run("hyprctl", "clients", "-j", capture=True).stdout)}
+               sorted(json.loads(clients.stdout), key=lambda client: client.get("focusHistoryID", 0), reverse=True)}
     with contextlib.suppress(OSError, ValueError):
         while pid > 1 and pid not in windows:
             pid = parent_pid(pid)
@@ -134,24 +161,40 @@ def focus_window_of(pid):
 
 
 def focus_session(session):
-    """Show the tmux session in an open terminal, switching the most recently used tmux client
-    to it; a new terminal is only opened when no tmux client has a window."""
+    """Show the tmux session in an open terminal by switching a tmux client to it: the one in the
+    focused window, else the most recently used. A new terminal is only opened when no tmux client
+    has a window."""
+    active = None
+    if shutil.which("hyprctl"):
+        with contextlib.suppress(ValueError, AttributeError):
+            active = json.loads(run("hyprctl", "activewindow", "-j", capture=True, check=False).stdout).get("address")
     clients = []
     for line in run("tmux", "list-clients", "-F", "#{client_activity} #{client_pid} #{client_tty} #{session_name}",
                     capture=True, check=False).stdout.splitlines():
         activity, pid, tty, name = line.split(" ", 3)
-        clients.append((name == session, int(activity), int(pid), tty))
-    # Prefer a client already showing the session, then the most recently active one.
-    for showing, _, pid, tty in sorted(clients, reverse=True):
-        address = window_of(pid)
+        address = window_of(int(pid))
         if address:
-            if not showing:
-                run("tmux", "switch-client", "-c", tty, "-t", f"={session}")
-            focus_window(address)
-            return
+            clients.append((address == active, int(activity), address, tty, name))
+    if clients:
+        _, _, address, tty, name = max(clients)
+        if name != session:
+            run("tmux", "switch-client", "-c", tty, "-t", f"={session}")
+        focus_window(address)
+        return
     terminal = os.environ.get("AGENT_RUN_TERMINAL", "ghostty")
     subprocess.Popen([terminal, "-e", "tmux", "attach-session", "-t", f"={session}"],
                      start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def watch(produce, interval=1):
+    """Print produce() as one JSON line whenever it changes; Quickshell reads these."""
+    previous = None
+    while True:
+        current = json.dumps(produce())
+        if current != previous:
+            print(current, flush=True)
+            previous = current
+        time.sleep(interval)
 
 
 def agent_command(agent, text):
@@ -205,6 +248,23 @@ class AgentRun:
         fields = "number,title,url,baseRefName,headRefName,isCrossRepository,state"
         return json.loads(run("gh", "pr", "view", self.url, "--json", fields, capture=True).stdout)
 
+    def stack(self, pr):
+        """This PR followed by the open PRs stacked on it, bottom first."""
+        fields = "number,title,url,baseRefName,headRefName,isCrossRepository"
+        repo = f"{self.owner}/{self.repo_name}"
+        open_prs = [candidate for candidate in json.loads(
+            run("gh", "pr", "list", "--repo", repo, "--state", "open", "--limit", "1000", "--json", fields,
+                capture=True).stdout) if not candidate["isCrossRepository"]]
+        stack = [pr]
+        while len(stack) < 50:
+            children = sorted((candidate for candidate in open_prs
+                               if candidate["baseRefName"] == stack[-1]["headRefName"]),
+                              key=lambda candidate: candidate["number"])
+            if not children:
+                break
+            stack.append(children[0])
+        return stack
+
     def prepare(self, pr):
         """Return the worktree to run agents in, reusing a checkout of the PR branch when one exists."""
         repo = self.repo()
@@ -221,8 +281,8 @@ class AgentRun:
         if pr["isCrossRepository"]:
             raise AgentRunError("Fix actions need a branch in this repository; this PR comes from a fork.")
         if repo == ABOARD_REPO:
-            return self.aboard_worktree(repo, pr["headRefName"])
-        return self.branch_worktree(repo, pr["headRefName"])
+            return self.aboard_worktree(repo, pr["headRefName"], pr["number"])
+        return self.branch_worktree(repo, pr["headRefName"], pr["number"])
 
     def review_worktree(self, repo):
         """A detached checkout of the PR head; cheap, and never touches local branches."""
@@ -240,8 +300,8 @@ class AgentRun:
             run("git", "-C", repo, "worktree", "add", "--detach", path, head)
         return path
 
-    def branch_worktree(self, repo, branch):
-        path = WORKTREE_ROOT / self.repo_name / f"pr-{self.number}"
+    def branch_worktree(self, repo, branch, number):
+        path = WORKTREE_ROOT / self.repo_name / f"pr-{number}"
         if path.resolve() in worktrees(repo):
             return path
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -251,9 +311,9 @@ class AgentRun:
             run("git", "-C", repo, "worktree", "add", "--track", "-b", branch, path, f"origin/{branch}")
         return path
 
-    def aboard_worktree(self, repo, branch):
+    def aboard_worktree(self, repo, branch, number):
         """A full aboard-wt workspace, so agents can run DB-backed tests."""
-        name = f"pr-{self.number}"
+        name = f"pr-{number}"
         path = repo / "worktrees" / name
         if path.resolve() not in worktrees(repo):
             local = run("git", "-C", repo, "show-ref", "--verify", "--quiet", f"refs/heads/{branch}",
@@ -277,7 +337,19 @@ class AgentRun:
             pr = self.pull_request()
             if pr["state"] != "OPEN":
                 raise AgentRunError(f"Pull request is {pr['state'].lower()}.")
-            path = self.prepare(pr)
+            if self.action == "rebase-stack":
+                pr["stack"] = self.stack(pr)
+                if len(pr["stack"]) < 2:
+                    raise AgentRunError("No pull requests are stacked on this one.")
+                # Agents work from the top of the stack, so one rebase moves every branch.
+                path = self.prepare(pr["stack"][-1])
+                checkouts = {fields.get("branch"): worktree for worktree, fields in worktrees(self.repo()).items()}
+                for member in pr["stack"]:
+                    worktree = checkouts.get(f"refs/heads/{member['headRefName']}")
+                    if worktree and worktree != path.resolve():
+                        member["worktree"] = str(worktree)
+            else:
+                path = self.prepare(pr)
             text = prompt(self.action, pr)
             # Session hooks read these to label the agent in the Agents widget.
             labels = {"AGENT_RUN_TITLE": self.window, "AGENT_RUN_URL": self.url}
@@ -363,6 +435,7 @@ class Sessions:
             status = "working"
         if status is None:
             path.unlink(missing_ok=True)
+            self.spawn_notification(path.stem, "close")
             return
         try:
             record = json.loads(path.read_text())
@@ -375,13 +448,89 @@ class Sessions:
             "id": path.stem, "agent": agent, "pid": pid, "cwd": cwd, "title": self.title(cwd),
             "url": os.environ.get("AGENT_RUN_URL", ""), "pane": os.environ.get("TMUX_PANE", ""),
         }
+        previous, since, now = record.get("status"), record.get("since", 0), time.time()
         message = self.message(event, payload)
-        record.update(status=status, updated=time.time(), message=message or (
+        record.update(status=status, updated=now, since=since if previous == status else now, message=message or (
             record.get("message", "") if status == "working" else ""))
         self.dir.mkdir(parents=True, exist_ok=True)
         temporary = path.with_suffix(".tmp")
         temporary.write_text(json.dumps(record))
         temporary.replace(path)
+        if status == "waiting" and previous != "waiting":
+            self.spawn_notification(path.stem, "waiting")
+        elif status == "done" and previous == "working" and now - since >= DONE_NOTIFY_SECONDS:
+            self.spawn_notification(path.stem, "done")
+        elif previous in ("waiting", "done") and status != previous:
+            # You answered or prompted again; the notification is stale.
+            self.spawn_notification(path.stem, "close")
+
+    def spawn_notification(self, session_id, kind):
+        # Detached: notify-send waits for the click, and the agent must not wait on the hook.
+        subprocess.Popen([os.environ.get("AGENT_RUN_EXE", "agent-run"), "_notify", session_id, kind],
+                         start_new_session=True, stdin=subprocess.DEVNULL,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def visible(self, record):
+        """Whether the agent is on screen: its pane is shown in the focused window."""
+        if not shutil.which("hyprctl"):
+            return False
+        active = json.loads(run("hyprctl", "activewindow", "-j", capture=True, check=False).stdout or "{}")
+        address = active.get("address") if isinstance(active, dict) else None
+        if not address:
+            return False
+        pane = record.get("pane")
+        if not pane:
+            return window_of(record["pid"]) == address
+        shown = run("tmux", "display-message", "-p", "-t", pane, "#{pane_active}#{window_active} #{session_name}",
+                    capture=True, check=False)
+        flags, _, session = shown.stdout.strip().partition(" ")
+        if shown.returncode or flags != "11":
+            return False
+        clients = run("tmux", "list-clients", "-t", f"={session}", "-F", "#{client_pid}",
+                      capture=True, check=False).stdout.split()
+        return any(window_of(int(client)) == address for client in clients)
+
+    def notification(self, session_id, kind):
+        """Show, replace or close the session's notification; Show focuses the agent."""
+        state_path = self.dir / f"{session_id}.notification"
+        try:
+            state = json.loads(state_path.read_text())
+        except (OSError, ValueError):
+            state = {}
+        # Only one notification per session: stop the previous one's click waiter.
+        waiter = state.get("pid")
+        with contextlib.suppress(OSError):
+            if waiter and "_notify" in Path(f"/proc/{waiter}/cmdline").read_text():
+                os.killpg(waiter, signal.SIGTERM)
+        if kind == "close":
+            if state.get("id"):
+                run("gdbus", "call", "--session", "--dest", "org.freedesktop.Notifications",
+                    "--object-path", "/org/freedesktop/Notifications",
+                    "--method", "org.freedesktop.Notifications.CloseNotification", str(state["id"]),
+                    capture=True, check=False)
+            state_path.unlink(missing_ok=True)
+            return
+        record = next((r for r in self.list() if r["id"] == session_id), None)
+        if record is None or self.visible(record):
+            return
+        agent = record["agent"].capitalize()
+        summary = f"{agent} needs you" if kind == "waiting" else f"{agent} is done"
+        body = "\n".join(filter(None, [record["title"], record.get("message", "")]))
+        process = subprocess.Popen(
+            ["notify-send", "--app-name=Agents", "--print-id", "--wait", "--action=focus=Show",
+             f"--urgency={'critical' if kind == 'waiting' else 'normal'}",
+             *([f"--replace-id={state['id']}"] if state.get("id") else []), summary, body],
+            stdout=subprocess.PIPE, text=True)
+        notification_id = process.stdout.readline().strip()
+        if notification_id.isdigit():
+            state_path.write_text(json.dumps({"id": int(notification_id), "pid": os.getpid()}))
+        try:
+            action = process.communicate(timeout=3600)[0].strip()
+        except subprocess.TimeoutExpired:
+            process.kill()
+            return
+        if action == "focus":
+            self.focus(session_id)
 
     def list(self):
         records = []
@@ -395,15 +544,6 @@ class Sessions:
                 continue
             records.append(record)
         return sorted(records, key=lambda r: (self.ORDER.get(r["status"], 9), -r["updated"]))
-
-    def watch(self):
-        previous = None
-        while True:
-            current = json.dumps(self.list())
-            if current != previous:
-                print(current, flush=True)
-                previous = current
-            time.sleep(1)
 
     def focus(self, session_id):
         record = next((r for r in self.list() if r["id"] == session_id), None)
@@ -421,6 +561,114 @@ class Sessions:
     def running_in(self, path):
         return any(Path(r["cwd"]).resolve() == path or path in Path(r["cwd"]).resolve().parents
                    for r in self.list())
+
+
+class Triage:
+    """Cheap first read of review requests: what a PR does, how risky it is, how long a review takes.
+    Results are cached per PR head commit, so each push is triaged once."""
+
+    SYSTEM_PROMPT = (
+        "You triage GitHub pull requests so a reviewer can decide what to review first. "
+        "Risk is how likely a mistake that slips through review hurts production. "
+        "high: likely data loss or corruption, a security hole, or an outage, e.g. destructive migrations, "
+        "auth or permission changes, money or ledger math. "
+        "medium: the default for feature work and refactors, including additive migrations and new endpoints. "
+        "low: dependency patch bumps, copy, styling, tests, docs, config behind a flag. "
+        "Expect most PRs to be medium. Be concrete and terse. Never ask questions."
+    )
+    SCHEMA = {
+        "type": "object",
+        "properties": {
+            "summary": {"type": "string", "description": "One sentence, at most 120 characters: what the PR does."},
+            "risk": {"type": "string", "enum": ["low", "medium", "high"]},
+            "minutes": {"type": "integer", "description": "Estimated minutes for a careful human review."},
+            "flags": {"type": "array", "items": {"type": "string"}, "maxItems": 3,
+                      "description": "Up to three labels of one or two lowercase words for what needs "
+                                     "attention, e.g. 'migration', 'auth', 'public api'."},
+        },
+        "required": ["summary", "risk", "minutes", "flags"],
+    }
+
+    def path(self, url):
+        owner, repo, number = parse_url(url)
+        return TRIAGE_DIR / f"{owner}_{repo}_{number}.json"
+
+    def read(self, url):
+        try:
+            return json.loads(self.path(url).read_text())
+        except (OSError, ValueError):
+            return None
+
+    def write(self, url, record):
+        TRIAGE_DIR.mkdir(parents=True, exist_ok=True)
+        path = self.path(url)
+        temporary = path.with_suffix(".tmp")
+        temporary.write_text(json.dumps({"url": url, "updated": time.time(), **record}))
+        temporary.replace(path)
+
+    def list(self):
+        records = {}
+        for path in TRIAGE_DIR.glob("*.json") if TRIAGE_DIR.is_dir() else []:
+            with contextlib.suppress(OSError, ValueError):
+                record = json.loads(path.read_text())
+                records[record["url"]] = record
+        return records
+
+    @staticmethod
+    def diff(url):
+        text = run("gh", "pr", "diff", url, capture=True).stdout
+        # Drop lock files: large, and they say nothing about risk.
+        sections = re.split(r"(?m)^(?=diff --git )", text)
+        kept = [section for section in sections
+                if not (m := re.match(r"diff --git a/(\S+)", section)) or Path(m[1]).name not in LOCK_FILES]
+        text = "".join(kept)
+        if len(text) > TRIAGE_MAX_DIFF:
+            text = text[:TRIAGE_MAX_DIFF] + "\n[diff truncated]\n"
+        return text
+
+    def triage(self, url, pr):
+        files = "\n".join(f"{f['path']} (+{f['additions']} -{f['deletions']})" for f in pr["files"])
+        text = (
+            f"Pull request: {pr['title']}\nAuthor: {pr['author']['login']}\n"
+            f"Size: +{pr['additions']} -{pr['deletions']} in {pr['changedFiles']} files\n\n"
+            f"Description:\n{(pr['body'] or '(none)')[:4000]}\n\nFiles:\n{files}\n\nDiff:\n{self.diff(url)}"
+        )
+        # Lean on purpose: no tools, MCP servers, settings or hooks. That cuts the cost ~500x
+        # and keeps triage out of the Agents widget.
+        result = subprocess.run(
+            ["claude", "-p", "--model", TRIAGE_MODEL, "--tools", "", "--strict-mcp-config",
+             "--setting-sources", "", "--no-session-persistence", "--system-prompt", self.SYSTEM_PROMPT,
+             "--output-format", "json", "--json-schema", json.dumps(self.SCHEMA)],
+            input=text, capture_output=True, text=True, timeout=300, cwd=TRIAGE_DIR, check=True)
+        output = json.loads(result.stdout)
+        if output.get("is_error") or not output.get("structured_output"):
+            raise AgentRunError(output.get("result") or "No triage returned")
+        return {**output["structured_output"], "cost": output.get("total_cost_usd")}
+
+    def run(self, urls):
+        TRIAGE_DIR.mkdir(parents=True, exist_ok=True)
+        # One triage at a time; later calls queue here and then find most PRs cached.
+        with (TRIAGE_DIR / ".lock").open("w") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            for url in urls:
+                try:
+                    pr = json.loads(run("gh", "pr", "view", url, "--json",
+                                        "headRefOid,title,body,author,files,additions,deletions,changedFiles",
+                                        capture=True).stdout)
+                    cached = self.read(url) or {}
+                    if cached.get("sha") == pr["headRefOid"] and (cached.get("status") == "done" or (
+                            cached.get("status") == "error" and time.time() - cached["updated"] < TRIAGE_RETRY_SECONDS)):
+                        continue
+                    self.write(url, {**cached, "sha": pr["headRefOid"], "status": "running"})
+                    self.write(url, {"sha": pr["headRefOid"], "status": "done", **self.triage(url, pr)})
+                except (AgentRunError, OSError, ValueError, KeyError,
+                        subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+                    detail = getattr(error, "stderr", None) or str(error)
+                    self.write(url, {**(self.read(url) or {}), "status": "error", "error": str(detail).strip()[:300]})
+            # Forget PRs not seen for a month.
+            for path in TRIAGE_DIR.glob("*.json"):
+                if time.time() - path.stat().st_mtime > 30 * 86400:
+                    path.unlink(missing_ok=True)
 
 
 class Prune:
@@ -565,18 +813,19 @@ class Prune:
 
 def main():
     parser = argparse.ArgumentParser(prog="agent-run", description="Start a coding agent on a GitHub pull request.")
-    parser.add_argument("action", choices=ACTIONS + ("prune", "sessions", "focus", "hook", "_run"),
+    parser.add_argument("action", choices=ACTIONS + ("prune", "sessions", "focus", "triage", "hook", "_run", "_notify"),
                         help="An action on a PR; 'prune' removes worktrees that are no longer needed; "
                              "'sessions' lists live agent sessions, 'focus ID' jumps to one, "
+                             "'triage URL...' pre-reads review requests in the background, "
                              "and 'hook AGENT EVENT' records an agent hook event")
     parser.add_argument("args", nargs="*", metavar="url")
     parser.add_argument("--agent", action="append", choices=("claude", "codex", "pi"),
                         help="Agent to use (repeat for side-by-side panes); defaults per action")
     parser.add_argument("--dry-run", action="store_true", help="prune: only show what would be removed")
-    parser.add_argument("--watch", action="store_true", help="sessions: print the list again whenever it changes")
+    parser.add_argument("--watch", action="store_true", help="sessions, triage: print the list again whenever it changes")
     args = parser.parse_args()
-    expected = {"prune": 0, "sessions": 0, "focus": 1, "hook": 2, "_run": 2}.get(args.action, 1)
-    if len(args.args) != expected:
+    expected = {"prune": 0, "sessions": 0, "focus": 1, "triage": None, "hook": 2, "_run": 2, "_notify": 2}.get(args.action, 1)
+    if expected is not None and len(args.args) != expected:
         parser.error(f"{args.action} takes {expected} argument(s)")
     if args.action == "hook":
         # Never disturb the agent: a failed status update only costs the widget a row.
@@ -587,9 +836,16 @@ def main():
         if args.action == "prune":
             Prune(args.dry_run).run()
         elif args.action == "sessions":
-            Sessions().watch() if args.watch else print(json.dumps(Sessions().list(), indent=2))
+            watch(Sessions().list) if args.watch else print(json.dumps(Sessions().list(), indent=2))
+        elif args.action == "triage":
+            if args.args:
+                Triage().run(args.args)
+            else:
+                watch(Triage().list, interval=2) if args.watch else print(json.dumps(Triage().list(), indent=2))
         elif args.action == "focus":
             Sessions().focus(args.args[0])
+        elif args.action == "_notify":
+            Sessions().notification(*args.args)
         elif args.action == "_run":
             action, url = args.args
             AgentRun(action, url, args.agent).execute()

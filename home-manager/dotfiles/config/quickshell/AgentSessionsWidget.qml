@@ -187,7 +187,10 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.shell.agentSessions.focus(session.modelData)
+                    onClicked: {
+                        root.shell.agentSessions.focus(session.modelData);
+                        root.shell.workOverlayOpen = false;
+                    }
                 }
             }
         }

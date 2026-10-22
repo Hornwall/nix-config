@@ -40,4 +40,4 @@ jq -c '{
     repository: .repository.name
   }],
   error: null
-}' <<<"$response"
+}' <<<"$response" | bash "$(dirname "$0")/github-stacks.sh"

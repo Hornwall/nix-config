@@ -25,4 +25,4 @@ jq -c '{
     author: .author.login
   }),
   error: null
-}' <<<"$response"
+}' <<<"$response" | bash "$(dirname "$0")/github-stacks.sh"

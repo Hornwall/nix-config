@@ -28,6 +28,7 @@ let
       coreutils
       gh
       git
+      glib
       libnotify
       python3
       tmux

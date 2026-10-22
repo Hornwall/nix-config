@@ -15,6 +15,7 @@ ShellRoot {
     property alias githubReviews: githubReviewService
     property alias githubPullRequests: githubPullRequestService
     property alias agentSessions: agentSessionService
+    property bool workOverlayOpen: false
 
     PersistentProperties {
         id: persistentState
@@ -82,8 +83,24 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
 
-        EmptyWorkspaceWidgets {
+        WorkOverlay {
             shell: root
+        }
+    }
+
+    IpcHandler {
+        target: "work"
+
+        function toggle(): void {
+            root.workOverlayOpen = !root.workOverlayOpen;
+        }
+
+        function open(): void {
+            root.workOverlayOpen = true;
+        }
+
+        function close(): void {
+            root.workOverlayOpen = false;
         }
     }
 

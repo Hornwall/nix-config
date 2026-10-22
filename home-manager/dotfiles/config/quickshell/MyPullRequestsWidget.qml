@@ -51,6 +51,8 @@ Rectangle {
             actions.push({ action: "address-comments", icon: "󰍨", hint: "Address review comments with an agent" });
         if (pullRequest.mergeable === "CONFLICTING")
             actions.push({ action: "rebase", icon: "󰘭", hint: "Rebase and resolve conflicts with an agent" });
+        if (pullRequest.stack && pullRequest.stack.position === 1)
+            actions.push({ action: "rebase-stack", icon: "󰘬", hint: "Rebase the whole stack of " + pullRequest.stack.size + " with an agent" });
         return actions;
     }
 
@@ -155,6 +157,7 @@ Rectangle {
         Item {
             Layout.fillWidth: true
             Layout.preferredHeight: root.bodyHeight
+            Layout.fillHeight: true
 
             Text {
                 anchors.centerIn: parent
@@ -182,6 +185,7 @@ Rectangle {
                     id: pullRequest
 
                     required property var modelData
+                    required property int index
                     property string hint: ""
                     width: pullRequestList.width
                     height: 72
@@ -192,6 +196,13 @@ Rectangle {
 
                     HoverHandler {
                         id: rowHover
+                    }
+
+                    StackRail {
+                        id: stackRail
+                        pullRequests: pullRequestList.model
+                        index: pullRequest.index
+                        gap: pullRequestList.spacing
                     }
 
                     Column {
@@ -206,6 +217,7 @@ Rectangle {
                             width: parent.width
                             text: pullRequest.modelData.repository + " #" + pullRequest.modelData.number
                                 + "  ·  " + root.relativeTime(pullRequest.modelData.updatedAt)
+                                + (stackRail.label !== "" ? "  ·  " + stackRail.label : "")
                             color: "#a6e3a1"
                             elide: Text.ElideRight
                             font.family: "FiraCode Nerd Font"
@@ -248,7 +260,10 @@ Rectangle {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: Quickshell.execDetached(["xdg-open", pullRequest.modelData.url])
+                        onClicked: {
+                            Quickshell.execDetached(["xdg-open", pullRequest.modelData.url]);
+                            root.shell.workOverlayOpen = false;
+                        }
                     }
 
                     Row {
@@ -268,6 +283,7 @@ Rectangle {
                                 hint: modelData.hint
                                 url: pullRequest.modelData.url
                                 onHoveredChanged: pullRequest.hint = hovered ? hint : ""
+                                onTriggered: root.shell.workOverlayOpen = false
                             }
                         }
                     }
