@@ -43,6 +43,17 @@ Rectangle {
         return "no checks";
     }
 
+    function agentActions(pullRequest) {
+        const actions = [];
+        if (pullRequest.checkStatus === "FAILURE" || pullRequest.checkStatus === "ERROR")
+            actions.push({ action: "fix-ci", icon: "󰖷", hint: "Fix failing checks with an agent" });
+        if (pullRequest.reviewDecision === "CHANGES_REQUESTED")
+            actions.push({ action: "address-comments", icon: "󰍨", hint: "Address review comments with an agent" });
+        if (pullRequest.mergeable === "CONFLICTING")
+            actions.push({ action: "rebase", icon: "󰘭", hint: "Rebase and resolve conflicts with an agent" });
+        return actions;
+    }
+
     function statusText(pullRequest) {
         const parts = [reviewLabel(pullRequest), checkLabel(pullRequest)];
         if (pullRequest.mergeable === "CONFLICTING")
@@ -171,16 +182,21 @@ Rectangle {
                     id: pullRequest
 
                     required property var modelData
+                    property string hint: ""
                     width: pullRequestList.width
                     height: 72
                     radius: 11
-                    color: pullRequestMouse.containsMouse ? "#1f68b5ab" : "#092a2b2f"
+                    color: rowHover.hovered ? "#1f68b5ab" : "#092a2b2f"
                     border.width: 1
-                    border.color: pullRequestMouse.containsMouse ? "#5568b5ab" : "#0dffffff"
+                    border.color: rowHover.hovered ? "#5568b5ab" : "#0dffffff"
+
+                    HoverHandler {
+                        id: rowHover
+                    }
 
                     Column {
                         anchors.left: parent.left
-                        anchors.right: arrow.left
+                        anchors.right: actions.left
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.leftMargin: 12
                         anchors.rightMargin: 10
@@ -208,8 +224,8 @@ Rectangle {
 
                         Text {
                             width: parent.width
-                            text: root.statusText(pullRequest.modelData)
-                            color: root.statusColor(pullRequest.modelData)
+                            text: pullRequest.hint !== "" ? pullRequest.hint : root.statusText(pullRequest.modelData)
+                            color: pullRequest.hint !== "" ? "#68b5ab" : root.statusColor(pullRequest.modelData)
                             elide: Text.ElideRight
                             font.family: "FiraCode Nerd Font"
                             font.pixelSize: 10
@@ -222,7 +238,7 @@ Rectangle {
                         anchors.rightMargin: 12
                         anchors.verticalCenter: parent.verticalCenter
                         text: "󰅂"
-                        color: pullRequestMouse.containsMouse ? "#68b5ab" : "#5c656e"
+                        color: rowHover.hovered ? "#68b5ab" : "#5c656e"
                         font.family: "FiraCode Nerd Font"
                         font.pixelSize: 17
                     }
@@ -233,6 +249,27 @@ Rectangle {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: Quickshell.execDetached(["xdg-open", pullRequest.modelData.url])
+                    }
+
+                    Row {
+                        id: actions
+                        anchors.right: arrow.left
+                        anchors.rightMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+
+                        Repeater {
+                            model: root.agentActions(pullRequest.modelData)
+
+                            AgentActionButton {
+                                required property var modelData
+                                action: modelData.action
+                                icon: modelData.icon
+                                hint: modelData.hint
+                                url: pullRequest.modelData.url
+                                onHoveredChanged: pullRequest.hint = hovered ? hint : ""
+                            }
+                        }
                     }
                 }
             }

@@ -281,11 +281,16 @@ class Workspaces:
                 pass
         print(f"Stopped {name}; code and databases preserved.")
 
-    def pane(self, name, kind):
+    def pane(self, name, kind, argv=()):
         path = self.existing(name)
-        command = shlex.split(os.environ.get("EDITOR", "nvim")) if kind == "editor" else [
-            os.environ.get("SHELL", "/bin/bash"), "-i"
-        ]
+        if kind == "exec":
+            command = list(argv[1:] if argv[:1] == ["--"] else argv)
+            if not command:
+                raise WorkspaceError("Give a command to run: aboard-wt _pane NAME exec -- COMMAND...")
+        else:
+            command = shlex.split(os.environ.get("EDITOR", "nvim")) if kind == "editor" else [
+                os.environ.get("SHELL", "/bin/bash"), "-i"
+            ]
         os.chdir(path)
         os.execvpe("direnv", ["direnv", "exec", str(path), *command], self.environment())
 
@@ -371,9 +376,10 @@ def main():
         commands.add_parser(command, help=help_text).add_argument("name")
     completion = commands.add_parser("_complete", help="Print cached shell completion candidates")
     completion.add_argument("kind", choices=("branches", "workspaces"))
-    pane = commands.add_parser("_pane", help="Internal: enter a worktree's editor or shell")
+    pane = commands.add_parser("_pane", help="Internal: enter a worktree's editor or shell, or run a command in it")
     pane.add_argument("name")
-    pane.add_argument("kind", choices=("editor", "shell"))
+    pane.add_argument("kind", choices=("editor", "shell", "exec"))
+    pane.add_argument("argv", nargs=argparse.REMAINDER)
     args = vars(parser.parse_args())
     command = args.pop("command")
     try:

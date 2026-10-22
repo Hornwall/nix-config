@@ -14,6 +14,7 @@ ShellRoot {
     property alias weather: weatherService
     property alias githubReviews: githubReviewService
     property alias githubPullRequests: githubPullRequestService
+    property alias agentSessions: agentSessionService
 
     PersistentProperties {
         id: persistentState
@@ -33,6 +34,10 @@ ShellRoot {
 
     GithubPullRequestService {
         id: githubPullRequestService
+    }
+
+    AgentSessionService {
+        id: agentSessionService
     }
 
     NotificationServer {

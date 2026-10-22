@@ -20,6 +20,24 @@ let
       exec python3 ${../scripts/aboard-wt.py} "$@"
     '';
   };
+
+  # Agents (claude, codex, pi) come from the user's PATH, not the Nix store.
+  agentRun = pkgs.writeShellApplication {
+    name = "agent-run";
+    runtimeInputs = with pkgs; [
+      coreutils
+      gh
+      git
+      libnotify
+      python3
+      tmux
+      aboardWorktree
+    ];
+    text = ''
+      export AGENT_RUN_EXE="$0"
+      exec python3 ${../scripts/agent-run.py} "$@"
+    '';
+  };
 in
 {
   # Host-specific configuration for ThinkPad Z16
@@ -35,8 +53,16 @@ in
     pkgs.abrd-admin
     pkgs.abrd
     aboardWorktree
+    agentRun
     # Add any ThinkPad Z16 specific packages here
   ];
+
+  # Agent hooks that report session status to `agent-run hook` for the
+  # Quickshell Agents widget. Codex asks to trust new hooks via `/hooks`.
+  hornwall.dotfiles.overrides = {
+    ".codex/hooks.json" = ../../dotfiles/hosts/thinkpad-z16/codex/hooks.json;
+    ".pi/agent/extensions/agent-status.ts" = ../../dotfiles/hosts/thinkpad-z16/pi/agent-status.ts;
+  };
 
   # Example: Host-specific environment variables
   home.sessionVariables = {

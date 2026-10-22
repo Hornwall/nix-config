@@ -18,7 +18,8 @@ PanelWindow {
     visible: emptyWorkspace
     color: "transparent"
     implicitWidth: Math.min(1136, modelData.width - 48)
-    implicitHeight: Math.max(reviewRequests.implicitHeight, myPullRequests.implicitHeight)
+    implicitHeight: agentSessions.implicitHeight + (agentSessions.visible ? 16 : 0)
+        + Math.max(reviewRequests.implicitHeight, myPullRequests.implicitHeight)
     exclusiveZone: 0
 
     anchors {
@@ -33,22 +34,35 @@ PanelWindow {
     WlrLayershell.namespace: "quickshell-empty-workspace"
     WlrLayershell.layer: WlrLayer.Bottom
 
-    RowLayout {
+    ColumnLayout {
         anchors.fill: parent
         spacing: 16
 
-        ReviewRequestsWidget {
-            id: reviewRequests
+        AgentSessionsWidget {
+            id: agentSessions
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: implicitHeight
             shell: root.shell
         }
 
-        MyPullRequestsWidget {
-            id: myPullRequests
+        RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            shell: root.shell
+            spacing: 16
+
+            ReviewRequestsWidget {
+                id: reviewRequests
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                shell: root.shell
+            }
+
+            MyPullRequestsWidget {
+                id: myPullRequests
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                shell: root.shell
+            }
         }
     }
 }
