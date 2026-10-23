@@ -21,7 +21,7 @@ if ! response=$(gh api graphql \
       }
     }
   }' \
-  -f searchQuery='org:Teamtailor is:pr is:open author:@me sort:updated-desc' 2>&1); then
+  -f searchQuery='org:Teamtailor is:pr is:open archived:false author:@me sort:updated-desc' 2>&1); then
   jq -cn --arg error "$response" '{ pullRequests: [], error: $error }'
   exit 0
 fi

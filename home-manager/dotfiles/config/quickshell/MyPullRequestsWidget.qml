@@ -1,14 +1,37 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 
-Rectangle {
+// One tab of PullRequestsWidget.
+Item {
     id: root
 
     required property var shell
     property int pullRequestCount: shell.githubPullRequests.pullRequests.length
     property int bodyHeight: pullRequestCount > 0
         ? Math.min(pullRequestCount, 6) * 78 - 6 : 90
+    // The row picked with the keyboard, or -1.
+    property int selected: -1
+
+    onSelectedChanged: if (selected >= 0)
+        pullRequestList.positionViewAtIndex(selected, ListView.Contain)
+
+    function open(index) {
+        const pullRequest = shell.githubPullRequests.pullRequests[index];
+        if (!pullRequest)
+            return;
+        Quickshell.execDetached(["xdg-open", pullRequest.url]);
+        shell.workOverlayOpen = false;
+    }
+
+    // Runs the row's nth agent action, as numbered on its buttons.
+    function runAction(index, number) {
+        const pullRequest = shell.githubPullRequests.pullRequests[index];
+        const action = pullRequest ? agentActions(pullRequest)[number] : undefined;
+        if (!action)
+            return;
+        Quickshell.execDetached(["agent-run", action.action, pullRequest.url]);
+        shell.workOverlayOpen = false;
+    }
 
     function relativeTime(value) {
         const seconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000));
@@ -53,6 +76,7 @@ Rectangle {
             actions.push({ action: "rebase", icon: "󰘭", hint: "Rebase and resolve conflicts with an agent" });
         if (pullRequest.stack && pullRequest.stack.position === 1)
             actions.push({ action: "rebase-stack", icon: "󰘬", hint: "Rebase the whole stack of " + pullRequest.stack.size + " with an agent" });
+        actions.push({ action: "checkout", icon: "󰊢", hint: "Check out in a worktree" });
         return actions;
     }
 
@@ -78,214 +102,133 @@ Rectangle {
         return "#68b5ab";
     }
 
-    implicitWidth: 560
-    implicitHeight: bodyHeight + 91
-    radius: 16
-    color: "#e61e1f22"
-    border.width: 1
-    border.color: "#18ffffff"
+    implicitHeight: bodyHeight
 
-    ColumnLayout {
+    Text {
+        anchors.centerIn: parent
+        visible: root.pullRequestCount === 0
+        width: parent.width - 32
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.Wrap
+        text: root.shell.githubPullRequests.loading ? "Loading your pull requests…"
+            : root.shell.githubPullRequests.error !== "" ? root.shell.githubPullRequests.error
+            : "You have no open pull requests."
+        color: root.shell.githubPullRequests.error !== "" ? "#d1434c" : "#8b949e"
+        font.family: "FiraCode Nerd Font"
+        font.pixelSize: 13
+    }
+
+    ListView {
+        id: pullRequestList
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 8
+        visible: root.pullRequestCount > 0
+        clip: true
+        spacing: 6
+        model: root.shell.githubPullRequests.pullRequests
 
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 34
-            spacing: 10
+        delegate: Rectangle {
+            id: pullRequest
 
-            Text {
-                text: "󰘬"
-                color: "#a6e3a1"
-                font.family: "FiraCode Nerd Font"
-                font.pixelSize: 21
+            required property var modelData
+            required property int index
+            property string hint: ""
+            property bool highlighted: rowHover.hovered || root.selected === index
+            width: pullRequestList.width
+            height: 72
+            radius: 11
+            color: highlighted ? "#1f68b5ab" : "#092a2b2f"
+            border.width: 1
+            border.color: highlighted ? "#5568b5ab" : "#0dffffff"
+
+            HoverHandler {
+                id: rowHover
             }
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 0
+            StackRail {
+                id: stackRail
+                pullRequests: pullRequestList.model
+                index: pullRequest.index
+                gap: pullRequestList.spacing
+            }
+
+            Column {
+                anchors.left: parent.left
+                anchors.right: actions.left
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: 12
+                anchors.rightMargin: 10
+                spacing: 3
 
                 Text {
-                    text: "My pull requests"
-                    color: "#ffffff"
+                    width: parent.width
+                    text: pullRequest.modelData.repository + " #" + pullRequest.modelData.number
+                        + "  ·  " + root.relativeTime(pullRequest.modelData.updatedAt)
+                        + (stackRail.label !== "" ? "  ·  " + stackRail.label : "")
+                    color: "#a6e3a1"
+                    elide: Text.ElideRight
                     font.family: "FiraCode Nerd Font"
-                    font.pixelSize: 16
+                    font.pixelSize: 11
                     font.weight: Font.DemiBold
                 }
 
                 Text {
-                    text: root.pullRequestCount === 1 ? "1 open pull request"
-                        : root.pullRequestCount + " open pull requests"
-                    color: "#8b949e"
+                    width: parent.width
+                    text: pullRequest.modelData.title
+                    color: "#f2f2f2"
+                    elide: Text.ElideRight
                     font.family: "FiraCode Nerd Font"
-                    font.pixelSize: 11
+                    font.pixelSize: 13
                 }
-            }
-
-            Rectangle {
-                Layout.preferredWidth: 30
-                Layout.preferredHeight: 30
-                radius: 9
-                color: refreshMouse.containsMouse ? "#1f68b5ab" : "transparent"
 
                 Text {
-                    anchors.centerIn: parent
-                    text: root.shell.githubPullRequests.loading ? "󰑓" : "󰑐"
-                    color: root.shell.githubPullRequests.loading ? "#8b949e" : "#68b5ab"
+                    width: parent.width
+                    text: pullRequest.hint !== "" ? pullRequest.hint : root.statusText(pullRequest.modelData)
+                    color: pullRequest.hint !== "" ? "#68b5ab" : root.statusColor(pullRequest.modelData)
+                    elide: Text.ElideRight
                     font.family: "FiraCode Nerd Font"
-                    font.pixelSize: 16
-                }
-
-                MouseArea {
-                    id: refreshMouse
-                    anchors.fill: parent
-                    enabled: !root.shell.githubPullRequests.loading
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.shell.githubPullRequests.refresh()
+                    font.pixelSize: 10
                 }
             }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 1
-            color: "#12ffffff"
-        }
-
-        Item {
-            Layout.fillWidth: true
-            Layout.preferredHeight: root.bodyHeight
-            Layout.fillHeight: true
 
             Text {
-                anchors.centerIn: parent
-                visible: root.pullRequestCount === 0
-                width: parent.width - 32
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.Wrap
-                text: root.shell.githubPullRequests.loading ? "Loading your pull requests…"
-                    : root.shell.githubPullRequests.error !== "" ? root.shell.githubPullRequests.error
-                    : "You have no open pull requests."
-                color: root.shell.githubPullRequests.error !== "" ? "#d1434c" : "#8b949e"
+                id: arrow
+                anchors.right: parent.right
+                anchors.rightMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
+                text: "󰅂"
+                color: pullRequest.highlighted ? "#68b5ab" : "#5c656e"
                 font.family: "FiraCode Nerd Font"
-                font.pixelSize: 13
+                font.pixelSize: 17
             }
 
-            ListView {
-                id: pullRequestList
+            MouseArea {
+                id: pullRequestMouse
                 anchors.fill: parent
-                visible: root.pullRequestCount > 0
-                clip: true
-                spacing: 6
-                model: root.shell.githubPullRequests.pullRequests
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.open(pullRequest.index)
+            }
 
-                delegate: Rectangle {
-                    id: pullRequest
+            Row {
+                id: actions
+                anchors.right: arrow.left
+                anchors.rightMargin: 8
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 4
 
-                    required property var modelData
-                    required property int index
-                    property string hint: ""
-                    width: pullRequestList.width
-                    height: 72
-                    radius: 11
-                    color: rowHover.hovered ? "#1f68b5ab" : "#092a2b2f"
-                    border.width: 1
-                    border.color: rowHover.hovered ? "#5568b5ab" : "#0dffffff"
+                Repeater {
+                    model: root.agentActions(pullRequest.modelData)
 
-                    HoverHandler {
-                        id: rowHover
-                    }
-
-                    StackRail {
-                        id: stackRail
-                        pullRequests: pullRequestList.model
-                        index: pullRequest.index
-                        gap: pullRequestList.spacing
-                    }
-
-                    Column {
-                        anchors.left: parent.left
-                        anchors.right: actions.left
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: 12
-                        anchors.rightMargin: 10
-                        spacing: 3
-
-                        Text {
-                            width: parent.width
-                            text: pullRequest.modelData.repository + " #" + pullRequest.modelData.number
-                                + "  ·  " + root.relativeTime(pullRequest.modelData.updatedAt)
-                                + (stackRail.label !== "" ? "  ·  " + stackRail.label : "")
-                            color: "#a6e3a1"
-                            elide: Text.ElideRight
-                            font.family: "FiraCode Nerd Font"
-                            font.pixelSize: 11
-                            font.weight: Font.DemiBold
-                        }
-
-                        Text {
-                            width: parent.width
-                            text: pullRequest.modelData.title
-                            color: "#f2f2f2"
-                            elide: Text.ElideRight
-                            font.family: "FiraCode Nerd Font"
-                            font.pixelSize: 13
-                        }
-
-                        Text {
-                            width: parent.width
-                            text: pullRequest.hint !== "" ? pullRequest.hint : root.statusText(pullRequest.modelData)
-                            color: pullRequest.hint !== "" ? "#68b5ab" : root.statusColor(pullRequest.modelData)
-                            elide: Text.ElideRight
-                            font.family: "FiraCode Nerd Font"
-                            font.pixelSize: 10
-                        }
-                    }
-
-                    Text {
-                        id: arrow
-                        anchors.right: parent.right
-                        anchors.rightMargin: 12
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "󰅂"
-                        color: rowHover.hovered ? "#68b5ab" : "#5c656e"
-                        font.family: "FiraCode Nerd Font"
-                        font.pixelSize: 17
-                    }
-
-                    MouseArea {
-                        id: pullRequestMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            Quickshell.execDetached(["xdg-open", pullRequest.modelData.url]);
-                            root.shell.workOverlayOpen = false;
-                        }
-                    }
-
-                    Row {
-                        id: actions
-                        anchors.right: arrow.left
-                        anchors.rightMargin: 8
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 4
-
-                        Repeater {
-                            model: root.agentActions(pullRequest.modelData)
-
-                            AgentActionButton {
-                                required property var modelData
-                                action: modelData.action
-                                icon: modelData.icon
-                                hint: modelData.hint
-                                url: pullRequest.modelData.url
-                                onHoveredChanged: pullRequest.hint = hovered ? hint : ""
-                                onTriggered: root.shell.workOverlayOpen = false
-                            }
-                        }
+                    AgentActionButton {
+                        required property var modelData
+                        required property int index
+                        key: root.selected === pullRequest.index ? String(index + 1) : ""
+                        action: modelData.action
+                        icon: modelData.icon
+                        hint: modelData.hint
+                        url: pullRequest.modelData.url
+                        onHoveredChanged: pullRequest.hint = hovered ? hint : ""
+                        onTriggered: root.shell.workOverlayOpen = false
                     }
                 }
             }
