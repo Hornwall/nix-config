@@ -630,15 +630,22 @@ class Sessions:
         run("tmux", "send-keys", "-t", pane, "Enter" if allow else "Escape")
 
     def kill(self, session_id):
-        """Stop the agent; a window agent-run opened drops to a shell in its worktree."""
+        """Stop the agent and close the tmux pane it runs in."""
         record = next((r for r in self.list() if r["id"] == session_id), None)
         if record is None:
             raise AgentRunError("That agent session has ended.")
+        try:
+            pane = self.pane(session_id)[1]
+        except AgentRunError:
+            pane = None
         # Make sure the pid still belongs to the agent and was not reused.
         argv = Path(f"/proc/{record['pid']}/cmdline").read_text(errors="replace").split("\0")[:2]
         if record["agent"] not in (Path(arg).name for arg in argv):
             raise AgentRunError(f"Process {record['pid']} is no longer {record['agent']}.")
         os.kill(record["pid"], signal.SIGTERM)
+        if pane:
+            # The pane may already be gone if the agent was all that ran in it.
+            run("tmux", "kill-pane", "-t", pane, capture=True, check=False)
         (self.dir / f"{session_id}.json").unlink(missing_ok=True)
         self.spawn_notification(session_id, "close")
 
