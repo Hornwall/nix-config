@@ -38,6 +38,12 @@ WORKTREE_ROOT = DATA_DIR / "worktrees"
 # One JSON line per agent session started and per triage, for `agent-run stats`.
 ACTIVITY_LOG = DATA_DIR / "activity.log"
 ACTIVITY_KEEP_DAYS = 30
+# The overseer gets agent events in batches, at most this many turns an hour, and stops relaying a session it has
+# prompted this often in an hour (a loop guard).
+OVERSEER_BATCH_SECONDS = 10
+OVERSEER_RETRY_SECONDS = 5
+OVERSEER_TURNS_PER_HOUR = 20
+OVERSEER_REPLIES_PER_SESSION = 3
 TRIAGE_DIR = Path(os.environ.get("XDG_CACHE_HOME", "~/.cache")).expanduser() / "agent-run" / "triage"
 TRIAGE_MODEL = "haiku"
 # Diffs are cut here (~40k tokens) so one huge PR can't run up the bill.
@@ -194,7 +200,9 @@ def focus_window_of(pid):
 def focus_session(session):
     """Show the tmux session in an open terminal by switching a tmux client to it: the one in the
     focused window, else the most recently used. A new terminal is only opened when no tmux client
-    has a window."""
+    has a window. With AGENT_RUN_NO_FOCUS set, as for work the overseer starts, nothing is switched."""
+    if os.environ.get("AGENT_RUN_NO_FOCUS"):
+        return
     active = None
     if shutil.which("hyprctl"):
         with contextlib.suppress(ValueError, AttributeError):
@@ -215,6 +223,11 @@ def focus_session(session):
     terminal = os.environ.get("AGENT_RUN_TERMINAL", "ghostty")
     subprocess.Popen([terminal, "-e", "tmux", "attach-session", "-t", f"={session}"],
                      start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def no_focus_env():
+    """Hands AGENT_RUN_NO_FOCUS on to a new tmux window, whose environment comes from the tmux server."""
+    return ["-e", "AGENT_RUN_NO_FOCUS=1"] if os.environ.get("AGENT_RUN_NO_FOCUS") else []
 
 
 def watch(produce, interval=1):
@@ -265,9 +278,10 @@ class AgentRun:
             inner = "exec " + shlex.join([executable, "_run", self.action, self.url, *agents])
             # An interactive shell gives agents the same PATH as a terminal (e.g. ~/.npm-packages/bin).
             shell = os.environ.get("SHELL", "/bin/bash")
-            run("tmux", "new-window", "-d", "-t", f"={SESSION}:", "-n", self.window,
+            run("tmux", "new-window", "-d", "-t", f"={SESSION}:", "-n", self.window, *no_focus_env(),
                 "-c", Path.home(), shlex.join([shell, "-ic", inner]))
-        run("tmux", "select-window", "-t", target)
+        if not os.environ.get("AGENT_RUN_NO_FOCUS"):
+            run("tmux", "select-window", "-t", target)
         focus_session(SESSION)
         # Tidy up in the background; the log shows what was removed or skipped.
         DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -497,8 +511,9 @@ class Idea:
         inner = "exec " + shlex.join([executable, "_idea", self.text, "--agent", self.agent])
         shell = os.environ.get("SHELL", "/bin/bash")
         window = run("tmux", "new-window", "-d", "-P", "-F", "#{window_id}", "-t", f"={SESSION}:", "-n", "idea",
-                     "-c", Path.home(), shlex.join([shell, "-ic", inner]), capture=True).stdout.strip()
-        run("tmux", "select-window", "-t", window)
+                     *no_focus_env(), "-c", Path.home(), shlex.join([shell, "-ic", inner]), capture=True).stdout.strip()
+        if not os.environ.get("AGENT_RUN_NO_FOCUS"):
+            run("tmux", "select-window", "-t", window)
         focus_session(SESSION)
 
     def execute(self):
@@ -551,6 +566,30 @@ class Sessions:
         runtime = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
         self.dir = Path(runtime) / "agent-sessions"
 
+    @contextlib.contextmanager
+    def locked(self):
+        """Serialises read-modify-write of session records between hooks, the overseer and you."""
+        self.dir.mkdir(parents=True, exist_ok=True)
+        with (self.dir / ".lock").open("w") as handle:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+            yield
+
+    def write(self, path, record):
+        temporary = path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(record))
+        temporary.replace(path)
+
+    def update(self, session_id, **fields):
+        path = self.dir / f"{session_id}.json"
+        with self.locked():
+            try:
+                record = json.loads(path.read_text())
+            except (OSError, ValueError):
+                raise AgentRunError("That agent session has ended.") from None
+            record.update(fields)
+            self.write(path, record)
+        return record
+
     @staticmethod
     def agent_pid():
         """The agent is the nearest ancestor that is not the shell running this hook."""
@@ -600,40 +639,62 @@ class Sessions:
         status = self.STATUS[event]
         if event == "PreToolUse" and payload.get("tool_name") != "AskUserQuestion":
             status = "working"
+        with self.locked():
+            try:
+                record = json.loads(path.read_text())
+            except (OSError, ValueError):
+                record = None
+            if status is None:
+                path.unlink(missing_ok=True)
+            elif not (record and event == "SessionStart" and payload.get("source") == "compact"):
+                previous, since = self.record(path, agent, pid, event, status, payload, record)
         if status is None:
-            path.unlink(missing_ok=True)
             self.spawn_notification(path.stem, "close")
+            if record:
+                Inbox().add(record, "ended")
             return
-        try:
-            record = json.loads(path.read_text())
-        except (OSError, ValueError):
-            record = None
         if record and event == "SessionStart" and payload.get("source") == "compact":
             return
+        record = json.loads(path.read_text())
+        if record.get("role") == "overseer":
+            Inbox().overseer_hook(event, payload, path)
+            return
+        now = time.time()
+        if status == "waiting" and previous != "waiting":
+            self.spawn_notification(path.stem, "waiting")
+            Inbox().add(record, "waiting")
+        elif status == "done" and previous == "working":
+            if now - since >= DONE_NOTIFY_SECONDS:
+                self.spawn_notification(path.stem, "done")
+            # A short turn only matters to the overseer when it asked for it.
+            if now - since >= DONE_NOTIFY_SECONDS or record.get("prompted_by") == "overseer":
+                Inbox().add(record, "done")
+            if record.get("prompted_by"):
+                self.update(path.stem, prompted_by="")
+        elif previous in ("waiting", "done") and status != previous:
+            # You answered or prompted again; the notification is stale.
+            self.spawn_notification(path.stem, "close")
+
+    def record(self, path, agent, pid, event, status, payload, record):
+        """Write the session's new status; returns its previous status and since when it had it."""
         cwd = payload.get("cwd") or os.getcwd()
         if record is None:
             log_activity("session", agent=agent)
         record = record or {
             "id": path.stem, "agent": agent, "pid": pid, "cwd": cwd, "title": self.title(cwd),
             "url": os.environ.get("AGENT_RUN_URL", ""), "pane": os.environ.get("TMUX_PANE", ""),
+            "role": os.environ.get("AGENT_RUN_ROLE", ""),
         }
         previous, since, now = record.get("status"), record.get("since", 0), time.time()
         message = self.message(event, payload)
         record.update(status=status, updated=now, since=since if previous == status else now, message=message or (
             record.get("message", "") if status == "working" else ""),
             waiting_for=self.WAITING_FOR.get(event, "") if status == "waiting" else "",
-            ask=self.ask(payload) if status == "done" else "")
-        self.dir.mkdir(parents=True, exist_ok=True)
-        temporary = path.with_suffix(".tmp")
-        temporary.write_text(json.dumps(record))
-        temporary.replace(path)
-        if status == "waiting" and previous != "waiting":
-            self.spawn_notification(path.stem, "waiting")
-        elif status == "done" and previous == "working" and now - since >= DONE_NOTIFY_SECONDS:
-            self.spawn_notification(path.stem, "done")
-        elif previous in ("waiting", "done") and status != previous:
-            # You answered or prompted again; the notification is stale.
-            self.spawn_notification(path.stem, "close")
+            ask=self.ask(payload) if status == "done" else "",
+            # A suggestion answers what the agent was blocked on, so it goes when the agent moves on.
+            suggestion=record.get("suggestion", "") if status == previous else "")
+        self.write(path, record)
+        return previous, since
 
     def spawn_notification(self, session_id, kind):
         # Detached: notify-send waits for the click, and the agent must not wait on the hook.
@@ -784,9 +845,383 @@ class Sessions:
         (self.dir / f"{session_id}.json").unlink(missing_ok=True)
         self.spawn_notification(session_id, "close")
 
+    def peek(self, session_id, lines=60):
+        """The bottom of the agent's terminal, what you would see in its pane."""
+        _, pane = self.pane(session_id)
+        lines = max(5, min(int(lines), 400))
+        text = run("tmux", "capture-pane", "-p", "-J", "-t", pane, "-S", f"-{lines}", capture=True).stdout
+        # Wide panes pad split layouts with spaces; they only cost the reader tokens.
+        return "\n".join(re.sub(r" {20,}", "    ", line.rstrip()) for line in text.rstrip().splitlines()[-lines:])
+
+    def suggest(self, session_id, text):
+        """Leave a suggestion on the session for you to act on; the Agents widget shows it."""
+        record = self.update(session_id, suggestion=" ".join(text.split())[:300])
+        notify_body = f"{record['title']}\n{record['suggestion']}"
+        if shutil.which("notify-send"):
+            run("notify-send", "--app-name=Agents", "Overseer suggests", notify_body, check=False)
+
     def running_in(self, path):
         return any(Path(r["cwd"]).resolve() == path or path in Path(r["cwd"]).resolve().parents
                    for r in self.list())
+
+
+class Inbox:
+    """Agent events for the overseer. Agent hooks add them; they reach the overseer in batches, through its own
+    Stop hook while it works, or through a one-line nudge typed into its pane once it is idle, which its
+    UserPromptSubmit hook then expands. State (deliveries, replies per session) lives next to the inbox."""
+
+    NUDGE = "[agent-run] New agent events, attached to this message."
+
+    def __init__(self):
+        self.sessions = Sessions()
+        self.dir = self.sessions.dir / "overseer"
+        self.path = self.dir / "inbox.jsonl"
+        self.state_path = self.dir / "state.json"
+
+    @contextlib.contextmanager
+    def locked(self):
+        self.dir.mkdir(parents=True, exist_ok=True)
+        with (self.dir / ".lock").open("w") as handle:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+            yield
+
+    def state(self):
+        try:
+            state = json.loads(self.state_path.read_text())
+        except (OSError, ValueError):
+            state = {}
+        hour_ago = time.time() - 3600
+        state["deliveries"] = [t for t in state.get("deliveries", []) if t > hour_ago]
+        state["replies"] = {session: kept for session, times in state.get("replies", {}).items()
+                            if (kept := [t for t in times if t > hour_ago])}
+        return state
+
+    def save(self, state):
+        temporary = self.state_path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(state))
+        temporary.replace(self.state_path)
+
+    def overseer(self):
+        return next((r for r in self.sessions.list() if r.get("role") == "overseer"), None)
+
+    def events(self):
+        events = []
+        with contextlib.suppress(OSError):
+            for line in self.path.read_text().splitlines():
+                with contextlib.suppress(ValueError):
+                    events.append(json.loads(line))
+        return events
+
+    def add(self, record, kind):
+        if record.get("role") == "overseer":
+            return
+        overseer = self.overseer()
+        if overseer is None or overseer.get("paused"):
+            return
+        event = {"time": time.time(), "kind": kind, **{key: record.get(key, "") for key in (
+            "id", "agent", "title", "status", "waiting_for", "message", "ask", "url", "cwd")}}
+        with self.locked():
+            if len(self.state()["replies"].get(record["id"], [])) >= OVERSEER_REPLIES_PER_SESSION:
+                return  # The loop guard handed this session back to you.
+            with self.path.open("a") as inbox:
+                inbox.write(json.dumps(event) + "\n")
+        subprocess.Popen([os.environ.get("AGENT_RUN_EXE", "agent-run"), "_deliver"], start_new_session=True,
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def replied(self, session_id):
+        """Count an overseer reply; past the limit the session's events go to you instead."""
+        with self.locked():
+            state = self.state()
+            times = state["replies"].setdefault(session_id, [])
+            if len(times) >= OVERSEER_REPLIES_PER_SESSION:
+                raise AgentRunError(f"Loop guard: you have prompted {session_id} {len(times)} times this hour. "
+                                    "Leave it to the user; suggest instead.")
+            times.append(time.time())
+            self.save(state)
+            if len(times) >= OVERSEER_REPLIES_PER_SESSION:
+                notify(f"The overseer has prompted {session_id} {len(times)} times this hour; "
+                       "its events now go to you.")
+
+    def take(self, counts_as_turn=True):
+        """Pending events, latest per session, as text for the overseer; None if there are none or the turn
+        cap is reached. Taken events leave the inbox."""
+        with self.locked():
+            events = self.events()
+            if not events:
+                return None
+            state = self.state()
+            if counts_as_turn and len(state["deliveries"]) >= OVERSEER_TURNS_PER_HOUR:
+                if not state.get("capped"):
+                    state["capped"] = True
+                    self.save(state)
+                    notify(f"The overseer reached {OVERSEER_TURNS_PER_HOUR} event turns this hour; "
+                           "events wait until the hour is up.")
+                return None
+            self.path.unlink(missing_ok=True)
+            latest = {}
+            for event in events:
+                latest[event["id"]] = event
+            if counts_as_turn:
+                state["deliveries"].append(time.time())
+            state["capped"] = False
+            self.save(state)
+        lines = []
+        for event in sorted(latest.values(), key=lambda e: e["time"]):
+            if event["kind"] == "waiting":
+                what = f"waiting for {event['waiting_for'] or 'you'}: {event['message']}"
+            elif event["kind"] == "done":
+                what = f"done: {event['ask'] or event['message']}"
+            else:
+                what = "session ended"
+            link = f" {event['url']}" if event["url"] else ""
+            lines.append(f"- {event['agent']} \"{event['title']}\" (id {event['id']}{link}) {what}".rstrip(": "))
+        return (f"[agent-run] {len(lines)} agent event{'s' if len(lines) != 1 else ''} since you last looked:\n"
+                + "\n".join(lines) + "\nHandle them per your rules; keep the reply short.")
+
+    def overseer_hook(self, event, payload, path):
+        """The overseer's own hooks deliver pending events: at the end of a turn by asking it to go on, and
+        when a prompt (usually the nudge) is submitted by attaching them."""
+        if event == "Stop":
+            text = self.take()
+            if text:
+                # It goes on working; keeps _deliver from nudging it meanwhile.
+                self.sessions.update(path.stem, status="working")
+                print(json.dumps({"decision": "block", "reason": text}))
+        elif event == "UserPromptSubmit":
+            nudged = str(payload.get("prompt", "")).startswith("[agent-run]")
+            text = self.take(counts_as_turn=nudged)
+            if text or nudged:
+                print(json.dumps({"hookSpecificOutput": {"hookEventName": "UserPromptSubmit",
+                                                         "additionalContext": text or "[agent-run] No events pending."}}))
+
+    @staticmethod
+    def ready(pane):
+        """Whether the overseer sits idle at an empty prompt: no spinner ("✶ Cooking… (1s") or grey prompt, no
+        dialog, nothing typed. Placeholder text is dim or grey; typed text is not."""
+        screen = run("tmux", "capture-pane", "-p", "-e", "-t", pane, capture=True, check=False).stdout.splitlines()
+        plain = [re.sub(r"\x1b\[[0-9;]*m", "", line) for line in screen]
+        prompt = next((i for i in reversed(range(len(plain))) if plain[i].lstrip().startswith("❯")), None)
+        if prompt is None:
+            return False  # A dialog or menu instead of the prompt.
+        if any(re.match(r"\s*\S \S+… \(", line) for line in plain[max(0, prompt - 4):prompt]):
+            return False
+        if re.match(r"\s*\x1b\[38;5;24[0-9]m❯", screen[prompt]):
+            return False  # A grey prompt: it is streaming a reply.
+        for i in range(prompt, len(screen)):
+            if i > prompt and plain[i].strip().startswith("─"):
+                break  # The bottom of the input box.
+            grey = False
+            for code, text in re.findall(r"\x1b\[([0-9;]*)m|([^\x1b]+)", screen[i]):
+                if text:
+                    if not grey and text.replace("❯", "").replace("\xa0", "").strip():
+                        return False
+                    continue
+                parts = code.split(";") if code else ["0"]
+                if parts[0] in ("0", "22", "39"):
+                    grey = False
+                if parts[0] in ("2", "90") or (parts[:2] == ["38", "5"] and len(parts) > 2 and (
+                        parts[2] == "8" or 238 <= int(parts[2]) <= 250)):
+                    grey = True
+        return True
+
+    def deliver(self):
+        """Background: wait out the batch window, then nudge an idle overseer; retry while it is busy."""
+        with (self.dir / "deliver.lock").open("w") as handle:
+            try:
+                fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                return  # Another one is on it.
+            while events := self.events():
+                overseer = self.overseer()
+                if overseer is None or overseer.get("paused"):
+                    self.path.unlink(missing_ok=True)
+                    return
+                wait = min(e["time"] for e in events) + OVERSEER_BATCH_SECONDS - time.time()
+                if wait > 0:
+                    time.sleep(wait)
+                    continue
+                if len(self.state()["deliveries"]) >= OVERSEER_TURNS_PER_HOUR:
+                    self.take()  # Notifies about the cap once.
+                    time.sleep(60)
+                    continue
+                pane = overseer.get("pane")
+                # An interrupted turn has no Stop hook and leaves it "working"; the screen tells.
+                idle = overseer["status"] in ("idle", "done") or time.time() - overseer["updated"] > 30
+                if idle and pane and self.ready(pane):
+                    run("tmux", "send-keys", "-t", pane, "-l", self.NUDGE)
+                    run("tmux", "send-keys", "-t", pane, "Enter")
+                    # Its UserPromptSubmit hook takes the events; check again afterwards.
+                    time.sleep(OVERSEER_RETRY_SECONDS * 2)
+                else:
+                    time.sleep(OVERSEER_RETRY_SECONDS)
+
+
+class Overseer:
+    """A claude session that watches and steers the other agents through `agent-run mcp`."""
+
+    WINDOW = "overseer"
+    PROMPT = """You are the overseer of the user's coding agents (claude, codex and pi), each running in a tmux pane.
+Use the `agents` tools: list_sessions to see them, peek to read an agent's terminal, reply to send an agent a
+prompt, start_idea and start_pr_action to start new work, and suggest to leave the user a note on a session.
+Rules:
+- Never answer an agent's permission prompt yourself. For an agent waiting on a permission, peek at what it
+  wants, then call suggest with "approve" or "deny" and a one-line reason; the user decides.
+- Reply to an agent only to unblock it with something clearly within its task (e.g. "yes, run the tests",
+  "use the existing factory"). Anything that pushes, force-pushes, deletes, migrates or touches production:
+  suggest, don't reply.
+- Start new agents only when the user asks.
+- Be brief. When asked for status, give one line per agent: what it works on, its state, what it needs.
+- Messages starting with [agent-run] are automatic: agent events delivered to you, not the user typing. Handle
+  each event (peek if you need more), then end your turn with one short line per event saying what you did."""
+
+    def launch(self):
+        target = f"={SESSION}:={self.WINDOW}"
+        if run("tmux", "has-session", "-t", f"={SESSION}", capture=True, check=False).returncode:
+            run("tmux", "new-session", "-d", "-s", SESSION, "-n", "home")
+        windows = run("tmux", "list-windows", "-t", f"={SESSION}", "-F", "#{window_name}", capture=True).stdout
+        if self.WINDOW not in windows.splitlines():
+            executable = os.environ.get("AGENT_RUN_EXE", "agent-run")
+            config = {"mcpServers": {"agents": {"type": "stdio", "command": executable, "args": ["mcp"]}}}
+            model = ["--model", os.environ["AGENT_RUN_OVERSEER_MODEL"]] \
+                if os.environ.get("AGENT_RUN_OVERSEER_MODEL") else []
+            inner = "exec " + shlex.join([
+                "claude", *model, "--mcp-config", json.dumps(config), "--allowedTools", "mcp__agents",
+                "--append-system-prompt", self.PROMPT, "Give me a short status of the running agents."])
+            shell = os.environ.get("SHELL", "/bin/bash")
+            labels = {"AGENT_RUN_ROLE": "overseer", "AGENT_RUN_TITLE": "overseer"}
+            env = [arg for key, value in labels.items() for arg in ("-e", f"{key}={value}")]
+            run("tmux", "new-window", "-d", "-t", f"={SESSION}:", "-n", self.WINDOW, *env,
+                "-c", Path.home(), shlex.join([shell, "-ic", inner]))
+        run("tmux", "select-window", "-t", target)
+        focus_session(SESSION)
+
+    @staticmethod
+    def pause(paused):
+        sessions = Sessions()
+        overseer = Inbox().overseer()
+        if overseer is None:
+            raise AgentRunError("The overseer is not running.")
+        sessions.update(overseer["id"], paused=paused)
+        if paused:
+            Inbox().path.unlink(missing_ok=True)
+
+
+class McpServer:
+    """agent-run's actions as MCP tools over stdio, for the overseer."""
+
+    def string(description):
+        return {"type": "string", "description": description}
+
+    ID = string("Session id from list_sessions")
+    TOOLS = [
+        {"name": "list_sessions", "description": "Running agent sessions, those waiting on the user first: id, "
+         "agent, title, status (waiting, done, working, idle), what a waiting one waits for, its last message.",
+         "inputSchema": {"type": "object", "properties": {}}},
+        {"name": "peek", "description": "The last lines of an agent's terminal.",
+         "inputSchema": {"type": "object", "required": ["id"], "properties": {
+             "id": ID, "lines": {"type": "integer", "description": "How many lines, 5 to 400 (default 60)"}}}},
+        {"name": "reply", "description": "Type a prompt into an agent and submit it. Not for agents waiting on "
+         "a permission or question.",
+         "inputSchema": {"type": "object", "required": ["id", "text"], "properties": {
+             "id": ID, "text": string("The prompt, one line")}}},
+        {"name": "suggest", "description": "Leave the user a short suggestion on a session, e.g. 'approve: only "
+         "runs the specs'. Shown in their Agents widget and as a notification.",
+         "inputSchema": {"type": "object", "required": ["id", "text"], "properties": {
+             "id": ID, "text": string("The suggestion, one line")}}},
+        {"name": "start_idea", "description": "Start an agent on a new idea in a fresh aboard workspace (a new "
+         "branch from origin/main). Setup takes a few minutes.",
+         "inputSchema": {"type": "object", "required": ["text"], "properties": {
+             "text": string("What to build, as the prompt for the agent"),
+             "agent": {"type": "string", "enum": ["claude", "codex", "pi"]}}}},
+        {"name": "start_pr_action", "description": "Start an agent on a GitHub pull request: review, "
+         "second-opinion, fix-ci, address-comments, rebase, rebase-stack.",
+         "inputSchema": {"type": "object", "required": ["action", "url"], "properties": {
+             "action": {"type": "string", "enum": [a for a in ACTIONS if a != "checkout"]},
+             "url": string("Pull request URL"),
+             "agent": {"type": "string", "enum": ["claude", "codex", "pi"]}}}},
+    ]
+    del string
+
+    def __init__(self):
+        # The protocol owns stdout; anything else printed (tmux, git) goes to stderr.
+        self.out = os.fdopen(os.dup(1), "w")
+        os.dup2(2, 1)
+        sys.stdout = sys.stderr
+        os.environ["AGENT_RUN_NO_FOCUS"] = "1"
+        self.sessions = Sessions()
+
+    def session(self, session_id):
+        record = next((r for r in self.sessions.list() if r["id"] == session_id), None)
+        if record is None or record.get("role") == "overseer":
+            raise AgentRunError(f"No agent session {session_id}.")
+        return record
+
+    def call(self, name, arguments):
+        agents = [arguments["agent"]] if arguments.get("agent") else None
+        if name == "list_sessions":
+            now = time.time()
+            return json.dumps([{
+                "id": r["id"], "agent": r["agent"], "title": r["title"], "status": r["status"],
+                "waiting_for": r.get("waiting_for", ""), "message": r.get("message", ""), "ask": r.get("ask", ""),
+                "suggestion": r.get("suggestion", ""), "cwd": r["cwd"], "url": r.get("url", ""),
+                "seconds_in_status": int(now - r.get("since", now)),
+            } for r in self.sessions.list() if r.get("role") != "overseer"], indent=1)
+        if name == "peek":
+            self.session(arguments["id"])
+            return self.sessions.peek(arguments["id"], arguments.get("lines", 60))
+        if name == "reply":
+            if self.session(arguments["id"])["status"] == "waiting":
+                raise AgentRunError("That agent is waiting on a prompt; suggest an answer instead.")
+            Inbox().replied(arguments["id"])
+            # Its next stop is reported to you even when the turn is short.
+            self.sessions.update(arguments["id"], prompted_by="overseer")
+            self.sessions.reply(arguments["id"], arguments["text"])
+            return "Sent."
+        if name == "suggest":
+            self.session(arguments["id"])
+            self.sessions.suggest(arguments["id"], arguments["text"])
+            return "Shown to the user."
+        if name == "start_idea":
+            Idea(arguments["text"], agents).launch()
+            return "Started in the background; it shows up in list_sessions once the workspace is ready."
+        if name == "start_pr_action":
+            if arguments["action"] not in ACTIONS or arguments["action"] == "checkout":
+                raise AgentRunError(f"Unknown action {arguments['action']}.")
+            AgentRun(arguments["action"], arguments["url"], agents).launch()
+            return "Started in the background."
+        raise AgentRunError(f"Unknown tool {name}.")
+
+    def handle(self, message):
+        method, params = message.get("method"), message.get("params") or {}
+        if method == "initialize":
+            return {"protocolVersion": params.get("protocolVersion", "2025-06-18"), "capabilities": {"tools": {}},
+                    "serverInfo": {"name": "agent-run", "version": "1"}}
+        if method == "ping":
+            return {}
+        if method == "tools/list":
+            return {"tools": self.TOOLS}
+        if method == "tools/call":
+            try:
+                text, error = self.call(params.get("name"), params.get("arguments") or {}), False
+            except (AgentRunError, OSError, ValueError, KeyError, subprocess.CalledProcessError) as exception:
+                text, error = f"Error: {exception}", True
+            return {"content": [{"type": "text", "text": text}], "isError": error}
+        raise KeyError(method)
+
+    def serve(self):
+        for line in sys.stdin:
+            if not line.strip():
+                continue
+            message = json.loads(line)
+            if "id" not in message:
+                continue  # A notification, e.g. notifications/initialized.
+            try:
+                response = {"jsonrpc": "2.0", "id": message["id"], "result": self.handle(message)}
+            except KeyError:
+                response = {"jsonrpc": "2.0", "id": message["id"],
+                            "error": {"code": -32601, "message": f"Unknown method {message.get('method')}"}}
+            self.out.write(json.dumps(response) + "\n")
+            self.out.flush()
 
 
 class Triage:
@@ -1127,11 +1562,14 @@ def stats():
 
 def main():
     parser = argparse.ArgumentParser(prog="agent-run", description="Start a coding agent on a GitHub pull request.")
-    parser.add_argument("action", choices=ACTIONS + ("idea", "_idea", "prune", "stats", "sessions", "focus", "reply", "approve", "deny", "kill",
+    parser.add_argument("action", choices=ACTIONS + ("idea", "_idea", "overseer", "mcp", "peek", "_deliver", "prune", "stats", "sessions", "focus", "reply", "approve", "deny", "kill",
                                                      "triage", "hook", "_run", "_notify"),
                         help="An action on a PR; 'prune' removes worktrees that are no longer needed and lists aboard "
                              "workspaces whose PR is done, which 'prune --workspaces NAME...' removes; "
                              "'idea TEXT' starts an agent on a new idea in a fresh aboard workspace; "
+                             "'overseer' opens a claude session that watches and steers the other agents through "
+                             "'mcp', agent-run as an MCP server, and gets their events automatically ('overseer pause' "
+                             "and 'overseer resume' stop and restart that); 'peek ID' prints the bottom of an agent's terminal; "
                              "'stats' counts today's sessions and triage cost, and the checkouts agents left; "
                              "'sessions' lists live agent sessions, 'focus ID' jumps to one, 'reply ID TEXT' "
                              "sends it a prompt, 'approve ID' and 'deny ID' answer its permission prompt, 'kill ID' stops it, "
@@ -1145,7 +1583,7 @@ def main():
                         help="prune: remove the named aboard workspaces, databases included, if their PR is done")
     parser.add_argument("--watch", action="store_true", help="sessions, triage: print the list again whenever it changes")
     args = parser.parse_args()
-    expected = {"idea": 1, "_idea": 1, "prune": 0, "stats": 0, "sessions": 0, "focus": 1, "reply": 2, "triage": None, "hook": 2, "_run": 2, "_notify": 2}.get(args.action, 1)
+    expected = {"idea": 1, "_idea": 1, "overseer": None, "mcp": 0, "peek": 1, "_deliver": 0, "prune": 0, "stats": 0, "sessions": 0, "focus": 1, "reply": 2, "triage": None, "hook": 2, "_run": 2, "_notify": 2}.get(args.action, 1)
     if args.action == "prune" and args.workspaces:
         expected = None
     if expected is not None and len(args.args) != expected:
@@ -1162,6 +1600,16 @@ def main():
             Idea(args.args[0], args.agent).launch()
         elif args.action == "_idea":
             Idea(args.args[0], args.agent).execute()
+        elif args.action == "overseer":
+            if args.args not in ([], ["pause"], ["resume"]):
+                parser.error("overseer takes nothing, 'pause' or 'resume'")
+            Overseer().launch() if not args.args else Overseer.pause(args.args[0] == "pause")
+        elif args.action == "_deliver":
+            Inbox().deliver()
+        elif args.action == "mcp":
+            McpServer().serve()
+        elif args.action == "peek":
+            print(Sessions().peek(args.args[0]))
         elif args.action == "stats":
             print(json.dumps(stats()))
         elif args.action == "sessions":

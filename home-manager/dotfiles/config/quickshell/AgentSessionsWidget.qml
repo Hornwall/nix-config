@@ -52,6 +52,11 @@ Rectangle {
         }
     }
 
+    function overseer() {
+        Quickshell.execDetached(["agent-run", "overseer"]);
+        shell.workOverlayOpen = false;
+    }
+
     function answer(index, allow) {
         const session = sessions[index];
         if (session && session.status === "waiting" && session.waiting_for === "permission")
@@ -148,6 +153,13 @@ Rectangle {
                     font.pixelSize: 11
                 }
             }
+
+            AgentActionButton {
+                icon: "󰚩"
+                hint: "Overseer: a claude that watches and steers these agents (v)"
+                command: []
+                onTriggered: root.overseer()
+            }
         }
 
         Rectangle {
@@ -231,10 +243,13 @@ Rectangle {
 
                         Text {
                             width: parent.width
-                            text: session.modelData.ask ? session.modelData.ask
+                            text: session.modelData.paused ? "Agent events paused"
+                                : session.modelData.suggestion ? "󰚩 overseer: " + session.modelData.suggestion
+                                : session.modelData.ask ? session.modelData.ask
                                 : session.modelData.message !== "" ? session.modelData.message
                                 : session.modelData.agent + "  ·  " + session.modelData.cwd
-                            color: session.modelData.status === "waiting" ? "#f9e2af" : "#7d8690"
+                            color: session.modelData.suggestion ? "#b4befe"
+                                : session.modelData.status === "waiting" ? "#f9e2af" : "#7d8690"
                             elide: Text.ElideRight
                             font.family: "FiraCode Nerd Font"
                             font.pixelSize: 10
@@ -262,6 +277,14 @@ Rectangle {
                             hint: "Deny"
                             command: []
                             onTriggered: root.answer(session.index, false)
+                        }
+
+                        AgentActionButton {
+                            visible: session.modelData.role === "overseer"
+                            icon: session.modelData.paused ? "󰐊" : "󰏤"
+                            hint: session.modelData.paused ? "Resume sending agent events to the overseer"
+                                : "Pause agent events to the overseer"
+                            command: ["agent-run", "overseer", session.modelData.paused ? "resume" : "pause"]
                         }
 
                         AgentActionButton {

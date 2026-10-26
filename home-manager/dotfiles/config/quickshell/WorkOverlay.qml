@@ -93,6 +93,9 @@ PanelWindow {
         case Qt.Key_N:
             idea.input.forceActiveFocus();
             break;
+        case Qt.Key_V:
+            agentSessions.overseer();
+            break;
         default:
             if (section === "agents" && event.key === Qt.Key_R)
                 current.reply(row);
@@ -200,7 +203,7 @@ PanelWindow {
         Text {
             id: keyHints
             anchors.centerIn: parent
-            text: "n new idea  ·  j/k move  ·  h/l switch tab  ·  tab next list  ·  ⏎ open  ·  "
+            text: "n new idea  ·  v overseer  ·  j/k move  ·  h/l switch tab  ·  tab next list  ·  ⏎ open  ·  "
                 + (root.section === "agents" ? "r reply  ·  x x stop  ·  a/d allow/deny" : "1–9 agent actions")
                 + "  ·  esc close"
             color: "#8b949e"
