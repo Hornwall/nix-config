@@ -24,6 +24,7 @@ DEFAULT_AGENTS = {
     "rebase-stack": "claude",
     # Only a checkout to work in, no agent.
     "checkout": [],
+    "idea": "claude",
 }
 SESSION = "agents"
 SHELLS = {"zsh", "bash", "sh", "fish"}
@@ -34,6 +35,9 @@ CODE_DIR = Path(os.environ.get("AGENT_RUN_CODE_DIR", "~/code")).expanduser()
 ABOARD_REPO = Path(os.environ.get("ABOARD_REPO", "~/code/aboard")).expanduser().resolve()
 DATA_DIR = Path(os.environ.get("XDG_DATA_HOME", "~/.local/share")).expanduser() / "agent-run"
 WORKTREE_ROOT = DATA_DIR / "worktrees"
+# One JSON line per agent session started and per triage, for `agent-run stats`.
+ACTIVITY_LOG = DATA_DIR / "activity.log"
+ACTIVITY_KEEP_DAYS = 30
 TRIAGE_DIR = Path(os.environ.get("XDG_CACHE_HOME", "~/.cache")).expanduser() / "agent-run" / "triage"
 TRIAGE_MODEL = "haiku"
 # Diffs are cut here (~40k tokens) so one huge PR can't run up the bill.
@@ -53,6 +57,23 @@ def run(*args, cwd=None, capture=False, check=True):
         stdout=subprocess.PIPE if capture else None,
         stderr=subprocess.PIPE if capture else None,
     )
+
+
+def log_activity(kind, **fields):
+    # Short appends are atomic, so hooks running at once can share the file.
+    with contextlib.suppress(OSError):
+        ACTIVITY_LOG.parent.mkdir(parents=True, exist_ok=True)
+        with ACTIVITY_LOG.open("a") as log:
+            log.write(json.dumps({"time": time.time(), "kind": kind, **fields}) + "\n")
+
+
+def activity():
+    events = []
+    with contextlib.suppress(OSError):
+        for line in ACTIVITY_LOG.read_text().splitlines():
+            with contextlib.suppress(ValueError):
+                events.append(json.loads(line))
+    return events
 
 
 def notify(message):
@@ -86,6 +107,14 @@ def prompt(action, pr):
     url, base, number = pr["url"], pr["baseRefName"], pr["number"]
     context = f"Pull request #{number} \"{pr['title']}\" ({url}), base branch {base}."
     no_push = "Commit your changes, but ask me before pushing."
+    # A PR still based on the branch of a merged PR moves onto that PR's target, dropping the merged commits.
+    merged = pr.get("mergedBase")
+    onto = merged["onto"] if merged else base
+    upstream = f"--onto origin/{onto} {merged['headRefOid']}" if merged else f"origin/{onto}"
+    moved = (f"Its base branch belongs to #{merged['number']}, which is merged, so it moves onto {onto}. "
+             f"Commits up to {merged['headRefOid'][:12]} are #{merged['number']}'s and are dropped by the rebase.\n"
+             if merged else "")
+    retarget = f", then make {onto} its base with `gh pr edit {url} --base {onto}`" if merged else ""
     return {
         "review": f"""{context}
 You are reviewing someone else's change. Read the description with `gh pr view {url}` and the diff with
@@ -104,18 +133,18 @@ Reviewers requested changes. Read the reviews with `gh pr view {url} --comments`
 comments with `gh api repos/{{owner}}/{{repo}}/pulls/{number}/comments`. Address each unresolved comment, or
 explain why you disagree, then summarise what you did per comment. Do not reply on GitHub. {no_push}""",
         "rebase": f"""{context}
-The branch conflicts with {base}. Run `git fetch origin` and rebase onto origin/{base}, resolving conflicts
-by keeping the intent of both sides. Run the tests touching the conflicted files. Ask me before
-force-pushing.""",
+{moved or f"The branch conflicts with {base}. "}Run `git fetch origin` and rebase with `git rebase {upstream}`,
+resolving conflicts by keeping the intent of both sides. Run the tests touching the conflicted files. Ask me
+before force-pushing{retarget}.""",
         "rebase-stack": f"""{context}
 It is the base of this stack of pull requests, bottom first (branch, then the worktree it is checked out in):
 {stack_lines(pr)}
-You are in a checkout of the top branch. Run `git fetch origin`, then rebase the whole stack onto
-origin/{base} at once with `git rebase --update-refs origin/{base}`, resolving conflicts by keeping the intent of
+{moved}You are in a checkout of the top branch. Run `git fetch origin`, then rebase the whole stack onto
+origin/{onto} at once with `git rebase --update-refs {upstream}`, resolving conflicts by keeping the intent of
 both sides. Git skips branches that are checked out in other worktrees; afterwards point each of those at its
 rebased commit, with `git -C <worktree> reset --hard <commit>` if that worktree has no local changes, and
 otherwise stop and ask me. Run the tests touching the conflicted files. Then show me each branch with its new
-commit, and ask me before force-pushing them all with `git push --force-with-lease origin <branches>`.""",
+commit, and ask me before force-pushing them all with `git push --force-with-lease origin <branches>`{retarget}.""",
     }[action]
 
 
@@ -267,6 +296,17 @@ class AgentRun:
             stack.append(children[0])
         return stack
 
+    def merged_base(self, pr):
+        """The merged PR whose branch this one is still based on, with the branch it merged into, or None."""
+        repo = f"{self.owner}/{self.repo_name}"
+        onto = run("gh", "repo", "view", repo, "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name",
+                   capture=True).stdout.strip()
+        if pr["baseRefName"] == onto:
+            return None
+        merged = json.loads(run("gh", "pr", "list", "--repo", repo, "--head", pr["baseRefName"], "--state", "merged",
+                                "--limit", "1", "--json", "number,headRefOid", capture=True).stdout)
+        return {**merged[0], "onto": onto} if merged else None
+
     def prepare(self, pr):
         """Return the worktree to run agents in, reusing a checkout of the PR branch when one exists."""
         repo = self.repo()
@@ -369,6 +409,8 @@ class AgentRun:
             pr = self.pull_request()
             if pr["state"] != "OPEN":
                 raise AgentRunError(f"Pull request is {pr['state'].lower()}.")
+            if self.action in ("rebase", "rebase-stack"):
+                pr["mergedBase"] = self.merged_base(pr)
             if self.action == "rebase-stack":
                 pr["stack"] = self.stack(pr)
                 if len(pr["stack"]) < 2:
@@ -382,6 +424,9 @@ class AgentRun:
                         member["worktree"] = str(worktree)
             else:
                 path = self.prepare(pr)
+            if pr.get("mergedBase"):
+                # The merged branch may be deleted; its commits are still reachable from the PR ref.
+                run("git", "-C", path, "fetch", "--quiet", "origin", f"pull/{pr['mergedBase']['number']}/head")
             if self.action == "checkout":
                 self.open_checkout(path)
             else:
@@ -394,6 +439,94 @@ class AgentRun:
             pass
         if path and path.is_dir():
             os.chdir(path)
+        shell = os.environ.get("SHELL", "/bin/bash")
+        os.execvp(shell, [shell, "-i"])
+
+
+class Idea:
+    """A new idea: an aboard workspace on a fresh branch, named after the idea, with an agent started on it."""
+
+    NAME_PROMPT = (
+        "Name a git branch for the change described by the user. Reply with two to five lowercase words joined "
+        "by hyphens, at most 40 characters, naming what changes, e.g. 'csv-export-for-absences'. No prefixes."
+    )
+    NAME_SCHEMA = {"type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}
+
+    def __init__(self, text, agents=None):
+        self.text = text.strip()
+        if not self.text:
+            raise AgentRunError("Describe the idea first.")
+        configured = config_agents()["idea"]
+        self.agent = (agents or (configured if isinstance(configured, list) else [configured]))[0]
+
+    @staticmethod
+    def slug(text):
+        return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", text.lower())).strip("-")[:40].strip("-")
+
+    def suggested_name(self):
+        # Lean like triage: no tools, settings or hooks, so it is cheap and stays out of the Agents widget.
+        with contextlib.suppress(OSError, ValueError, KeyError, TypeError,
+                                 subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            DATA_DIR.mkdir(parents=True, exist_ok=True)
+            result = subprocess.run(
+                ["claude", "-p", "--model", TRIAGE_MODEL, "--tools", "", "--strict-mcp-config",
+                 "--setting-sources", "", "--no-session-persistence", "--system-prompt", self.NAME_PROMPT,
+                 "--output-format", "json", "--json-schema", json.dumps(self.NAME_SCHEMA)],
+                input=self.text[:2000], capture_output=True, text=True, timeout=60, cwd=DATA_DIR, check=True)
+            name = self.slug(json.loads(result.stdout)["structured_output"]["name"])
+            if name:
+                return name
+        return self.slug(" ".join(self.text.split()[:5])) or "idea"
+
+    @staticmethod
+    def free_name(name):
+        """name, or name-2, name-3… when a workspace or branch already uses it."""
+        taken = set(run("aboard-wt", "_complete", "workspaces", capture=True).stdout.split())
+        for branch in run("aboard-wt", "_complete", "branches", capture=True).stdout.split():
+            taken.add(branch.partition("/")[2] if branch.startswith("origin/") else branch)
+        candidate, number = name, 2
+        while candidate in taken:
+            candidate, number = f"{name[:37]}-{number}", number + 1
+        return candidate
+
+    def launch(self):
+        """Do the slow part in a window of the agents session, where its progress shows."""
+        executable = os.environ.get("AGENT_RUN_EXE", "agent-run")
+        if run("tmux", "has-session", "-t", f"={SESSION}", capture=True, check=False).returncode:
+            run("tmux", "new-session", "-d", "-s", SESSION, "-n", "home")
+        inner = "exec " + shlex.join([executable, "_idea", self.text, "--agent", self.agent])
+        shell = os.environ.get("SHELL", "/bin/bash")
+        window = run("tmux", "new-window", "-d", "-P", "-F", "#{window_id}", "-t", f"={SESSION}:", "-n", "idea",
+                     "-c", Path.home(), shlex.join([shell, "-ic", inner]), capture=True).stdout.strip()
+        run("tmux", "select-window", "-t", window)
+        focus_session(SESSION)
+
+    def execute(self):
+        try:
+            print("Naming the idea…", flush=True)
+            name = self.free_name(self.suggested_name())
+            if os.environ.get("TMUX_PANE"):
+                run("tmux", "rename-window", "-t", os.environ["TMUX_PANE"], f"idea {name}")
+            print(f"Creating aboard workspace {name}; seeding takes a few minutes.", flush=True)
+            run("aboard-wt", "create", name, "--no-open")
+            path = ABOARD_REPO / "worktrees" / name
+            session = f"aboard-{name}"
+            run("aboard-wt", "open", name)
+            # The agent gets this shell's PATH (e.g. ~/.npm-packages/bin), not the tmux server's.
+            agent = shlex.join(["aboard-wt", "_pane", name, "exec", "--", *agent_command(self.agent, self.text)])
+            labels = {"AGENT_RUN_TITLE": f"aboard {name}", "PATH": os.environ.get("PATH", "")}
+            env = [arg for key, value in labels.items() for arg in ("-e", f"{key}={value}")]
+            run("tmux", "new-window", "-t", f"={session}:", "-n", "agent", *env, "-c", path,
+                f"{agent}; exec {shlex.join(['aboard-wt', '_pane', name, 'shell'])}")
+            focus_session(session)
+            if os.environ.get("TMUX_PANE"):
+                run("tmux", "kill-window", "-t", os.environ["TMUX_PANE"])
+        except (AgentRunError, OSError, subprocess.CalledProcessError) as error:
+            if isinstance(error, subprocess.CalledProcessError) and error.stderr:
+                print(error.stderr.strip(), file=sys.stderr)
+            print(f"agent-run: {error}", file=sys.stderr)
+        except KeyboardInterrupt:
+            pass
         shell = os.environ.get("SHELL", "/bin/bash")
         os.execvp(shell, [shell, "-i"])
 
@@ -478,6 +611,8 @@ class Sessions:
         if record and event == "SessionStart" and payload.get("source") == "compact":
             return
         cwd = payload.get("cwd") or os.getcwd()
+        if record is None:
+            log_activity("session", agent=agent)
         record = record or {
             "id": path.stem, "agent": agent, "pid": pid, "cwd": cwd, "title": self.title(cwd),
             "url": os.environ.get("AGENT_RUN_URL", ""), "pane": os.environ.get("TMUX_PANE", ""),
@@ -751,7 +886,9 @@ class Triage:
                             cached.get("status") == "error" and time.time() - cached["updated"] < TRIAGE_RETRY_SECONDS)):
                         continue
                     self.write(url, {**cached, "sha": pr["headRefOid"], "status": "running"})
-                    self.write(url, {"sha": pr["headRefOid"], "status": "done", **self.triage(url, pr)})
+                    result = self.triage(url, pr)
+                    log_activity("triage", cost=result.get("cost") or 0)
+                    self.write(url, {"sha": pr["headRefOid"], "status": "done", **result})
                 except (AgentRunError, OSError, ValueError, KeyError,
                         subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
                     detail = getattr(error, "stderr", None) or str(error)
@@ -769,8 +906,10 @@ class Prune:
     work and no process outside an idle tmux shell is using them.
     """
 
-    def __init__(self, dry_run=False):
+    def __init__(self, dry_run=False, workspaces=None):
         self.dry_run = dry_run
+        # aboard workspaces to remove; None only lists the ones whose PR is done.
+        self.workspaces = workspaces
         self.states = {}
 
     @staticmethod
@@ -816,8 +955,22 @@ class Prune:
                 pids.append(int(proc.name))
         return pids
 
+    @staticmethod
+    def bundler_rewrite(path):
+        """Whether Gemfile.lock only differs in the bundler and ruby versions, as when a devenv's bundler rewrote it."""
+        diff = run("git", "-C", path, "diff", "-U0", "--", "Gemfile.lock", capture=True).stdout.splitlines()
+        changed = [line[1:].strip() for line in diff if line[:1] in ("+", "-") and not line.startswith(("+++", "---"))]
+        return all(re.fullmatch(r"bundler \(.*|ruby [0-9.]+|[0-9.]+", line) for line in changed)
+
+    def changes(self, path):
+        """Uncommitted changes, not counting a Gemfile.lock only the bundler rewrote."""
+        lines = run("git", "-C", path, "status", "--porcelain", capture=True).stdout.splitlines()
+        if " M Gemfile.lock" in lines and self.bundler_rewrite(path):
+            lines.remove(" M Gemfile.lock")
+        return lines
+
     def blocker(self, path, kind):
-        if run("git", "-C", path, "status", "--porcelain", capture=True).stdout.strip():
+        if self.changes(path):
             return "has uncommitted changes"
         if kind == "pr" and run("git", "-C", path, "log", "--oneline", "HEAD", "--not", "--remotes",
                                 capture=True).stdout.strip():
@@ -851,12 +1004,17 @@ class Prune:
         if self.users(path.resolve()):
             print(f"skip {path}: still in use by another process")
             return
+        if run("git", "-C", path, "status", "--porcelain", capture=True).stdout.strip():
+            run("git", "-C", path, "checkout", "--", "Gemfile.lock")
         run("git", "-C", repo, "worktree", "remove", path)
         with contextlib.suppress(OSError):
             path.parent.rmdir()
         print(f"removed {path} ({why})")
 
     def prune(self):
+        if self.workspaces is not None:
+            self.aboard_workspaces()
+            return
         for repo_dir in sorted(p for p in WORKTREE_ROOT.glob("*") if p.is_dir()):
             repo = CODE_DIR / repo_dir.name
             slug = self.slug(repo) if repo.is_dir() else None
@@ -881,15 +1039,54 @@ class Prune:
                 self.remove(repo, path, repo_dir.name, number, why)
         self.aboard_workspaces()
 
+    @staticmethod
+    def branch_pr(slug, branch):
+        result = run("gh", "pr", "list", "--repo", slug, "--head", branch, "--state", "all", "--limit", "1",
+                     "--json", "number,state", "--jq", "first // empty", capture=True, check=False)
+        return json.loads(result.stdout) if result.returncode == 0 and result.stdout.strip() else None
+
+    def workspace_blocker(self, path, number):
+        if self.changes(path):
+            return "has uncommitted changes"
+        unpushed = ("git", "-C", path, "log", "--oneline", "HEAD", "--not", "--remotes")
+        if run(*unpushed, capture=True).stdout.strip():
+            # GitHub deletes merged branches; the PR head still counts as pushed.
+            run("git", "-C", path, "fetch", "--quiet", "origin",
+                f"+refs/pull/{number}/head:refs/remotes/origin/pull/{number}", capture=True, check=False)
+            if run(*unpushed, capture=True).stdout.strip():
+                return "has unpushed commits"
+        if Sessions().running_in(path):
+            return "an agent is still running in it"
+        return None
+
     def aboard_workspaces(self):
-        """aboard-wt workspaces own databases, so only suggest removing them."""
+        """aboard-wt workspaces own databases, so a plain prune only lists those whose PR is done, and removing
+        them takes a second, explicit `prune --workspaces NAME...`."""
         if not ABOARD_REPO.is_dir():
             return
         slug = self.slug(ABOARD_REPO)
-        for path in worktrees(ABOARD_REPO):
-            match = re.fullmatch(r"pr-([0-9]+)", path.name)
-            if match and path.parent == ABOARD_REPO / "worktrees" and self.state(slug, match[1]) in ("MERGED", "CLOSED"):
-                print(f"PR closed; remove its workspace with: aboard-wt remove {path.name}")
+        for path, fields in sorted(worktrees(ABOARD_REPO).items()):
+            branch = fields.get("branch", "").removeprefix("refs/heads/")
+            if path.parent != ABOARD_REPO / "worktrees" or not branch:
+                continue
+            if self.workspaces is not None and path.name not in self.workspaces:
+                continue
+            pr = self.branch_pr(slug, branch)
+            if pr is None or pr["state"] not in ("MERGED", "CLOSED"):
+                continue
+            why = f"PR #{pr['number']} {pr['state'].lower()}"
+            blocker = self.workspace_blocker(path, pr["number"])
+            if blocker:
+                print(f"skip workspace {path.name} ({why}): {blocker}")
+            elif self.workspaces is None:
+                print(f"workspace {path.name} ({why})")
+            elif self.dry_run:
+                print(f"would remove workspace {path.name} ({why})")
+            else:
+                if run("git", "-C", path, "status", "--porcelain", capture=True).stdout.strip():
+                    run("git", "-C", path, "checkout", "--", "Gemfile.lock")
+                run("aboard-wt", "remove", path.name, "--yes", capture=True)
+                print(f"removed workspace {path.name} ({why})")
 
     def run(self):
         WORKTREE_ROOT.mkdir(parents=True, exist_ok=True)
@@ -900,13 +1097,42 @@ class Prune:
                 print("Another prune is running.")
                 return
             self.prune()
+            self.trim_activity()
+
+    def trim_activity(self):
+        cutoff = time.time() - ACTIVITY_KEEP_DAYS * 86400
+        events = activity()
+        kept = [event for event in events if event.get("time", 0) >= cutoff]
+        if len(kept) < len(events) and not self.dry_run:
+            temporary = ACTIVITY_LOG.with_suffix(".tmp")
+            temporary.write_text("".join(json.dumps(event) + "\n" for event in kept))
+            temporary.replace(ACTIVITY_LOG)
+
+
+def stats():
+    """Today's agent activity and the checkouts agents left behind."""
+    midnight = time.mktime(time.localtime()[:3] + (0, 0, 0, 0, 0, -1))
+    today = [event for event in activity() if event.get("time", 0) >= midnight]
+    triages = [event for event in today if event.get("kind") == "triage"]
+    workspaces = ABOARD_REPO / "worktrees"
+    return {
+        "sessions": sum(event.get("kind") == "session" for event in today),
+        "triaged": len(triages),
+        "cost": round(sum(event.get("cost") or 0 for event in triages), 4),
+        "worktrees": sum(1 for path in WORKTREE_ROOT.glob("*/*") if re.fullmatch(r"(review|pr)-[0-9]+", path.name)),
+        "workspaces": sum(1 for path in workspaces.glob("*") if AgentRun.is_aboard_workspace(path))
+        if workspaces.is_dir() else 0,
+    }
 
 
 def main():
     parser = argparse.ArgumentParser(prog="agent-run", description="Start a coding agent on a GitHub pull request.")
-    parser.add_argument("action", choices=ACTIONS + ("prune", "sessions", "focus", "reply", "approve", "deny", "kill",
+    parser.add_argument("action", choices=ACTIONS + ("idea", "_idea", "prune", "stats", "sessions", "focus", "reply", "approve", "deny", "kill",
                                                      "triage", "hook", "_run", "_notify"),
-                        help="An action on a PR; 'prune' removes worktrees that are no longer needed; "
+                        help="An action on a PR; 'prune' removes worktrees that are no longer needed and lists aboard "
+                             "workspaces whose PR is done, which 'prune --workspaces NAME...' removes; "
+                             "'idea TEXT' starts an agent on a new idea in a fresh aboard workspace; "
+                             "'stats' counts today's sessions and triage cost, and the checkouts agents left; "
                              "'sessions' lists live agent sessions, 'focus ID' jumps to one, 'reply ID TEXT' "
                              "sends it a prompt, 'approve ID' and 'deny ID' answer its permission prompt, 'kill ID' stops it, "
                              "'triage URL...' pre-reads review requests in the background, "
@@ -915,9 +1141,13 @@ def main():
     parser.add_argument("--agent", action="append", choices=("claude", "codex", "pi"),
                         help="Agent to use (repeat for side-by-side panes); defaults per action")
     parser.add_argument("--dry-run", action="store_true", help="prune: only show what would be removed")
+    parser.add_argument("--workspaces", action="store_true",
+                        help="prune: remove the named aboard workspaces, databases included, if their PR is done")
     parser.add_argument("--watch", action="store_true", help="sessions, triage: print the list again whenever it changes")
     args = parser.parse_args()
-    expected = {"prune": 0, "sessions": 0, "focus": 1, "reply": 2, "triage": None, "hook": 2, "_run": 2, "_notify": 2}.get(args.action, 1)
+    expected = {"idea": 1, "_idea": 1, "prune": 0, "stats": 0, "sessions": 0, "focus": 1, "reply": 2, "triage": None, "hook": 2, "_run": 2, "_notify": 2}.get(args.action, 1)
+    if args.action == "prune" and args.workspaces:
+        expected = None
     if expected is not None and len(args.args) != expected:
         parser.error(f"{args.action} takes {expected} argument(s)")
     if args.action == "hook":
@@ -927,7 +1157,13 @@ def main():
         return 0
     try:
         if args.action == "prune":
-            Prune(args.dry_run).run()
+            Prune(args.dry_run, args.args if args.workspaces else None).run()
+        elif args.action == "idea":
+            Idea(args.args[0], args.agent).launch()
+        elif args.action == "_idea":
+            Idea(args.args[0], args.agent).execute()
+        elif args.action == "stats":
+            print(json.dumps(stats()))
         elif args.action == "sessions":
             watch(Sessions().list) if args.watch else print(json.dumps(Sessions().list(), indent=2))
         elif args.action == "triage":

@@ -345,13 +345,15 @@ class Workspaces:
                 status = "needs setup"
             print(f"{name:24} {branch:36} {status:12} {self.url(self.config_slot(path))}")
 
-    def remove(self, name):
+    def remove(self, name, yes=False):
         path = self.existing(name)
         if self.git("-C", str(path), "status", "--porcelain").stdout.strip():
             raise WorkspaceError("Workspace has uncommitted changes; commit or move them before removing it.")
         if self.git("-C", str(path), "log", "--oneline", "HEAD", "--not", "--remotes").stdout.strip():
             raise WorkspaceError("Workspace has commits not present on a remote; push them before removing it.")
-        if not sys.stdin.isatty() or input(f"Delete {path} and ALL its databases/uploads? Type '{name}' to confirm: ") != name:
+        if yes:
+            pass
+        elif not sys.stdin.isatty() or input(f"Delete {path} and ALL its databases/uploads? Type '{name}' to confirm: ") != name:
             raise WorkspaceError("Removal cancelled.")
         self.stop(name)
         with self.lock(), self.lock("workspace-" + name), self.lock("tmux-" + name):
@@ -376,9 +378,11 @@ def main():
     for command, help_text in (("open", "Open or switch to the two-window tmux session"),
                                ("setup", "Prepare a workspace after interrupted creation"),
                                ("up", "Run the full stack in the foreground"),
-                               ("stop", "Stop services, preserving all data"),
-                               ("remove", "Confirm deletion of a clean, pushed workspace")):
+                               ("stop", "Stop services, preserving all data")):
         commands.add_parser(command, help=help_text).add_argument("name")
+    remove = commands.add_parser("remove", help="Confirm deletion of a clean, pushed workspace")
+    remove.add_argument("name")
+    remove.add_argument("--yes", action="store_true", help="Skip the typed confirmation, e.g. when a script asks")
     completion = commands.add_parser("_complete", help="Print cached shell completion candidates")
     completion.add_argument("kind", choices=("branches", "workspaces"))
     pane = commands.add_parser("_pane", help="Internal: enter a worktree's editor or shell, or run a command in it")

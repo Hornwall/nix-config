@@ -72,10 +72,15 @@ Item {
             actions.push({ action: "fix-ci", icon: "󰖷", hint: "Fix failing checks with an agent" });
         if (pullRequest.reviewDecision === "CHANGES_REQUESTED")
             actions.push({ action: "address-comments", icon: "󰍨", hint: "Address review comments with an agent" });
-        if (pullRequest.mergeable === "CONFLICTING")
-            actions.push({ action: "rebase", icon: "󰘭", hint: "Rebase and resolve conflicts with an agent" });
+        const merged = pullRequest.mergedBase;
         if (pullRequest.stack && pullRequest.stack.position === 1)
-            actions.push({ action: "rebase-stack", icon: "󰘬", hint: "Rebase the whole stack of " + pullRequest.stack.size + " with an agent" });
+            actions.push(merged
+                ? { action: "rebase-stack", icon: "󰘬", danger: true, hint: "#" + merged.number + " is merged: move the stack onto " + merged.onto + " with an agent" }
+                : { action: "rebase-stack", icon: "󰘬", danger: pullRequest.stack.problems.length > 0, hint: "Rebase the whole stack of " + pullRequest.stack.size + " with an agent" });
+        else if (merged)
+            actions.push({ action: "rebase", icon: "󰘭", danger: true, hint: "#" + merged.number + " is merged: move onto " + merged.onto + " with an agent" });
+        if (pullRequest.mergeable === "CONFLICTING" && !(pullRequest.stack && pullRequest.stack.position === 1) && !merged)
+            actions.push({ action: "rebase", icon: "󰘭", hint: "Rebase and resolve conflicts with an agent" });
         actions.push({ action: "checkout", icon: "󰊢", hint: "Check out in a worktree" });
         return actions;
     }
@@ -84,11 +89,20 @@ Item {
         const parts = [reviewLabel(pullRequest), checkLabel(pullRequest)];
         if (pullRequest.mergeable === "CONFLICTING")
             parts.push("has conflicts");
+        // The bottom of a stack speaks for the whole stack.
+        const problems = pullRequest.stack && pullRequest.stack.position === 1 ? pullRequest.stack.problems
+            : pullRequest.mergedBase ? ["base #" + pullRequest.mergedBase.number + " merged"] : [];
+        for (const problem of problems) {
+            if (problem !== "#" + pullRequest.number + " conflicts")
+                parts.push(problem);
+        }
         return parts.join("  ·  ");
     }
 
     function statusColor(pullRequest) {
         if (pullRequest.mergeable === "CONFLICTING"
+                || pullRequest.mergedBase
+                || (pullRequest.stack && pullRequest.stack.position === 1 && pullRequest.stack.problems.length > 0)
                 || pullRequest.reviewDecision === "CHANGES_REQUESTED"
                 || pullRequest.checkStatus === "FAILURE"
                 || pullRequest.checkStatus === "ERROR")
@@ -226,6 +240,7 @@ Item {
                         action: modelData.action
                         icon: modelData.icon
                         hint: modelData.hint
+                        danger: modelData.danger || false
                         url: pullRequest.modelData.url
                         onHoveredChanged: pullRequest.hint = hovered ? hint : ""
                         onTriggered: root.shell.workOverlayOpen = false

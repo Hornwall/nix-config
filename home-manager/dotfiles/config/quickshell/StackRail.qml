@@ -1,6 +1,6 @@
 import QtQuick
 
-// A rail along the left edge of a PR row that joins the rows of one stack.
+// A rail along the left edge of a PR row that joins the rows of one stack; red when the stack needs fixing.
 Rectangle {
     id: root
 
@@ -22,5 +22,5 @@ Rectangle {
     width: 3
     height: parent.height - y - (joinsBelow ? -gap : 12)
     radius: 1.5
-    color: "#80b4befe"
+    color: stack !== null && stack.problems.length > 0 ? "#d1434c" : "#80b4befe"
 }

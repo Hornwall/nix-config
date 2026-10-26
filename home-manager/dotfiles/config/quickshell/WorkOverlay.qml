@@ -87,6 +87,12 @@ PanelWindow {
         case Qt.Key_Escape:
             shell.workOverlayOpen = false;
             break;
+        case Qt.Key_P:
+            activity.prune();
+            break;
+        case Qt.Key_N:
+            idea.input.forceActiveFocus();
+            break;
         default:
             if (section === "agents" && event.key === Qt.Key_R)
                 current.reply(row);
@@ -133,7 +139,8 @@ PanelWindow {
         id: content
         anchors.centerIn: parent
         width: Math.min(1136, root.width - 48)
-        height: Math.min(root.height - 96, agentSessions.implicitHeight + (agentSessions.visible ? 16 : 0)
+        // Leaves room for the two footers below.
+        height: Math.min(root.height - 150, idea.implicitHeight + 16 + agentSessions.implicitHeight + (agentSessions.visible ? 16 : 0)
             + pullRequests.implicitHeight)
         focus: true
         Keys.onPressed: event => root.handleKey(event)
@@ -146,6 +153,14 @@ PanelWindow {
         ColumnLayout {
             anchors.fill: parent
             spacing: 16
+
+            IdeaInput {
+                id: idea
+                Layout.fillWidth: true
+                Layout.preferredHeight: implicitHeight
+                shell: root.shell
+                onDone: content.forceActiveFocus()
+            }
 
             AgentSessionsWidget {
                 id: agentSessions
@@ -171,6 +186,7 @@ PanelWindow {
     }
 
     Rectangle {
+        id: keyHintsPill
         anchors.top: content.bottom
         anchors.topMargin: 12
         anchors.horizontalCenter: content.horizontalCenter
@@ -184,12 +200,20 @@ PanelWindow {
         Text {
             id: keyHints
             anchors.centerIn: parent
-            text: "j/k move  ·  h/l switch tab  ·  tab next list  ·  ⏎ open  ·  "
+            text: "n new idea  ·  j/k move  ·  h/l switch tab  ·  tab next list  ·  ⏎ open  ·  "
                 + (root.section === "agents" ? "r reply  ·  x x stop  ·  a/d allow/deny" : "1–9 agent actions")
                 + "  ·  esc close"
             color: "#8b949e"
             font.family: "FiraCode Nerd Font"
             font.pixelSize: 11
         }
+    }
+
+    ActivityFooter {
+        id: activity
+        anchors.top: keyHintsPill.bottom
+        anchors.topMargin: 8
+        anchors.horizontalCenter: content.horizontalCenter
+        active: root.visible
     }
 }
