@@ -35,7 +35,7 @@
   };
 
   # Use latest kernel
-  boot.kernelPackages = pkgs.linuxPackages_7_2;
+  boot.kernelPackages = pkgs.linuxPackages_7_3;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
