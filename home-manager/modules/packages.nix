@@ -32,6 +32,7 @@
     pkgs.direnv
     pkgs.opencode
     pkgs.claude-code
+    pkgs.claude-desktop
     pkgs.graphify
     pkgs.xtool
     pkgs.unstable.pi-coding-agent

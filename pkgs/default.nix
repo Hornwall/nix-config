@@ -10,6 +10,9 @@
   abrd = if abrdPackage != null then abrdPackage else throw "abrd requires abrdPackage";
   abrd-admin = if abrdAdminPackage != null then abrdAdminPackage else throw "abrd-admin requires abrdAdminPackage";
   beyond-identity = pkgs.callPackage ./beyond-identity.nix { };
+  claude-desktop = pkgs.callPackage ./claude-desktop/package.nix {
+    claude-code = pkgs.callPackage ./claude-code/package.nix { };
+  };
   claude-code = pkgs.callPackage ./claude-code/package.nix { };
   gh = pkgs.callPackage ./gh.nix { };
   graphify = pkgs.callPackage ./graphify/package.nix { };
