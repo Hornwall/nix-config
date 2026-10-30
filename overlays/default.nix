@@ -22,6 +22,18 @@
   # You can change versions, add patches, set compilation flags, anything really.
   # https://nixos.wiki/wiki/Overlays
   modifications = final: prev: {
+    # fpdf2 2.8.9: test_image_with_explicit_dimensions fails on a PDF hash
+    # mismatch, breaking open-webui. Remove once fixed upstream.
+    pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+      (_pyFinal: pyPrev: {
+        fpdf2 = pyPrev.fpdf2.overridePythonAttrs (old: {
+          disabledTests = (old.disabledTests or [ ]) ++ [
+            "test_image_with_explicit_dimensions"
+          ];
+        });
+      })
+    ];
+
     # example = prev.example.overrideAttrs (oldAttrs: rec {
     # ...
     # });
