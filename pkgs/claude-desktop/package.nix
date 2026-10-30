@@ -133,13 +133,14 @@ stdenv.mkDerivation {
 
     # The app downloads a generic Linux build of Claude Code, which can't run
     # on NixOS. Its CLAUDE_CODE_LOCAL_BINARY override is compiled out of
-    # release builds, so wire it back up and point it at our claude-code.
+    # release builds, so wire it back up at the end of the constructor and
+    # point it at our claude-code.
     resources=$out/lib/claude-desktop/resources
     asar extract $resources/app.asar app
-    ccdChunk=$(grep -rlF 'process.env.CLAUDE_CODE_LOCAL_BINARY}async initLocalBinary' app/.vite/build)
+    ccdChunk=$(grep -rlF '}async initLocalBinary(' app/.vite/build)
     substituteInPlace "$ccdChunk" --replace-fail \
-      'process.env.CLAUDE_CODE_LOCAL_BINARY}async initLocalBinary' \
-      'process.env.CLAUDE_CODE_LOCAL_BINARY&&(this.localBinaryInitPromise=this.initLocalBinary(process.env.CLAUDE_CODE_LOCAL_BINARY))}async initLocalBinary'
+      '}async initLocalBinary(' \
+      ';process.env.CLAUDE_CODE_LOCAL_BINARY&&(this.localBinaryInitPromise=this.initLocalBinary(process.env.CLAUDE_CODE_LOCAL_BINARY))}async initLocalBinary('
     rm -r $resources/app.asar $resources/app.asar.unpacked
     asar pack app $resources/app.asar --unpack '{*.node,github-mcp-server}'
 
