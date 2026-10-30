@@ -41,7 +41,15 @@
     pkgs.spotify
     pkgs.discord
     pkgs.gimp
-    pkgs.chromium
+    # Vulkan lets WebGPU use the real GPU instead of the SwiftShader CPU fallback.
+    # Force the iGPU: WebGPU on the dGPU while compositing on the iGPU gives corrupt frames.
+    (pkgs.chromium.override {
+      commandLineArgs = [
+        "--enable-features=Vulkan"
+        "--enable-unsafe-webgpu"
+        "--use-webgpu-power-preference=force-low-power"
+      ];
+    })
     pkgs.inkscape
     pkgs.calibre
     pkgs.feh
