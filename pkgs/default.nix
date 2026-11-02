@@ -21,6 +21,7 @@
     inherit opencodeSrc;
   };
   pup = pkgs.callPackage ./pup.nix { };
+  t3code = pkgs.callPackage ./t3code/package.nix { };
   tuple = pkgs.callPackage ./tuple.nix { };
   xtool = pkgs.callPackage ./xtool.nix { };
   voxtype = pkgs.callPackage ./voxtype.nix { vulkanSupport = true; };

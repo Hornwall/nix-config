@@ -35,6 +35,7 @@
     pkgs.claude-desktop
     pkgs.graphify
     pkgs.xtool
+    pkgs.t3code
     pkgs.unstable.pi-coding-agent
 
     # Desktop Applications
