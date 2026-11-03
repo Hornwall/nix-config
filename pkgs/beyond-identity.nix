@@ -31,11 +31,11 @@
 
 let
   pname = "beyond-identity";
-  version = "3.0.0-28";
+  version = "3.0.0-29";
 
   installer = fetchurl {
     url = "https://downloads.byndid.com/linux/run/production/${pname}-${version}-x86_64.run";
-    hash = "sha256-Qop2gpdz39N+rZJeraJYG9GE0qzp0cSTli9O//967Xk=";
+    hash = "sha256-SQ2qu79i/pWYOuChAqWt6esfj5Sce2s0EofquCTc2cE=";
   };
 
   # The early-access Linux release is a makeself archive containing an
