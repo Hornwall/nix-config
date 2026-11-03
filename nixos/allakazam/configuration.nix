@@ -193,8 +193,8 @@
     wtype
     xdg-desktop-portal-gtk
     xdg-desktop-portal-hyprland
-    unstable.ruby_3_4
-    unstable.rubyPackages_3_4.standard
+    unstable.ruby_4_0
+    unstable.rubyPackages_4_0.standard
     unstable.code-cursor
     unstable.cursor-cli
     libsecret
