@@ -63,6 +63,7 @@ ShellRoot {
 
     VolumeOsd {}
     BrightnessOsd {}
+    FingerprintOsd {}
 
     Variants {
         model: Quickshell.screens
