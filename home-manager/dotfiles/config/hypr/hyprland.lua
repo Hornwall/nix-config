@@ -26,6 +26,8 @@ local menu        = "walker"
 -------------------
 
 hl.on("hyprland.start", function()
+    -- Apps launched via systemd services (elephant/walker) need these too.
+    hl.exec_cmd("dbus-update-activation-environment --systemd XDG_SESSION_TYPE ELECTRON_OZONE_PLATFORM_HINT && systemctl --user restart elephant")
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
     hl.exec_cmd("hypridle")
     hl.exec_cmd("elephant")
@@ -55,6 +57,10 @@ hl.env("GTK_THEME", "Adwaita:dark")
 hl.env("QT_STYLE_OVERRIDE", "Adwaita-Dark")
 hl.env("MOZ_ENABLE_WAYLAND", "1")
 hl.env("GDK_SCALE", "2")
+-- Electron's ozone "auto" hint needs XDG_SESSION_TYPE; without it apps like
+-- Slack fall back to XWayland and screen sharing bypasses the portal (black).
+hl.env("XDG_SESSION_TYPE", "wayland")
+hl.env("ELECTRON_OZONE_PLATFORM_HINT", "wayland")
 
 hl.config({
     xwayland = {
@@ -265,7 +271,7 @@ hl.bind("switch:off:Lid Switch", hl.dsp.dpms({ action = "on" }), { locked = true
 
 hl.window_rule({
     name = "slack-workspace-3",
-    match = { class = "^(Slack)$" },
+    match = { class = "^([Ss]lack)$" },
     workspace = "3",
 })
 
@@ -279,6 +285,25 @@ hl.window_rule({
     name = "ghostty-workspace-1",
     match = { class = "^(com\\.mitchellh\\.ghostty)$" },
     workspace = "1",
+})
+
+-- Zoom (XWayland) spawns transparent overlay windows (share toolbar, floating
+-- video, menus). With follow_mouse they steal focus on hover and flicker.
+hl.window_rule({
+    name = "zoom-overlays",
+    match = { class = "^(zoom)$", title = "^(as_toolbar|zoom_linux_float_video_window|zoom_linux_float_message_reminder|AnnoInputLinux)$" },
+    float = true,
+    pin = true,
+    no_focus = true,
+    no_initial_focus = true,
+    no_shadow = true,
+    no_blur = true,
+})
+
+hl.window_rule({
+    name = "zoom-menus",
+    match = { class = "^(zoom)$", title = "^(menu window)$" },
+    stay_focused = true,
 })
 
 hl.window_rule({
