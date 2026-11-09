@@ -119,7 +119,9 @@ in
   # (Install) so it validates regardless of how Linux enterprise-roots resolve.
   programs.firefox = {
     enable = true;
-    package = pkgs.unstable.firefox;
+    # Stable, not unstable: Firefox leaks its LD_LIBRARY_PATH to apps it opens
+    # via URL schemes, and a newer glibc there crashes stable Slack/Claude.
+    package = pkgs.firefox;
     policies.Certificates = {
       ImportEnterpriseRoots = true;
       Install = [ "${aboardDevCert}/ca.pem" ];
