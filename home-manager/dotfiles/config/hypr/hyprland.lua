@@ -15,7 +15,7 @@ hl.monitor({ output = "HDMI-A-1", mode = "3840x2160@60", position = "auto", scal
 ---------------------
 
 local terminal    = "ghostty"
-local fileManager = "dolphin"
+local fileManager = "nautilus"
 local menu        = "walker"
 
 -------------------
