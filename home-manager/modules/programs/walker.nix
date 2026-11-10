@@ -73,7 +73,7 @@
         opacity: 0;
       }
 
-      /* Frosted glass: Hyprland's `layerrule = blur, walker` frosts the
+      /* Frosted glass: the "glass-walker" layer rule in hyprland.lua frosts the
          wallpaper behind these translucent surfaces. */
       .box-wrapper {
         background-color: alpha(@window_bg_color, 0.92);

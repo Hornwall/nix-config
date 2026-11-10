@@ -10,6 +10,7 @@
     ./programs/neovim.nix
     ./programs/walker.nix
     ./programs/hyprland-session.nix
+    ./theme.nix
     ./packages.nix
     ./dotfiles.nix
   ];

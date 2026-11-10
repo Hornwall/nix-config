@@ -29,8 +29,7 @@ hl.on("hyprland.start", function()
     -- services (home-manager/modules/programs/hyprland-session.nix). Walker runs
     -- as a service via programs.walker.runAsService. The SSH agent is NixOS's
     -- socket-activated gcr-ssh-agent (see SSH_AUTH_SOCK below).
-    hl.exec_cmd([[gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"]])
-    hl.exec_cmd([[gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"]])
+    -- Dark theme comes from home-manager/modules/theme.nix.
     hl.exec_cmd(terminal)
     hl.exec_cmd("firefox")
     hl.exec_cmd("slack")
@@ -45,10 +44,7 @@ end)
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_THEME", "Adwaita-HyprCursor")
 hl.env("HYPRCURSOR_SIZE", "24")
-hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 hl.env("SSH_AUTH_SOCK", os.getenv("XDG_RUNTIME_DIR") .. "/gcr/ssh")
-hl.env("GTK_THEME", "Adwaita:dark")
-hl.env("QT_STYLE_OVERRIDE", "Adwaita-Dark")
 hl.env("MOZ_ENABLE_WAYLAND", "1")
 hl.env("GDK_SCALE", "2")
 -- Electron's ozone "auto" hint needs XDG_SESSION_TYPE; without it apps like
