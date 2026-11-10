@@ -32,4 +32,13 @@
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+  # Expire Home Manager generations older than 30 days weekly and collect the
+  # garbage they leave behind. The system's nix.gc only covers system profiles.
+  services.home-manager.autoExpire = {
+    enable = true;
+    frequency = "weekly";
+    timestamp = "-30 days";
+    store.cleanup = true;
+  };
 }

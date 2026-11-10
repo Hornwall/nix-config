@@ -19,31 +19,29 @@ let
     Install.WantedBy = [ "hyprland-session.target" ];
   };
 
-  # Suspend only when running on battery: requires a battery and no mains
-  # supply online. Desktops (no battery) never suspend from idle.
-  idleSuspend = pkgs.writeShellApplication {
-    name = "idle-suspend";
-    runtimeInputs = [ pkgs.coreutils pkgs.systemd ];
+  # Exits 0 when running on battery: a battery exists and no mains supply is
+  # online. Desktops (no battery) count as plugged in. Used by hypridle.conf.
+  onBattery = pkgs.writeShellApplication {
+    name = "on-battery";
+    runtimeInputs = [ pkgs.coreutils ];
     text = ''
       shopt -s nullglob
       has_battery=false
       for supply in /sys/class/power_supply/*; do
         type=$(cat "$supply/type" 2>/dev/null || true)
         if [ "$type" = "Mains" ] && [ "$(cat "$supply/online" 2>/dev/null || echo 0)" = "1" ]; then
-          exit 0
+          exit 1
         fi
         if [ "$type" = "Battery" ]; then
           has_battery=true
         fi
       done
-      if $has_battery; then
-        exec systemctl suspend
-      fi
+      $has_battery
     '';
   };
 in
 {
-  home.packages = [ idleSuspend ];
+  home.packages = [ onBattery ];
 
   systemd.user.services = {
     hypridle = mkHyprService "Hyprland idle daemon" (lib.getExe pkgs.hypridle);

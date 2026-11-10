@@ -211,8 +211,8 @@ hl.bind(mainMod .. " + V",              hl.dsp.window.float({ action = "toggle" 
 hl.bind(mainMod .. " + SPACE",          hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + SHIFT + V",      hl.dsp.exec_cmd(menu .. " -m clipboard"))  -- clipboard history (elephant)
 hl.bind(mainMod .. " + P",              hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + J",              hl.dsp.layout("togglesplit"))
-hl.bind(mainMod .. " + SHIFT + L",      hl.dsp.exec_cmd("hyprlock"))
+hl.bind(mainMod .. " + T",              hl.dsp.layout("togglesplit"))
+hl.bind(mainMod .. " + Escape",         hl.dsp.exec_cmd("loginctl lock-session"))
 hl.bind(mainMod .. " + o",              hl.dsp.exec_cmd("voxtype record toggle"))
 
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
@@ -224,6 +224,21 @@ hl.bind(mainMod .. " + H", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + K", hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + J", hl.dsp.focus({ direction = "down" }))
+
+-- Move windows with SUPER+SHIFT+hjkl, resize with SUPER+CTRL+hjkl.
+local resizeStep = 40
+local directions = {
+    H = { name = "left",  x = -resizeStep, y = 0 },
+    J = { name = "down",  x = 0,           y = resizeStep },
+    K = { name = "up",    x = 0,           y = -resizeStep },
+    L = { name = "right", x = resizeStep,  y = 0 },
+}
+for key, dir in pairs(directions) do
+    hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ direction = dir.name }))
+    hl.bind(mainMod .. " + CTRL + " .. key,  hl.dsp.window.resize({ x = dir.x, y = dir.y, relative = true }), { repeating = true })
+end
+
+hl.bind(mainMod .. " + Tab", hl.dsp.focus({ workspace = "previous" }))
 
 hl.bind("CTRL + ALT + " .. mainMod .. " + H", hl.dsp.workspace.move({ monitor = "l" }))
 hl.bind("CTRL + ALT + " .. mainMod .. " + L", hl.dsp.workspace.move({ monitor = "r" }))
@@ -257,7 +272,9 @@ hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tr
 hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
 
-hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd([[grim -g "$(slurp)" - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy]]))
+-- Whole focused monitor, no selection.
+hl.bind("Print", hl.dsp.exec_cmd([[grim -o "$(hyprctl activeworkspace -j | jq -r .monitor)" - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy && notify-send "Screenshot" "Monitor captured and copied"]]))
+hl.bind(mainMod .. " + SHIFT + C",hl.dsp.exec_cmd([[grim -g "$(slurp)" - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy]]))
 hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("gradia --screenshot"))
 hl.bind(mainMod .. " + SHIFT + O", hl.dsp.exec_cmd([[grim -g "$(slurp)" - | tesseract stdin stdout | wl-copy && notify-send "OCR" "Text copied to clipboard"]]))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd([[geom="$(slurp)" && notify-send "Screen Recording" "Recording started" -i video-x-generic && wf-recorder -g "$geom" -f ~/Videos/recording-$(date +%Y%m%d-%H%M%S).mp4]]))
