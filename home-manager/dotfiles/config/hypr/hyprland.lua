@@ -117,9 +117,18 @@ hl.config({
 -- (the old "ignorezero") keeps fully transparent pixels unblurred.
 hl.layer_rule({
     name = "glass-layers",
-    match = { namespace = "^(quickshell-bar|quickshell-notifications|quickshell-osd|walker)$" },
+    match = { namespace = "^(quickshell-bar|quickshell-notifications|quickshell-osd)$" },
     blur = true,
     ignore_alpha = 0,
+})
+
+-- Walker's theme draws a wide translucent box-shadow; a higher threshold
+-- blurs only the panel itself instead of the whole shadow area.
+hl.layer_rule({
+    name = "glass-walker",
+    match = { namespace = "^walker$" },
+    blur = true,
+    ignore_alpha = 0.5,
 })
 
 hl.curve("easeOutQuint",   { type = "bezier", points = { { 0.23, 1 },    { 0.32, 1 }   } })
