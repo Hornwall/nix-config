@@ -49,5 +49,9 @@ in
     hypridle = mkHyprService "Hyprland idle daemon" (lib.getExe pkgs.hypridle);
     hyprpaper = mkHyprService "Hyprland wallpaper daemon" (lib.getExe pkgs.hyprpaper);
     quickshell = mkHyprService "Quickshell desktop shell" "${pkgs.quickshell}/bin/qs -n";
+    # Overrides the package unit, which would also start under GNOME
+    # (graphical-session.target) next to GNOME's own polkit agent.
+    hyprpolkitagent = mkHyprService "Hyprland polkit authentication agent"
+      "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent";
   };
 }

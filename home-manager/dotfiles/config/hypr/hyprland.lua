@@ -24,14 +24,13 @@ local menu        = "walker"
 
 hl.on("hyprland.start", function()
     -- Apps launched via systemd services (elephant/walker) need these too.
-    hl.exec_cmd("dbus-update-activation-environment --systemd XDG_SESSION_TYPE ELECTRON_OZONE_PLATFORM_HINT && systemctl --user restart elephant")
-    hl.exec_cmd("systemctl --user start hyprpolkitagent")
-    -- hypridle, hyprpaper and quickshell run as systemd user services
-    -- (home-manager/modules/programs/hyprland-session.nix).
-    hl.exec_cmd("walker --gapplication-service")
+    hl.exec_cmd("dbus-update-activation-environment --systemd XDG_SESSION_TYPE ELECTRON_OZONE_PLATFORM_HINT && systemctl --user restart elephant walker")
+    -- hypridle, hyprpaper, quickshell and hyprpolkitagent run as systemd user
+    -- services (home-manager/modules/programs/hyprland-session.nix). Walker runs
+    -- as a service via programs.walker.runAsService. The SSH agent is NixOS's
+    -- socket-activated gcr-ssh-agent (see SSH_AUTH_SOCK below).
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"]])
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"]])
-    hl.exec_cmd("gnome-keyring-daemon --start --components=ssh")
     hl.exec_cmd(terminal)
     hl.exec_cmd("firefox")
     hl.exec_cmd("slack")
