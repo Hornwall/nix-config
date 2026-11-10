@@ -1,7 +1,54 @@
 { config, lib, pkgs, ... }:
 
+let
+  # Full system update: flake inputs, pinned Claude packages, NixOS, Home Manager,
+  # then prune old system generations (keeping the latest three).
+  nixUpdate = pkgs.writeShellApplication {
+    name = "nix-update";
+    runtimeInputs = with pkgs; [ coreutils git nix home-manager hostname ];
+    text = ''
+      repo="''${NIX_CONFIG_DIR:-/var/nix-config}"
+      host="$(hostname)"
+      cd "$repo"
+
+      echo "==> Updating flake inputs"
+      nix flake update
+
+      echo "==> Updating claude-code"
+      ./pkgs/claude-code/update.sh
+
+      echo "==> Updating claude-desktop"
+      ./pkgs/claude-desktop/update.sh
+
+      echo "==> Rebuilding NixOS ($host)"
+      sudo nixos-rebuild switch --flake ".#$host"
+
+      echo "==> Switching Home Manager ($USER@$host)"
+      home-manager switch --flake ".#$USER@$host"
+
+      echo "==> Committing and pushing updates"
+      update_files=(flake.lock pkgs/claude-code/manifest.json pkgs/claude-desktop/manifest.json)
+      git add -- "''${update_files[@]}"
+      if git diff --cached --quiet -- "''${update_files[@]}"; then
+        echo "No package updates to commit"
+      else
+        git commit -m "Update packages" -- "''${update_files[@]}"
+        git push
+      fi
+
+      echo "==> Pruning NixOS generations (keeping latest 3)"
+      sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations +3
+      # Refresh bootloader entries so pruned generations disappear from the menu.
+      sudo /nix/var/nix/profiles/system/bin/switch-to-configuration boot
+      sudo nix-collect-garbage
+
+      echo "==> Done"
+    '';
+  };
+in
 {
   home.packages = [
+    nixUpdate
     # Development Tools
     pkgs.kitty
     pkgs.ghostty
