@@ -1,6 +1,3 @@
--- Migrated from hyprland.conf.
--- Keep hyprland.conf around as a fallback while validating the Lua config.
-
 ------------------
 ---- MONITORS ----
 ------------------
@@ -30,7 +27,6 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd XDG_SESSION_TYPE ELECTRON_OZONE_PLATFORM_HINT && systemctl --user restart elephant")
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
     hl.exec_cmd("hypridle")
-    hl.exec_cmd("elephant")
     hl.exec_cmd("walker --gapplication-service")
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"]])
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"]])
@@ -52,7 +48,7 @@ hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_THEME", "Adwaita-HyprCursor")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
-hl.env("SSH_AUTH_SOCK", "/run/user/1000/gcr/ssh")
+hl.env("SSH_AUTH_SOCK", os.getenv("XDG_RUNTIME_DIR") .. "/gcr/ssh")
 hl.env("GTK_THEME", "Adwaita:dark")
 hl.env("QT_STYLE_OVERRIDE", "Adwaita-Dark")
 hl.env("MOZ_ENABLE_WAYLAND", "1")
@@ -117,11 +113,14 @@ hl.config({
     },
 })
 
--- Glass: frost the wallpaper behind layer-shell surfaces. The .conf form is:
---   layerrule = blur, <quickshell-bar|quickshell-notifications|quickshell-osd|walker>
---   layerrule = ignorezero, <same>
--- Port these once the layer-rule binding is confirmed in the Lua API; until
--- then hyprland.conf (the live config) carries them.
+-- Glass: frost the wallpaper behind layer-shell surfaces. ignore_alpha = 0
+-- (the old "ignorezero") keeps fully transparent pixels unblurred.
+hl.layer_rule({
+    name = "glass-layers",
+    match = { namespace = "^(quickshell-bar|quickshell-notifications|quickshell-osd|walker)$" },
+    blur = true,
+    ignore_alpha = 0,
+})
 
 hl.curve("easeOutQuint",   { type = "bezier", points = { { 0.23, 1 },    { 0.32, 1 }   } })
 hl.curve("easeInOutCubic", { type = "bezier", points = { { 0.65, 0.05 }, { 0.36, 1 }   } })
@@ -257,12 +256,12 @@ hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = tr
 hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd([[grim -g "$(slurp)" - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy]]))
 hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("gradia --screenshot"))
 hl.bind(mainMod .. " + SHIFT + O", hl.dsp.exec_cmd([[grim -g "$(slurp)" - | tesseract stdin stdout | wl-copy && notify-send "OCR" "Text copied to clipboard"]]))
-hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd([[wf-recorder -g "$(slurp)" -f ~/Videos/recording-$(date +%Y%m%d-%H%M%S).mp4 && notify-send "Screen Recording" "Recording started" -i video-x-generic]]))
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd([[geom="$(slurp)" && notify-send "Screen Recording" "Recording started" -i video-x-generic && wf-recorder -g "$geom" -f ~/Videos/recording-$(date +%Y%m%d-%H%M%S).mp4]]))
 hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd([[pkill -SIGINT wf-recorder && notify-send "Screen Recording" "Recording stopped" -i video-x-generic]]))
 
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 
-hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("hyprlock"), { locked = true })
+hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("loginctl lock-session"), { locked = true })
 hl.bind("switch:off:Lid Switch", hl.dsp.dpms({ action = "on" }), { locked = true })
 
 --------------------------------
