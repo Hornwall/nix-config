@@ -20,27 +20,38 @@ let
       echo "==> Updating claude-desktop"
       ./pkgs/claude-desktop/update.sh
 
-      echo "==> Rebuilding NixOS ($host)"
-      sudo nixos-rebuild switch --flake ".#$host"
+      update_files=(flake.lock pkgs/claude-code/manifest.json pkgs/claude-desktop/manifest.json)
+      if git diff --quiet HEAD -- "''${update_files[@]}"; then
+        echo "==> Nothing changed, done"
+        exit 0
+      fi
+
+      # Claude packages are only used by Home Manager; NixOS only needs a
+      # rebuild when the flake inputs moved.
+      nixos_changed=false
+      if ! git diff --quiet HEAD -- flake.lock; then
+        nixos_changed=true
+        echo "==> Rebuilding NixOS ($host)"
+        sudo nixos-rebuild switch --flake ".#$host"
+      else
+        echo "==> Flake inputs unchanged, skipping NixOS rebuild"
+      fi
 
       echo "==> Switching Home Manager ($USER@$host)"
       home-manager switch --flake ".#$USER@$host"
 
       echo "==> Committing and pushing updates"
-      update_files=(flake.lock pkgs/claude-code/manifest.json pkgs/claude-desktop/manifest.json)
       git add -- "''${update_files[@]}"
-      if git diff --cached --quiet -- "''${update_files[@]}"; then
-        echo "No package updates to commit"
-      else
-        git commit -m "Update packages" -- "''${update_files[@]}"
-        git push
-      fi
+      git commit -m "Update packages" -- "''${update_files[@]}"
+      git push
 
-      echo "==> Pruning NixOS generations (keeping latest 3)"
-      sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations +3
-      # Refresh bootloader entries so pruned generations disappear from the menu.
-      sudo /nix/var/nix/profiles/system/bin/switch-to-configuration boot
-      sudo nix-collect-garbage
+      if [[ "$nixos_changed" == true ]]; then
+        echo "==> Pruning NixOS generations (keeping latest 3)"
+        sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations +3
+        # Refresh bootloader entries so pruned generations disappear from the menu.
+        sudo /nix/var/nix/profiles/system/bin/switch-to-configuration boot
+        sudo nix-collect-garbage
+      fi
 
       echo "==> Done"
     '';
