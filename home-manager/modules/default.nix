@@ -9,6 +9,7 @@
     ./programs/zsh.nix
     ./programs/neovim.nix
     ./programs/walker.nix
+    ./programs/hyprland-session.nix
     ./packages.nix
     ./dotfiles.nix
   ];
