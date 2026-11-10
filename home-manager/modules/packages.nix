@@ -132,7 +132,6 @@ in
     pkgs.wf-recorder
     pkgs.grim
     pkgs.slurp
-    pkgs.satty
     pkgs.tesseract
     pkgs.gnome-keyring
     pkgs.seahorse
