@@ -8,8 +8,9 @@ let
   mkHyprService = description: command: {
     Unit = {
       Description = description;
+      # No After=hyprland-session.target: the target is already ordered after
+      # the units it wants, and the extra edge can form ordering cycles.
       PartOf = [ "hyprland-session.target" ];
-      After = [ "hyprland-session.target" ];
     };
     Service = {
       ExecStart = command;
