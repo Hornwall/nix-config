@@ -155,7 +155,7 @@ stdenv.mkDerivation {
       "''${gappsWrapperArgs[@]}" \
       --prefix PATH : ${lib.makeBinPath [ bubblewrap socat openssh xdg-utils ]} \
       --set-default CLAUDE_CODE_LOCAL_BINARY ${lib.getExe claude-code} \
-      --add-flags "--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true"
+      --add-flags "--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true --password-store=gnome-libsecret"
   '';
 
   passthru.updateScript = ./update.sh;

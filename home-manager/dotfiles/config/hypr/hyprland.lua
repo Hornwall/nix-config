@@ -3,10 +3,12 @@
 ------------------
 
 hl.monitor({ output = "", mode = "1920x1080", position = "auto", scale = "auto" })
-hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = "1" })
+hl.monitor({ output = "eDP-1", mode = "preferred", position = "0x0", scale = "1" })
 hl.monitor({ output = "DP-1", mode = "preferred", position = "-1920x0", scale = "auto" })
-hl.monitor({ output = "desc:LG Electronics LG ULTRAWIDE 506NTCZJZ651", mode = "preferred", position = "-1920x0", scale = "1.25" })
-hl.monitor({ output = "desc:Dell Inc. Dell AW3423DW", mode = "preferred", position = "-1920x0", scale = "auto" })
+hl.monitor({ output = "desc:LG Electronics LG ULTRAWIDE 506NTCZJZ651", mode = "preferred", position = "-2752x0", scale = "1.25" })
+hl.monitor({ output = "desc:Dell Inc. Dell AW3423DW", mode = "preferred", position = "-3440x0", scale = "auto" })
+hl.monitor({ output = "desc:Dell Inc. DELL P3425WE 6SNTY54", mode = "preferred", position = "-760x-1440", scale = "1" })
+hl.monitor({ output = "desc:Dell Inc. DELL P2723QE 86MR964", mode = "preferred", position = "-320x-1440", scale = "1.5" })
 hl.monitor({ output = "HDMI-A-2", disabled = true })
 hl.monitor({ output = "HDMI-A-1", mode = "3840x2160@60", position = "auto", scale = "auto" })
 
