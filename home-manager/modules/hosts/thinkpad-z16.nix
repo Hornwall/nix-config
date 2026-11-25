@@ -50,6 +50,7 @@ in
     pkgs.teams-for-linux
     pkgs.awscli2
     pkgs.sentry-cli
+    pkgs.buildkite-cli
     pkgs.pup
     pkgs.abrd-admin
     pkgs.abrd

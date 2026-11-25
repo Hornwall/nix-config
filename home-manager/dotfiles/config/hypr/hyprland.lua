@@ -4,9 +4,9 @@
 
 hl.monitor({ output = "", mode = "1920x1080", position = "auto", scale = "auto" })
 hl.monitor({ output = "eDP-1", mode = "preferred", position = "0x0", scale = "1" })
-hl.monitor({ output = "DP-1", mode = "preferred", position = "-1920x0", scale = "auto" })
-hl.monitor({ output = "desc:LG Electronics LG ULTRAWIDE 506NTCZJZ651", mode = "preferred", position = "-2752x0", scale = "1.25" })
-hl.monitor({ output = "desc:Dell Inc. Dell AW3423DW", mode = "preferred", position = "-3440x0", scale = "auto" })
+hl.monitor({ output = "DP-1", mode = "preferred", position = "auto-left", scale = "auto" })
+hl.monitor({ output = "desc:LG Electronics LG ULTRAWIDE 506NTCZJZ651", mode = "preferred", position = "-4096x0", scale = "1.25" })
+hl.monitor({ output = "desc:Dell Inc. Dell AW3423DW", mode = "preferred", position = "-3440x0", scale = "1" })
 hl.monitor({ output = "desc:Dell Inc. DELL P3425WE 6SNTY54", mode = "preferred", position = "-760x-1440", scale = "1" })
 hl.monitor({ output = "desc:Dell Inc. DELL P2723QE 86MR964", mode = "preferred", position = "-320x-1440", scale = "1.5" })
 hl.monitor({ output = "HDMI-A-2", disabled = true })
@@ -37,6 +37,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("slack")
     hl.exec_cmd("voxtype daemon")
     hl.exec_cmd("tetherd")
+    hl.exec_cmd("librepods") -- AirPods tray applet
 end)
 
 -------------------------------
@@ -307,6 +308,12 @@ hl.window_rule({
     name = "ghostty-workspace-1",
     match = { class = "^(com\\.mitchellh\\.ghostty)$" },
     workspace = "1",
+})
+
+hl.window_rule({
+    name = "librepods-float",
+    match = { class = "^(librepods|me\\.kavishdevar\\.librepods)$" },
+    float = true,
 })
 
 -- Zoom (XWayland) spawns transparent overlay windows (share toolbar, floating

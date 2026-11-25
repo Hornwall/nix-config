@@ -73,9 +73,11 @@
         JustWorksRepairing = "always";
         Class = "0x000100";
         FastConnectable = true;
+        ControllerMode = "dual"; # BR/EDR + LE, needed for AirPods pairing/reconnects
       };
     };
   };
+  services.blueman.enable = true; # Bluetooth manager GUI + tray applet
 
   # Set your time zone.
   time.timeZone = "Europe/Stockholm";
@@ -215,6 +217,7 @@
     wget
     lsof
     distrobox
+    librepods # AirPods noise control, battery and ear detection
     _1password-gui
     _1password-cli
     gnome-tweaks
