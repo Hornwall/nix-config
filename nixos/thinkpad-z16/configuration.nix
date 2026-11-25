@@ -182,19 +182,6 @@
 
   programs.git.enable = true;
 
-  programs.tether = {
-    enable = true;
-    wifi = {
-      enable = true;
-      openFirewall = true;
-    };
-    bluetooth = {
-      enable = true;
-      adapters = [ "hci0" ];
-    };
-    extensions = [ "firefox" "chromium" ];
-  };
-
   programs.steam.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -233,7 +220,6 @@
     xdg-desktop-portal-hyprland
     unstable.ruby_4_0
     unstable.rubyPackages_4_0.standard
-    unstable.android-studio
     unstable.code-cursor
     unstable.cursor-cli
     libsecret

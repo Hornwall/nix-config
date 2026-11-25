@@ -12,7 +12,6 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
 
-    hyprland.url = "github:hyprwm/Hyprland";
 
     opencode-src = {
       # Pinned to a known-good rev (bun@1.3.13, matches nixpkgs). Newer dev revs
@@ -39,11 +38,6 @@
       inputs.elephant.follows = "elephant";
     };
 
-    tether = {
-      url = "github:zackb/tether";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -54,7 +48,6 @@
      nixos-hardware,
      nixpkgs-unstable,
      home-manager,
-     hyprland,
      ...
    } @ inputs: let
      inherit (self) outputs;
@@ -118,15 +111,12 @@
          specialArgs = {inherit inputs outputs;};
          modules = [
            nixos-hardware.nixosModules.lenovo-thinkpad-z
-           hyprland.nixosModules.default
-           inputs.tether.nixosModules.default
            ./nixos/thinkpad-z16/configuration.nix
          ];
        };
        allakazam = nixpkgs.lib.nixosSystem {
          specialArgs = {inherit inputs outputs;};
          modules = [
-           hyprland.nixosModules.default
            ./nixos/allakazam/configuration.nix
          ];
        };
